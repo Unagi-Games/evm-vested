@@ -1,0 +1,17 @@
+version: '3'
+services:
+  evm-contracts:
+    user: "${DOCKER_USER_ID}:${DOCKER_USER_ID}"
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: evm-vested-contracts
+    links:
+      - evm-emulator:evm-emulator
+    volumes:
+      - .:/usr/src
+  evm-emulator:
+    image: trufflesuite/ganache-cli:v6.12.2
+    ports:
+      - 8545:8545
+    command: -f https://data-seed-prebsc-1-s1.binance.org:8545

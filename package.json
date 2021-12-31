@@ -1,0 +1,20 @@
+{
+  "name": "evm-vested",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "truffle compile",
+    "test": "truffle test --network development",
+    "migrate:dev": "truffle migrate --network development",
+    "migrate": "truffle migrate --network evm"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.1.0",
+    "@truffle/hdwallet-provider": "^2.0.0",
+    "dotenv": "^10.0.0",
+    "truffle": "^5.4.26"
+  }
+}

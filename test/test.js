@@ -1,0 +1,4 @@
+
+contract("Any", () => {
+    it('Tests', () => {});
+});
