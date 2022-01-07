@@ -1,5 +1,1 @@
-const Migrations = artifacts.require("Migrations");
-
-module.exports = function (deployer) {
-  deployer.deploy(Migrations);
-};
+module.exports = require("../src/migrations/1_initial_migration")(web3);

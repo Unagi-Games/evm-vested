@@ -1,4 +1,4 @@
-# Vested SmartContracts
+# Ultimate Champions SmartContracts
 
 ## Getting Started
 
@@ -50,6 +50,10 @@ Build containers and install all dependencies:
 make install
 ```
 
+### Config
+
+`./src/config.ts` contains an empty configuration for the initial token allocation of the CHAMP token.
+
 ## Developments
 
 ### Start
@@ -62,26 +66,24 @@ make evm-emulator
 
 ### Migrate contracts
 
-Run the following command to migrate the contracts to your local EVM Emulator
+Run the following command to migrate the contracts.
 ```bash
+# Migrate on your local evm emulator
 make migrate-dev
+
+# Migrate on BSC Testnet
+make migrate-testnet-bsc
+
+# Migrate on BSC
+make migrate-bsc
 ```
 
 ## Deployment
 
 Run the following command to migrate the contracts to the EVM provider
 ```bash
-make migrate
+make migrate-bsc
 ```
-
-## Git flow
-
-### Branches
-
-* develop is deployed on the binance smart chain testnet: (todo: direct link to testnet UltimateLeague Wallet)
-* master is deployed on the binance smart chain mainnet: (todo: direct link to mainnet UltimateLeague Wallet)
-
-See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Troubleshooting
 

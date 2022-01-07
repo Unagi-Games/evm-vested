@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/2_deploy-contracts")(web3);

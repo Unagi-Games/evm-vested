@@ -14,14 +14,23 @@ test: ## Run truffle tests
 migrate-dev: ## Migrate Solidity SmartContracts to development EVM emulator
 	@docker-compose run --rm --no-deps evm-contracts npm run migrate:dev
 
-.PHONY: migrate
-migrate: ## Migrate Solidity SmartContracts
-	@docker-compose run --rm --no-deps evm-contracts npm run migrate
+.PHONY: migrate-testnet-bsc
+migrate-testnet-bsc: ## Migrate Solidity SmartContracts to Testnet BSC
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:testnet-bsc
+
+.PHONY: migrate-bsc
+migrate-bsc: ## Migrate Solidity SmartContracts to BSC
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:bsc
+
+.PHONY: format
+format: ## Format typescript code with prettier
+	@docker-compose run --rm --no-deps evm-contracts npm run prettier:write
 
 .PHONY: clean
 clean: ## Clean dependencies and build
 	@docker-compose run --rm --no-deps evm-contracts rm -rf node_modules
 	@docker-compose run --rm --no-deps evm-contracts rm -rf build/*
+	@docker-compose run --rm --no-deps evm-contracts rm -rf types/*
 
 .PHONY: evm-emulator
 evm-emulator: ## Start EVM Emulator forked from Binance Smart Chain

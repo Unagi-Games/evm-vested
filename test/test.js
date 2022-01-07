@@ -1,4 +1,0 @@
-
-contract("Any", () => {
-    it('Tests', () => {});
-});

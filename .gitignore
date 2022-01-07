@@ -160,3 +160,8 @@ yarn-error.log
 
 # backups from backoffice
 backups
+
+# config
+config.prod.ts
+config.dev.ts
+config.testnet.ts
