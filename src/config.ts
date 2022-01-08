@@ -80,7 +80,7 @@ export const PLAY_TO_EARN_RESERVE_SCHEDULE: ScheduleStep[] = [
   [19, Math.floor(6.334 * 365 * 24 * 36000)],
 ];
 export const PLAY_TO_EARN_RESERVE_EDITABLE = SIX_MONTH_AFTER_GAME_LAUNCH.diff(
-  GAME_LAUNCH,
+  TGE,
   "seconds"
 );
 
@@ -99,7 +99,7 @@ export const STACKING_RESERVE_SCHEDULE: ScheduleStep[] = [
   [100, 365 * 24 * 36000],
 ];
 export const STACKING_RESERVE_EDITABLE = SIX_MONTH_AFTER_GAME_LAUNCH.diff(
-  GAME_LAUNCH,
+  TGE,
   "seconds"
 );
 
