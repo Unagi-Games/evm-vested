@@ -13,6 +13,16 @@ export interface LockedUltimateChampionsTokenContract
   ): Promise<LockedUltimateChampionsTokenInstance>;
 }
 
+export interface LockedWalletTracked {
+  name: "LockedWalletTracked";
+  args: {
+    lockedWallet: string;
+    vestingContract: string;
+    0: string;
+    1: string;
+  };
+}
+
 export interface OwnershipTransferred {
   name: "OwnershipTransferred";
   args: {
@@ -23,7 +33,7 @@ export interface OwnershipTransferred {
   };
 }
 
-type AllEvents = OwnershipTransferred;
+type AllEvents = LockedWalletTracked | OwnershipTransferred;
 
 export interface LockedUltimateChampionsTokenInstance
   extends Truffle.ContractInstance {
@@ -94,7 +104,7 @@ export interface LockedUltimateChampionsTokenInstance
   ): Promise<BN>;
 
   /**
-   * Allow to update the list of locked wallets with their associated vesting contract. Requirements: - The caller must be the owner. - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
+   * Allow to update the list of locked wallets with their associated vesting contract. Emits a {LockedWalletTracked} event. Requirements: - The caller must be the owner. - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
    */
   setLockedWallet: {
     (
@@ -195,7 +205,7 @@ export interface LockedUltimateChampionsTokenInstance
     ): Promise<BN>;
 
     /**
-     * Allow to update the list of locked wallets with their associated vesting contract. Requirements: - The caller must be the owner. - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
+     * Allow to update the list of locked wallets with their associated vesting contract. Emits a {LockedWalletTracked} event. Requirements: - The caller must be the owner. - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
      */
     setLockedWallet: {
       (

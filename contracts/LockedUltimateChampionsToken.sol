@@ -74,6 +74,7 @@ contract LockedUltimateChampionsToken is Ownable {
 
     /**
      * @dev Allow to update the list of locked wallets with their associated vesting contract.
+     * Emits a {LockedWalletTracked} event.
      *
      * Requirements:
      *
@@ -103,6 +104,8 @@ contract LockedUltimateChampionsToken is Ownable {
             _lockedWalletsTracked[lockedWallet] = true;
         }
         _lockedWalletToVestingContract[lockedWallet] = vestingContract;
+
+        emit LockedWalletTracked(lockedWallet, vestingContract);
     }
 
     /**
@@ -115,4 +118,6 @@ contract LockedUltimateChampionsToken is Ownable {
     {
         return _lockedWalletToVestingContract[lockedWallet];
     }
+
+    event LockedWalletTracked(address lockedWallet, address vestingContract);
 }
