@@ -22,6 +22,10 @@ contract LockedUltimateChampionsToken is Ownable {
      * @dev Initialize the CHAMP contract.
      */
     constructor(address champAddress) {
+        require(
+            champAddress != address(0),
+            "LockedUltimateChampionsToken: champAddress should be a valid address. Received address(0)."
+        );
         _champContract = IERC20Metadata(champAddress);
     }
 
@@ -77,6 +81,15 @@ contract LockedUltimateChampionsToken is Ownable {
         public
         onlyOwner
     {
+        require(
+            lockedWallet != address(0),
+            "LockedUltimateChampionsToken: lockedWallet should be a valid address. Received address(0)."
+        );
+        require(
+            vestingContract != address(0),
+            "LockedUltimateChampionsToken: vestingContract should be a valid address. Received address(0)."
+        );
+
         if (!_lockedWalletsTracked[lockedWallet]) {
             _lockedWallets.push(lockedWallet);
             _lockedWalletsTracked[lockedWallet] = true;
