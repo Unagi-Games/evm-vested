@@ -34,6 +34,8 @@ import {
   TEAM_RESERVE_EDITABLE,
   TEAM_RESERVE_SCHEDULE,
   TEAM_RESERVE_START,
+  UNAGI_MAINTENANCE_MULTISIG,
+  UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER,
   UNAGI_RESERVE,
   UNAGI_RESERVE_AMOUNT,
   UNAGI_RESERVE_EDITABLE,
@@ -48,6 +50,12 @@ import {
   ScheduleStep,
   UnixTimestamp,
 } from "../types";
+import {
+  BENEFICIARY_MANAGER_ROLE,
+  DEFAULT_ADMIN_ROLE,
+  PAUSER_ROLE,
+  SCHEDULE_MANAGER_ROLE,
+} from "../roles";
 
 const LockedUltimateChampionsToken = artifacts.require(
   "LockedUltimateChampionsToken"
@@ -55,6 +63,8 @@ const LockedUltimateChampionsToken = artifacts.require(
 const UltimateChampionsToken = artifacts.require("UltimateChampionsToken");
 const VestingWalletMultiLinear = artifacts.require("VestingWalletMultiLinear");
 const PaymentSplitter = artifacts.require("UPaymentSplitter");
+
+let rootAccount: string;
 
 async function buildVestingContract(
   beneficiary: Address,
@@ -77,6 +87,25 @@ async function buildVestingContract(
     await vestingContract.lock(editable);
   }
 
+  await vestingContract.grantRole(
+    DEFAULT_ADMIN_ROLE,
+    UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+  );
+  await vestingContract.grantRole(PAUSER_ROLE, UNAGI_MAINTENANCE_MULTISIG);
+  await vestingContract.grantRole(
+    SCHEDULE_MANAGER_ROLE,
+    UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+  );
+  await vestingContract.grantRole(
+    BENEFICIARY_MANAGER_ROLE,
+    UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+  );
+
+  await vestingContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
+  await vestingContract.renounceRole(PAUSER_ROLE, rootAccount);
+  await vestingContract.renounceRole(SCHEDULE_MANAGER_ROLE, rootAccount);
+  await vestingContract.renounceRole(BENEFICIARY_MANAGER_ROLE, rootAccount);
+
   return vestingContract.address;
 }
 
@@ -86,12 +115,14 @@ interface LockedWallet {
 }
 
 module.exports =
-  (web3: Web3) => async (deployer: Truffle.Deployer, network: Network) => {
+  (web3: Web3) =>
+  async (deployer: Truffle.Deployer, network: Network, accounts: Address[]) => {
     if (network === "test") {
       console.log("Deployment disabled for tests");
       return;
     }
 
+    rootAccount = accounts[0];
     const lockedWallets: LockedWallet[] = [];
     const champHolders: Address[] = [];
     const champHoldersBalances: CHAMPAmountWEI[] = [];
@@ -218,19 +249,32 @@ module.exports =
       web3.utils.toWei(String(EMPLOYEE_REWARDS_AMOUNT), "ether")
     );
 
+    // Deploy and setup UltimateChampionsToken
     await deployer.deploy(
       UltimateChampionsToken,
       champHolders,
       champHoldersBalances
     );
-
     const champTokenContract = await UltimateChampionsToken.deployed();
+    await champTokenContract.grantRole(
+      DEFAULT_ADMIN_ROLE,
+      UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+    );
+    await champTokenContract.grantRole(PAUSER_ROLE, UNAGI_MAINTENANCE_MULTISIG);
+    await champTokenContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
+    await champTokenContract.renounceRole(PAUSER_ROLE, rootAccount);
+
+    // Deploy and setup LockedUltimateChampionsToken
     await deployer.deploy(
       LockedUltimateChampionsToken,
       champTokenContract.address
     );
     const lockedChampTokenContract =
       await LockedUltimateChampionsToken.deployed();
+    await lockedChampTokenContract.transferOwnership(
+      UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+    );
+
     for (const lock of lockedWallets) {
       await lockedChampTokenContract.setLockedWallet(
         lock.lockedWallet,

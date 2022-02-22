@@ -1,6 +1,10 @@
 import moment from "moment";
 import { Address, CHAMPAmount, ScheduleStep, UnixTimestamp } from "./types";
 
+// Unagi maintenance accounts
+export const UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER: Address = "";
+export const UNAGI_MAINTENANCE_MULTISIG: Address = "";
+
 const GAME_LAUNCH = moment(0);
 const TGE = moment(0);
 const SIX_MONTH_AFTER_GAME_LAUNCH = moment(GAME_LAUNCH).add(6, "month");
