@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Unagi Vesting Contracts v1.0.0 (LockedUltimateChampionsToken.sol)
-pragma solidity ^0.8.0;
+pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";

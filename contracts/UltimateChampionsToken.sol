@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Unagi Vesting Contracts v1.0.0 (UltimateChampionsToken.sol)
-pragma solidity ^0.8.0;
+pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/token/ERC777/presets/ERC777PresetFixedSupply.sol";
 import "@openzeppelin/contracts/utils/Multicall.sol";
