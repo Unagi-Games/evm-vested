@@ -14,6 +14,14 @@ export interface VestingWalletMultiLinearContract
   ): Promise<VestingWalletMultiLinearInstance>;
 }
 
+export interface BeneficiaryEdited {
+  name: "BeneficiaryEdited";
+  args: {
+    beneficiaryAddress: string;
+    0: string;
+  };
+}
+
 export interface ERC20Released {
   name: "ERC20Released";
   args: {
@@ -94,6 +102,21 @@ export interface RoleRevoked {
   };
 }
 
+export interface ScheduleReset {
+  name: "ScheduleReset";
+  args: {};
+}
+
+export interface ScheduleStepAdded {
+  name: "ScheduleStepAdded";
+  args: {
+    stepPercent: BN;
+    stepDuration: BN;
+    0: BN;
+    1: BN;
+  };
+}
+
 export interface Unpaused {
   name: "Unpaused";
   args: {
@@ -103,6 +126,7 @@ export interface Unpaused {
 }
 
 type AllEvents =
+  | BeneficiaryEdited
   | ERC20Released
   | EtherReleased
   | Locked
@@ -111,6 +135,8 @@ type AllEvents =
   | RoleAdminChanged
   | RoleGranted
   | RoleRevoked
+  | ScheduleReset
+  | ScheduleStepAdded
   | Unpaused;
 
 export interface VestingWalletMultiLinearInstance
@@ -378,7 +404,7 @@ export interface VestingWalletMultiLinearInstance
   beneficiary(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
-   * Setter for the beneficiary address. Requirements: - Caller must have role BENEFICIARY_MANAGER_ROLE.
+   * Setter for the beneficiary address. Emits a {BeneficiaryEdited} event. Requirements: - Caller must have role BENEFICIARY_MANAGER_ROLE.
    */
   setBeneficiary: {
     (
@@ -400,7 +426,7 @@ export interface VestingWalletMultiLinearInstance
   };
 
   /**
-   * Add a step to the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - step percent sum should not go above 100.
+   * Add a step to the schedule. Emits a {ScheduleStepAdded} event. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - step percent sum should not go above 100.
    */
   addToSchedule: {
     (
@@ -426,7 +452,7 @@ export interface VestingWalletMultiLinearInstance
   };
 
   /**
-   * Delete all steps of the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - The contract must not be locked.
+   * Delete all steps of the schedule. Emits a {ScheduleReset} event. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - The contract must not be locked.
    */
   resetSchedule: {
     (txDetails?: Truffle.TransactionDetails): Promise<
@@ -711,7 +737,7 @@ export interface VestingWalletMultiLinearInstance
     beneficiary(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
-     * Setter for the beneficiary address. Requirements: - Caller must have role BENEFICIARY_MANAGER_ROLE.
+     * Setter for the beneficiary address. Emits a {BeneficiaryEdited} event. Requirements: - Caller must have role BENEFICIARY_MANAGER_ROLE.
      */
     setBeneficiary: {
       (
@@ -733,7 +759,7 @@ export interface VestingWalletMultiLinearInstance
     };
 
     /**
-     * Add a step to the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - step percent sum should not go above 100.
+     * Add a step to the schedule. Emits a {ScheduleStepAdded} event. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - step percent sum should not go above 100.
      */
     addToSchedule: {
       (
@@ -759,7 +785,7 @@ export interface VestingWalletMultiLinearInstance
     };
 
     /**
-     * Delete all steps of the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - The contract must not be locked.
+     * Delete all steps of the schedule. Emits a {ScheduleReset} event. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - The contract must not be locked.
      */
     resetSchedule: {
       (txDetails?: Truffle.TransactionDetails): Promise<

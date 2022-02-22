@@ -140,6 +140,7 @@ contract VestingWalletMultiLinear is
 
     /**
      * @dev Setter for the beneficiary address.
+     * Emits a {BeneficiaryEdited} event.
      *
      * Requirements:
      *
@@ -154,10 +155,13 @@ contract VestingWalletMultiLinear is
             "VestingWalletMultiLinear: beneficiary is zero address"
         );
         _beneficiary = beneficiaryAddress;
+
+        emit BeneficiaryEdited(beneficiaryAddress);
     }
 
     /**
      * @dev Add a step to the schedule.
+     * Emits a {ScheduleStepAdded} event.
      *
      * Requirements:
      *
@@ -178,10 +182,13 @@ contract VestingWalletMultiLinear is
         );
         _stepPercentSum += stepPercent;
         _duration += stepDuration;
+
+        emit ScheduleStepAdded(stepPercent, stepDuration);
     }
 
     /**
      * @dev Delete all steps of the schedule.
+     * Emits a {ScheduleReset} event.
      *
      * Requirements:
      *
@@ -196,6 +203,8 @@ contract VestingWalletMultiLinear is
         delete _sortedSchedule;
         _stepPercentSum = 0;
         _duration = 0;
+
+        emit ScheduleReset();
     }
 
     /**
@@ -290,4 +299,10 @@ contract VestingWalletMultiLinear is
             return (stepAllocation * (timestamp - step.start)) / step.duration;
         }
     }
+
+    event BeneficiaryEdited(address beneficiaryAddress);
+
+    event ScheduleReset();
+
+    event ScheduleStepAdded(uint8 stepPercent, uint64 stepDuration);
 }

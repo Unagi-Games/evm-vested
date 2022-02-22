@@ -1,4 +1,5 @@
 import { VestingWalletMultiLinearInstance } from "../types/truffle-contracts";
+import { ScheduleStepAdded } from "../types/truffle-contracts/VestingWalletMultiLinear";
 
 const VestingWalletMultiLinear = artifacts.require("VestingWalletMultiLinear");
 const AnyToken = artifacts.require("ERC777PresetFixedSupply");
@@ -101,6 +102,19 @@ contract("VestingWalletMultiLinear", (accounts) => {
     expect((await vestingContract.duration()).toNumber()).to.equals(10);
   });
 
+  it("Emit ScheduleStepAdded event", async () => {
+    const vestingContract = await VestingWalletMultiLinear.new(rootUser, 0);
+    const transaction = await vestingContract.addToSchedule(1, 3);
+
+    expect(transaction.logs[0]).to.have.property("event", "ScheduleStepAdded");
+    const event = transaction
+      .logs[0] as Truffle.TransactionLog<ScheduleStepAdded>;
+    expect(event.args).to.have.property("stepPercent");
+    expect(event.args.stepPercent.toNumber()).to.equals(1);
+    expect(event.args).to.have.property("stepDuration");
+    expect(event.args.stepDuration.toNumber()).to.equals(3);
+  });
+
   it("Reset schedule", async () => {
     const vestingContract = await VestingWalletMultiLinear.new(rootUser, 0);
     await vestingContract.addToSchedule(0, 1);
@@ -123,12 +137,32 @@ contract("VestingWalletMultiLinear", (accounts) => {
     }
   });
 
+  it("Emit ScheduleReset event", async () => {
+    const vestingContract = await VestingWalletMultiLinear.new(rootUser, 0);
+    await vestingContract.addToSchedule(0, 1);
+    const transaction = await vestingContract.resetSchedule();
+
+    expect(transaction.logs[0]).to.have.property("event", "ScheduleReset");
+  });
+
   it("Edit beneficiary", async () => {
     const newBeneficiary = accounts[1];
     const vestingContract = await VestingWalletMultiLinear.new(rootUser, 0);
     expect(await vestingContract.beneficiary()).to.equals(rootUser);
     await vestingContract.setBeneficiary(newBeneficiary);
     expect(await vestingContract.beneficiary()).to.equals(newBeneficiary);
+  });
+
+  it("Emit BeneficiaryEdited event", async () => {
+    const newBeneficiary = accounts[1];
+    const vestingContract = await VestingWalletMultiLinear.new(rootUser, 0);
+    const transaction = await vestingContract.setBeneficiary(newBeneficiary);
+
+    expect(transaction.logs[0]).to.have.property("event", "BeneficiaryEdited");
+    expect(transaction.logs[0].args).to.have.property(
+      "beneficiaryAddress",
+      newBeneficiary
+    );
   });
 
   describe("vestedAmount function", () => {
