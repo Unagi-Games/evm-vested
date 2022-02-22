@@ -94,7 +94,7 @@ contract VestingWalletMultiLinear is
     /**
      * @dev Pause token releases.
      */
-    function pause() public onlyRole(PAUSER_ROLE) {
+    function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
@@ -105,7 +105,7 @@ contract VestingWalletMultiLinear is
      *
      * - Caller must have role PAUSER_ROLE.
      */
-    function unpause() public onlyRole(PAUSER_ROLE) {
+    function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
@@ -116,7 +116,7 @@ contract VestingWalletMultiLinear is
      *
      * - Caller must have role DEFAULT_ADMIN_ROLE.
      */
-    function lock(uint256 lockDuration) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function lock(uint256 lockDuration) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _lock(lockDuration);
     }
 
@@ -127,7 +127,7 @@ contract VestingWalletMultiLinear is
      *
      * - Caller must have role DEFAULT_ADMIN_ROLE.
      */
-    function permanentLock() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function permanentLock() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _permanentLock();
     }
 
@@ -169,7 +169,7 @@ contract VestingWalletMultiLinear is
      * - step percent sum should not go above 100.
      */
     function addToSchedule(uint8 stepPercent, uint64 stepDuration)
-        public
+        external
         onlyRole(SCHEDULE_MANAGER_ROLE)
         whenNotLocked
     {
@@ -196,7 +196,7 @@ contract VestingWalletMultiLinear is
      * - The contract must not be locked.
      */
     function resetSchedule()
-        public
+        external
         onlyRole(SCHEDULE_MANAGER_ROLE)
         whenNotLocked
     {
@@ -210,7 +210,7 @@ contract VestingWalletMultiLinear is
     /**
      * @dev Getter for the step percent sum.
      */
-    function stepPercentSum() public view returns (uint8) {
+    function stepPercentSum() external view returns (uint8) {
         return _stepPercentSum;
     }
 

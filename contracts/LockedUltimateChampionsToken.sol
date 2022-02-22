@@ -55,7 +55,7 @@ contract LockedUltimateChampionsToken is Ownable {
     /**
      * @dev Returns the sum of locked CHAMPs.
      */
-    function totalSupply() public view returns (uint256) {
+    function totalSupply() external view returns (uint256) {
         uint256 total = 0;
         for (uint256 i = 0; i < _lockedWallets.length; i++) {
             total += _champContract.balanceOf(
@@ -82,7 +82,7 @@ contract LockedUltimateChampionsToken is Ownable {
      * - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
      */
     function setLockedWallet(address lockedWallet, address vestingContract)
-        public
+        external
         onlyOwner
     {
         require(

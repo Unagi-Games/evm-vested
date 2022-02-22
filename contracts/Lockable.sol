@@ -80,7 +80,7 @@ abstract contract Lockable is Context {
      *
      * - The contract must be temporary locked.
      */
-    function lockEnd() public view virtual whenLocked returns (uint256) {
+    function lockEnd() external view virtual whenLocked returns (uint256) {
         require(!permanentlyLocked(), "Lockable: not temporary locked");
         return _lockEnd;
     }

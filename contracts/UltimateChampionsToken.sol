@@ -60,7 +60,7 @@ contract UltimateChampionsToken is
      *
      * - Caller must have role PAUSER_ROLE.
      */
-    function pause() public onlyRole(PAUSER_ROLE) {
+    function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
@@ -71,7 +71,7 @@ contract UltimateChampionsToken is
      *
      * - Caller must have role PAUSER_ROLE.
      */
-    function unpause() public onlyRole(PAUSER_ROLE) {
+    function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
