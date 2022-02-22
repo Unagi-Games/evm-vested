@@ -54,6 +54,7 @@ contract VestingWalletMultiLinear is
     }
 
     ScheduleStep[] private _sortedSchedule;
+    uint8 private _stepPercentSum;
     address private _beneficiary;
     uint64 private _duration;
 
@@ -161,15 +162,21 @@ contract VestingWalletMultiLinear is
      * Requirements:
      *
      * - Caller must have role SCHEDULE_MANAGER_ROLE.
+     * - step percent sum should not go above 100.
      */
     function addToSchedule(uint8 stepPercent, uint64 stepDuration)
         public
         onlyRole(SCHEDULE_MANAGER_ROLE)
         whenNotLocked
     {
+        require(
+            _stepPercentSum + stepPercent <= 100,
+            "VestingWalletMultiLinear: stepPercentSum above 100. Double check schedule and/or rebuild it."
+        );
         _sortedSchedule.push(
             ScheduleStep(stepPercent, start() + duration(), stepDuration)
         );
+        _stepPercentSum += stepPercent;
         _duration += stepDuration;
     }
 
@@ -187,6 +194,15 @@ contract VestingWalletMultiLinear is
         whenNotLocked
     {
         delete _sortedSchedule;
+        _stepPercentSum = 0;
+        _duration = 0;
+    }
+
+    /**
+     * @dev Getter for the step percent sum.
+     */
+    function stepPercentSum() public view returns (uint8) {
+        return _stepPercentSum;
     }
 
     /**

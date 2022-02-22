@@ -381,25 +381,26 @@ export interface VestingWalletMultiLinearInstance
    * Setter for the beneficiary address. Requirements: - Caller must have role BENEFICIARY_MANAGER_ROLE.
    */
   setBeneficiary: {
-    (newBeneficiary: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
+    (
+      beneficiaryAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      newBeneficiary: string,
+      beneficiaryAddress: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      newBeneficiary: string,
+      beneficiaryAddress: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      newBeneficiary: string,
+      beneficiaryAddress: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
   /**
-   * Add a step to the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE.
+   * Add a step to the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - step percent sum should not go above 100.
    */
   addToSchedule: {
     (
@@ -435,6 +436,11 @@ export interface VestingWalletMultiLinearInstance
     sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
     estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
   };
+
+  /**
+   * Getter for the step percent sum.
+   */
+  stepPercentSum(txDetails?: Truffle.TransactionDetails): Promise<BN>;
 
   /**
    * Getter for the vesting duration.
@@ -708,25 +714,26 @@ export interface VestingWalletMultiLinearInstance
      * Setter for the beneficiary address. Requirements: - Caller must have role BENEFICIARY_MANAGER_ROLE.
      */
     setBeneficiary: {
-      (newBeneficiary: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
+      (
+        beneficiaryAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        newBeneficiary: string,
+        beneficiaryAddress: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        newBeneficiary: string,
+        beneficiaryAddress: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        newBeneficiary: string,
+        beneficiaryAddress: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
 
     /**
-     * Add a step to the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE.
+     * Add a step to the schedule. Requirements: - Caller must have role SCHEDULE_MANAGER_ROLE. - step percent sum should not go above 100.
      */
     addToSchedule: {
       (
@@ -762,6 +769,11 @@ export interface VestingWalletMultiLinearInstance
       sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
       estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
     };
+
+    /**
+     * Getter for the step percent sum.
+     */
+    stepPercentSum(txDetails?: Truffle.TransactionDetails): Promise<BN>;
 
     /**
      * Getter for the vesting duration.

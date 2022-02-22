@@ -92,10 +92,28 @@ contract("VestingWalletMultiLinear", (accounts) => {
     await vestingContract.methods["release()"]();
   });
 
+  it("Add step to schedule", async () => {
+    const vestingContract = await VestingWalletMultiLinear.new(rootUser, 0);
+    await vestingContract.addToSchedule(1, 3);
+    await vestingContract.addToSchedule(5, 7);
+
+    expect((await vestingContract.stepPercentSum()).toNumber()).to.equals(6);
+    expect((await vestingContract.duration()).toNumber()).to.equals(10);
+  });
+
   it("Reset schedule", async () => {
     const vestingContract = await VestingWalletMultiLinear.new(rootUser, 0);
     await vestingContract.addToSchedule(0, 1);
     await vestingContract.resetSchedule();
+
+    expect(
+      (await vestingContract.stepPercentSum()).toNumber(),
+      "stepPercentSum should be reset."
+    ).to.equals(0);
+    expect(
+      (await vestingContract.duration()).toNumber(),
+      "duration should be reset."
+    ).to.equals(0);
 
     try {
       await vestingContract.methods["vestedAmount(uint64)"](0);
