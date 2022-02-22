@@ -16,6 +16,8 @@ contract LockedUltimateChampionsToken is Ownable {
     mapping(address => bool) private _lockedWalletsTracked;
     mapping(address => address) private _lockedWalletToVestingContract;
 
+    uint8 private constant MAX_TRACKED_WALLETS = 200;
+
     IERC20Metadata private immutable _champContract;
 
     /**
@@ -76,6 +78,7 @@ contract LockedUltimateChampionsToken is Ownable {
      * Requirements:
      *
      * - The caller must be the owner.
+     * - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
      */
     function setLockedWallet(address lockedWallet, address vestingContract)
         public
@@ -91,6 +94,11 @@ contract LockedUltimateChampionsToken is Ownable {
         );
 
         if (!_lockedWalletsTracked[lockedWallet]) {
+            require(
+                _lockedWallets.length < MAX_TRACKED_WALLETS,
+                "Too much tracked wallets. Consider creating a new instance of this contract to handle more."
+            );
+
             _lockedWallets.push(lockedWallet);
             _lockedWalletsTracked[lockedWallet] = true;
         }

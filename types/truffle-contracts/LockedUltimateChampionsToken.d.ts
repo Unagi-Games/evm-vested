@@ -94,7 +94,7 @@ export interface LockedUltimateChampionsTokenInstance
   ): Promise<BN>;
 
   /**
-   * Allow to update the list of locked wallets with their associated vesting contract. Requirements: - The caller must be the owner.
+   * Allow to update the list of locked wallets with their associated vesting contract. Requirements: - The caller must be the owner. - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
    */
   setLockedWallet: {
     (
@@ -195,7 +195,7 @@ export interface LockedUltimateChampionsTokenInstance
     ): Promise<BN>;
 
     /**
-     * Allow to update the list of locked wallets with their associated vesting contract. Requirements: - The caller must be the owner.
+     * Allow to update the list of locked wallets with their associated vesting contract. Requirements: - The caller must be the owner. - The number of tracked locked wallets should remains bellow MAX_TRACKED_WALLETS items.
      */
     setLockedWallet: {
       (
