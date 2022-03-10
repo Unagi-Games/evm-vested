@@ -271,9 +271,6 @@ module.exports =
     );
     const lockedChampTokenContract =
       await LockedUltimateChampionsToken.deployed();
-    await lockedChampTokenContract.transferOwnership(
-      UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
-    );
 
     for (const lock of lockedWallets) {
       await lockedChampTokenContract.setLockedWallet(
@@ -281,4 +278,8 @@ module.exports =
         lock.vestingWallet
       );
     }
+
+    await lockedChampTokenContract.transferOwnership(
+      UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+    );
   };
