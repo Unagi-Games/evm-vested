@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
-// Unagi Vesting Contracts v1.0.0 (LockedUltimateChampionsToken.sol)
+// Unagi Contracts v1.0.0 (LockedChampToken.sol)
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /**
- * @title LockedUltimateChampionsToken
+ * @title LockedChampToken
  * @dev Partial implementation of IERC20 which allows to check balance of locked CHAMP for a given beneficiary.
  * This contract acts like a view of the CHAMP token and will simply return the balance of a vesting wallet assigned to a beneficiary.
  * @custom:security-contact security@unagi.ch
  */
-contract LockedUltimateChampionsToken is Ownable {
+contract LockedChampToken is Ownable {
     address[] private _lockedWallets;
     mapping(address => bool) private _lockedWalletsTracked;
     mapping(address => address) private _lockedWalletToVestingContract;
@@ -26,7 +26,7 @@ contract LockedUltimateChampionsToken is Ownable {
     constructor(address champAddress) {
         require(
             champAddress != address(0),
-            "LockedUltimateChampionsToken: champAddress should be a valid address. Received address(0)."
+            "LockedChampToken: champAddress should be a valid address. Received address(0)."
         );
         _champContract = IERC20Metadata(champAddress);
     }
@@ -87,11 +87,11 @@ contract LockedUltimateChampionsToken is Ownable {
     {
         require(
             lockedWallet != address(0),
-            "LockedUltimateChampionsToken: lockedWallet should be a valid address. Received address(0)."
+            "LockedChampToken: lockedWallet should be a valid address. Received address(0)."
         );
         require(
             vestingContract != address(0),
-            "LockedUltimateChampionsToken: vestingContract should be a valid address. Received address(0)."
+            "LockedChampToken: vestingContract should be a valid address. Received address(0)."
         );
 
         if (!_lockedWalletsTracked[lockedWallet]) {

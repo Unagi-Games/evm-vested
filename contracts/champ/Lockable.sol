@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Unagi Vesting Contracts v1.0.0 (Lockable.sol)
+// Unagi Contracts v1.0.0 (Lockable.sol)
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/utils/Context.sol";

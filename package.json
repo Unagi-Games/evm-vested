@@ -1,7 +1,7 @@
 {
   "name": "evm-vested",
   "version": "1.0.0",
-  "description": "Unagi tokens & vesting smartcontracts",
+  "description": "Unagi Tokens, NFT and vesting smartcontracts",
   "scripts": {
     "typechain:generate": "typechain --target=truffle-v5 'build/contracts/*.json'",
     "postinstall": "truffle compile && npm run typechain:generate",
