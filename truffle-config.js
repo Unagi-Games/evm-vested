@@ -6,7 +6,7 @@ require("dotenv").config({
 });
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
-const { TESTNET_BSC_PROVIDER_URL, BSC_PROVIDER_URL, MNEMONIC_SECRET } = process.env;
+const { TESTNET_BSC_PROVIDER_URL, BSC_PROVIDER_URL, MNEMONIC_SECRET, POLYGONSCAN_API_KEY, ETHERSCAN_API_KEY } = process.env;
 if(!TESTNET_BSC_PROVIDER_URL) {
   throw new Error('Missing env TESTNET_BSC_PROVIDER_URL');
 }
@@ -15,6 +15,12 @@ if(!BSC_PROVIDER_URL) {
 }
 if(!MNEMONIC_SECRET) {
   throw new Error('Missing env MNEMONIC_SECRET');
+}
+if(!POLYGONSCAN_API_KEY) {
+  throw new Error('Missing env POLYGONSCAN_API_KEY');
+}
+if(!ETHERSCAN_API_KEY) {
+  throw new Error('Missing env ETHERSCAN_API_KEY');
 }
 
 module.exports = {
@@ -43,6 +49,11 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     }
+  },
+  plugins: ['truffle-plugin-verify'],
+  api_keys: {
+    etherscan: ETHERSCAN_API_KEY,
+    polygonscan: POLYGONSCAN_API_KEY
   },
   compilers: {
     solc: {
