@@ -22,6 +22,14 @@ migrate-testnet-polygon: ## Migrate Solidity SmartContracts to Testnet Polygon
 migrate-polygon: ## Migrate Solidity SmartContracts to Polygon
 	@docker-compose run --rm --no-deps evm-contracts npm run migrate:polygon
 
+.PHONY: migrate-testnet-goerli
+migrate-testnet-goerli: ## Migrate Solidity SmartContracts to Testnet Ethereum Goerli
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:testnet-goerli
+
+.PHONY: migrate-ethereum
+migrate-ethereum: ## Migrate Solidity SmartContracts to Ethereum
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:ethereum
+
 .PHONY: format
 format: ## Format typescript code with prettier
 	@docker-compose run --rm --no-deps evm-contracts npm run prettier:write

@@ -9,7 +9,9 @@
     "test": "truffle test --network test",
     "migrate:dev": "truffle migrate --network development",
     "migrate:testnet-polygon": "truffle migrate --network testnet-polygon",
-    "migrate:polygon": "truffle migrate --network polygon"
+    "migrate:polygon": "truffle migrate --network polygon",
+    "migrate:testnet-goerli": "truffle migrate --network testnet-goerli",
+    "migrate:ethereum": "truffle migrate --network ethereum"
   },
   "keywords": [],
   "author": "Unagi AG",

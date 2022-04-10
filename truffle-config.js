@@ -6,12 +6,18 @@ require("dotenv").config({
 });
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
-const { TESTNET_POLYGON_PROVIDER_URL, POLYGON_PROVIDER_URL, MNEMONIC_SECRET, POLYGONSCAN_API_KEY, ETHERSCAN_API_KEY } = process.env;
+const { TESTNET_POLYGON_PROVIDER_URL, POLYGON_PROVIDER_URL, TESTNET_GOERLI_PROVIDER_URL, ETHEREUM_PROVIDER_URL, MNEMONIC_SECRET, POLYGONSCAN_API_KEY, ETHERSCAN_API_KEY } = process.env;
 if(!TESTNET_POLYGON_PROVIDER_URL) {
   throw new Error('Missing env TESTNET_POLYGON_PROVIDER_URL');
 }
 if(!POLYGON_PROVIDER_URL) {
   throw new Error('Missing env POLYGON_PROVIDER_URL');
+}
+if(!TESTNET_GOERLI_PROVIDER_URL) {
+  throw new Error('Missing env TESTNET_GOERLI_PROVIDER_URL');
+}
+if(!ETHEREUM_PROVIDER_URL) {
+  throw new Error('Missing env ETHEREUM_PROVIDER_URL');
 }
 if(!MNEMONIC_SECRET) {
   throw new Error('Missing env MNEMONIC_SECRET');
@@ -45,6 +51,20 @@ module.exports = {
     polygon: {
       provider: () => new HDWalletProvider(MNEMONIC_SECRET, POLYGON_PROVIDER_URL),
       network_id: 137,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    "testnet-goerli": {
+      provider: () => new HDWalletProvider(MNEMONIC_SECRET, TESTNET_GOERLI_PROVIDER_URL),
+      network_id: 5,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    ethereum: {
+      provider: () => new HDWalletProvider(MNEMONIC_SECRET, ETHEREUM_PROVIDER_URL),
+      network_id: 1,
       confirmations: 10,
       timeoutBlocks: 200,
       skipDryRun: true
