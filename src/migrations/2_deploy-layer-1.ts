@@ -57,9 +57,7 @@ import {
   SCHEDULE_MANAGER_ROLE,
 } from "../roles";
 
-const LockedChampToken = artifacts.require(
-  "LockedChampToken"
-);
+const LockedChampToken = artifacts.require("LockedChampToken");
 const ChampToken = artifacts.require("ChampToken");
 const VestingWalletMultiLinear = artifacts.require("VestingWalletMultiLinear");
 const PaymentSplitter = artifacts.require("UPaymentSplitter");
@@ -250,11 +248,7 @@ module.exports =
     );
 
     // Deploy and setup ChampToken
-    await deployer.deploy(
-      ChampToken,
-      champHolders,
-      champHoldersBalances
-    );
+    await deployer.deploy(ChampToken, champHolders, champHoldersBalances);
     const champTokenContract = await ChampToken.deployed();
     await champTokenContract.grantRole(
       DEFAULT_ADMIN_ROLE,
@@ -265,12 +259,8 @@ module.exports =
     await champTokenContract.renounceRole(PAUSER_ROLE, rootAccount);
 
     // Deploy and setup LockedChampToken
-    await deployer.deploy(
-      LockedChampToken,
-      champTokenContract.address
-    );
-    const lockedChampTokenContract =
-      await LockedChampToken.deployed();
+    await deployer.deploy(LockedChampToken, champTokenContract.address);
+    const lockedChampTokenContract = await LockedChampToken.deployed();
 
     for (const lock of lockedWallets) {
       await lockedChampTokenContract.setLockedWallet(

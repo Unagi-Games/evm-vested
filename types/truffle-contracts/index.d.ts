@@ -5,6 +5,9 @@
 import { AccessControlContract } from "./AccessControl";
 import { AccessControlEnumerableContract } from "./AccessControlEnumerable";
 import { ChampTokenContract } from "./ChampToken";
+import { ChildChampTokenContract } from "./ChildChampToken";
+import { ChildMgcTokenContract } from "./ChildMgcToken";
+import { ChildUltimateChampionsNFTContract } from "./ChildUltimateChampionsNFT";
 import { ERC165Contract } from "./ERC165";
 import { ERC721Contract } from "./ERC721";
 import { ERC721URIStorageContract } from "./ERC721URIStorage";
@@ -12,6 +15,7 @@ import { ERC777Contract } from "./ERC777";
 import { ERC777PresetFixedSupplyContract } from "./ERC777PresetFixedSupply";
 import { IAccessControlContract } from "./IAccessControl";
 import { IAccessControlEnumerableContract } from "./IAccessControlEnumerable";
+import { IChildTokenContract } from "./IChildToken";
 import { IERC165Contract } from "./IERC165";
 import { IERC1820RegistryContract } from "./IERC1820Registry";
 import { IERC20Contract } from "./IERC20";
@@ -42,6 +46,11 @@ declare global {
       require(name: "AccessControl"): AccessControlContract;
       require(name: "AccessControlEnumerable"): AccessControlEnumerableContract;
       require(name: "ChampToken"): ChampTokenContract;
+      require(name: "ChildChampToken"): ChildChampTokenContract;
+      require(name: "ChildMgcToken"): ChildMgcTokenContract;
+      require(
+        name: "ChildUltimateChampionsNFT"
+      ): ChildUltimateChampionsNFTContract;
       require(name: "ERC165"): ERC165Contract;
       require(name: "ERC721"): ERC721Contract;
       require(name: "ERC721URIStorage"): ERC721URIStorageContract;
@@ -51,6 +60,7 @@ declare global {
       require(
         name: "IAccessControlEnumerable"
       ): IAccessControlEnumerableContract;
+      require(name: "IChildToken"): IChildTokenContract;
       require(name: "IERC165"): IERC165Contract;
       require(name: "IERC1820Registry"): IERC1820RegistryContract;
       require(name: "IERC20"): IERC20Contract;
@@ -86,6 +96,15 @@ export {
   AccessControlEnumerableInstance,
 } from "./AccessControlEnumerable";
 export { ChampTokenContract, ChampTokenInstance } from "./ChampToken";
+export {
+  ChildChampTokenContract,
+  ChildChampTokenInstance,
+} from "./ChildChampToken";
+export { ChildMgcTokenContract, ChildMgcTokenInstance } from "./ChildMgcToken";
+export {
+  ChildUltimateChampionsNFTContract,
+  ChildUltimateChampionsNFTInstance,
+} from "./ChildUltimateChampionsNFT";
 export { ERC165Contract, ERC165Instance } from "./ERC165";
 export { ERC721Contract, ERC721Instance } from "./ERC721";
 export {
@@ -105,6 +124,7 @@ export {
   IAccessControlEnumerableContract,
   IAccessControlEnumerableInstance,
 } from "./IAccessControlEnumerable";
+export { IChildTokenContract, IChildTokenInstance } from "./IChildToken";
 export { IERC165Contract, IERC165Instance } from "./IERC165";
 export {
   IERC1820RegistryContract,
