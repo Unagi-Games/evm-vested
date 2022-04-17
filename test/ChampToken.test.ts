@@ -1,14 +1,14 @@
-import { UltimateChampionsTokenInstance } from "../types/truffle-contracts";
+import { ChampTokenInstance } from "../types/truffle-contracts";
 
-const UltimateChampionsToken = artifacts.require("UltimateChampionsToken");
+const ChampToken = artifacts.require("ChampToken");
 
-contract("UltimateChampionsToken", (accounts) => {
-  let contract: UltimateChampionsTokenInstance;
+contract("ChampToken", (accounts) => {
+  let contract: ChampTokenInstance;
   const rootUser = accounts[0];
   const anyUser = accounts[1];
 
   beforeEach(async () => {
-    contract = await UltimateChampionsToken.new(
+    contract = await ChampToken.new(
       [rootUser],
       [web3.utils.toWei("1000000000", "ether")]
     );

@@ -332,6 +332,14 @@ export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
   symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
+   * See {IERC721Metadata-tokenURI}.
+   */
+  tokenURI(
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  /**
    * See {IERC721-transferFrom}.
    */
   transferFrom: {
@@ -392,14 +400,6 @@ export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
     sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
     estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
   };
-
-  /**
-   * Returns the URI associated to `tokenId` that point to a JSON file conforms to ERC721Metadata extension..
-   */
-  tokenURI(
-    tokenId: number | BN | string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
 
   /**
    * Check if token already exists, return true if it does exist
@@ -633,6 +633,14 @@ export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
     symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
+     * See {IERC721Metadata-tokenURI}.
+     */
+    tokenURI(
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    /**
      * See {IERC721-transferFrom}.
      */
     transferFrom: {
@@ -693,14 +701,6 @@ export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
       sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
       estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
     };
-
-    /**
-     * Returns the URI associated to `tokenId` that point to a JSON file conforms to ERC721Metadata extension..
-     */
-    tokenURI(
-      tokenId: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
 
     /**
      * Check if token already exists, return true if it does exist

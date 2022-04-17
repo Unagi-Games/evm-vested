@@ -57,10 +57,10 @@ import {
   SCHEDULE_MANAGER_ROLE,
 } from "../roles";
 
-const LockedUltimateChampionsToken = artifacts.require(
-  "LockedUltimateChampionsToken"
+const LockedChampToken = artifacts.require(
+  "LockedChampToken"
 );
-const UltimateChampionsToken = artifacts.require("UltimateChampionsToken");
+const ChampToken = artifacts.require("ChampToken");
 const VestingWalletMultiLinear = artifacts.require("VestingWalletMultiLinear");
 const PaymentSplitter = artifacts.require("UPaymentSplitter");
 
@@ -249,13 +249,13 @@ module.exports =
       web3.utils.toWei(String(EMPLOYEE_REWARDS_AMOUNT), "ether")
     );
 
-    // Deploy and setup UltimateChampionsToken
+    // Deploy and setup ChampToken
     await deployer.deploy(
-      UltimateChampionsToken,
+      ChampToken,
       champHolders,
       champHoldersBalances
     );
-    const champTokenContract = await UltimateChampionsToken.deployed();
+    const champTokenContract = await ChampToken.deployed();
     await champTokenContract.grantRole(
       DEFAULT_ADMIN_ROLE,
       UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
@@ -264,13 +264,13 @@ module.exports =
     await champTokenContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
     await champTokenContract.renounceRole(PAUSER_ROLE, rootAccount);
 
-    // Deploy and setup LockedUltimateChampionsToken
+    // Deploy and setup LockedChampToken
     await deployer.deploy(
-      LockedUltimateChampionsToken,
+      LockedChampToken,
       champTokenContract.address
     );
     const lockedChampTokenContract =
-      await LockedUltimateChampionsToken.deployed();
+      await LockedChampToken.deployed();
 
     for (const lock of lockedWallets) {
       await lockedChampTokenContract.setLockedWallet(

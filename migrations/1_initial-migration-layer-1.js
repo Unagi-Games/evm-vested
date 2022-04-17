@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/1_initial-migration-layer-1")(web3);

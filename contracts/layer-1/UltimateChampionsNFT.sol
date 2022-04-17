@@ -2,7 +2,7 @@
 // Unagi Contracts v1.0.0 (UltimateChampionsNFT.sol)
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Multicall.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
@@ -14,18 +14,9 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * See https://github.com/ethereum/EIPs/blob/34a2d1fcdf3185ca39969a7b076409548307b63b/EIPS/eip-721.md#specification
  * @custom:security-contact security@unagi.ch
  */
-contract UltimateChampionsNFT is ERC721, AccessControl, Multicall, Pausable {
-    using Counters for Counters.Counter;
-    using Strings for uint256;
-
+contract UltimateChampionsNFT is ERC721URIStorage, AccessControl, Multicall, Pausable {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
-
-    // Counter for token ID
-    Counters.Counter private _tokenIds;
-
-    // Mapping from token ID to metadata URI.
-    mapping(uint256 => string) private _tokenURIs;
 
     /**
      * @dev Create NFCHAMP contract.
@@ -52,7 +43,7 @@ contract UltimateChampionsNFT is ERC721, AccessControl, Multicall, Pausable {
         returns (bool)
     {
         return
-            ERC721.supportsInterface(interfaceId) ||
+        ERC721.supportsInterface(interfaceId) ||
             AccessControl.supportsInterface(interfaceId);
     }
 
@@ -76,23 +67,6 @@ contract UltimateChampionsNFT is ERC721, AccessControl, Multicall, Pausable {
      */
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
-    }
-
-    /**
-     * @dev Returns the URI associated to `tokenId` that point to a JSON file conforms to ERC721Metadata extension..
-     */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        require(
-            _exists(tokenId),
-            "UltimateChampionsNFT: URI query for nonexistent token"
-        );
-
-        return string(abi.encodePacked("ipfs://", _tokenURIs[tokenId]));
     }
 
     /**
@@ -146,21 +120,6 @@ contract UltimateChampionsNFT is ERC721, AccessControl, Multicall, Pausable {
      */
     function exists(uint256 tokenId) external view returns (bool) {
         return _exists(tokenId);
-    }
-
-    /**
-     * @dev Sets `_tokenURI` as the tokenURI of `tokenId`.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     */
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal {
-        require(
-            _exists(tokenId),
-            "ERC721URIStorage: URI set of nonexistent token"
-        );
-        _tokenURIs[tokenId] = _tokenURI;
     }
 
     /**

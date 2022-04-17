@@ -2,7 +2,7 @@
 // Unagi Vesting Contracts v1.0.0 (TestLockable.sol)
 pragma solidity 0.8.12;
 
-import "../champ/Lockable.sol";
+import "../layer-1/champ/Lockable.sol";
 
 contract TestLockable is Lockable {
     constructor() {}

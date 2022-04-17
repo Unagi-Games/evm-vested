@@ -9,9 +9,9 @@
     "test": "truffle test --network test",
     "migrate:dev": "truffle migrate --network development",
     "migrate:testnet-polygon": "truffle migrate --network testnet-polygon",
-    "migrate:polygon": "truffle migrate --network polygon",
     "migrate:testnet-goerli": "truffle migrate --network testnet-goerli",
-    "migrate:ethereum": "truffle migrate --network ethereum"
+    "migrate:layer-1": "truffle migrate --network ethereum -f 1 --to 99",
+    "migrate:layer-2": "truffle migrate --network polygon -f 100 --to 199"
   },
   "keywords": [],
   "author": "Unagi AG",
@@ -23,6 +23,7 @@
     "@types/node": "^17.0.8",
     "dotenv": "^10.0.0",
     "moment": "^2.29.1",
+    "solidity-bytes-utils": "^0.8.0",
     "truffle": "^5.4.27",
     "ts-node": "^10.4.0",
     "typechain": "^6.1.0",

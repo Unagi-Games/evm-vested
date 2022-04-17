@@ -50,26 +50,26 @@ export interface IERC20Instance extends Truffle.ContractInstance {
   ): Promise<BN>;
 
   /**
-   * Moves `amount` tokens from the caller's account to `recipient`. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
+   * Moves `amount` tokens from the caller's account to `to`. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
    */
   transfer: {
     (
-      recipient: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      recipient: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      recipient: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      recipient: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
@@ -111,30 +111,30 @@ export interface IERC20Instance extends Truffle.ContractInstance {
   };
 
   /**
-   * Moves `amount` tokens from `sender` to `recipient` using the allowance mechanism. `amount` is then deducted from the caller's allowance. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
+   * Moves `amount` tokens from `from` to `to` using the allowance mechanism. `amount` is then deducted from the caller's allowance. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
    */
   transferFrom: {
     (
-      sender: string,
-      recipient: string,
+      from: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      sender: string,
-      recipient: string,
+      from: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      sender: string,
-      recipient: string,
+      from: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      sender: string,
-      recipient: string,
+      from: string,
+      to: string,
       amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
@@ -155,26 +155,26 @@ export interface IERC20Instance extends Truffle.ContractInstance {
     ): Promise<BN>;
 
     /**
-     * Moves `amount` tokens from the caller's account to `recipient`. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
+     * Moves `amount` tokens from the caller's account to `to`. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
      */
     transfer: {
       (
-        recipient: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        recipient: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        recipient: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        recipient: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
@@ -216,30 +216,30 @@ export interface IERC20Instance extends Truffle.ContractInstance {
     };
 
     /**
-     * Moves `amount` tokens from `sender` to `recipient` using the allowance mechanism. `amount` is then deducted from the caller's allowance. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
+     * Moves `amount` tokens from `from` to `to` using the allowance mechanism. `amount` is then deducted from the caller's allowance. Returns a boolean value indicating whether the operation succeeded. Emits a {Transfer} event.
      */
     transferFrom: {
       (
-        sender: string,
-        recipient: string,
+        from: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        sender: string,
-        recipient: string,
+        from: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        sender: string,
-        recipient: string,
+        from: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        sender: string,
-        recipient: string,
+        from: string,
+        to: string,
         amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
