@@ -8,7 +8,6 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 export interface UltimateChampionsNFTContract
   extends Truffle.Contract<UltimateChampionsNFTInstance> {
   "new"(
-    predicate: string,
     meta?: Truffle.TransactionDetails
   ): Promise<UltimateChampionsNFTInstance>;
 }
@@ -114,9 +113,9 @@ type AllEvents =
 export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  PAUSER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  MINT_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  PREDICATE_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  PAUSER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
    * See {IERC721-approve}.
@@ -402,19 +401,37 @@ export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Check if token already exists, return true if it does exist
+   * Allow to mint a new NFCHAMP. Requirements: - Caller must have role MINT_ROLE.
    */
-  exists(
-    tokenId: number | BN | string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<boolean>;
+  safeMint: {
+    (
+      to: string,
+      ipfsMedataURI: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      to: string,
+      ipfsMedataURI: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      to: string,
+      ipfsMedataURI: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      to: string,
+      ipfsMedataURI: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   methods: {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    PAUSER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    MINT_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    PREDICATE_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    PAUSER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
      * See {IERC721-approve}.
@@ -703,12 +720,30 @@ export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Check if token already exists, return true if it does exist
+     * Allow to mint a new NFCHAMP. Requirements: - Caller must have role MINT_ROLE.
      */
-    exists(
-      tokenId: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
+    safeMint: {
+      (
+        to: string,
+        ipfsMedataURI: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        to: string,
+        ipfsMedataURI: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        to: string,
+        ipfsMedataURI: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        to: string,
+        ipfsMedataURI: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     /**
      * See {IERC721-safeTransferFrom}.
@@ -770,62 +805,6 @@ export interface UltimateChampionsNFTInstance extends Truffle.ContractInstance {
         to: string,
         tokenId: number | BN | string,
         _data: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Called by predicate contract to mint tokens while withdrawing Requirements: - Caller must have role PREDICATE_ROLE.
-     */
-    "mint(address,uint256)": {
-      (
-        to: string,
-        tokenId: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        to: string,
-        tokenId: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        to: string,
-        tokenId: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        to: string,
-        tokenId: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Called by predicate contract to mint tokens while withdrawing Bring metadata associated with token from L2 to L1. Requirements: - `to` cannot be the zero address. - `tokenId` must not exist. - Caller must have role PREDICATE_ROLE. Emits a {Transfer} event.
-     */
-    "mint(address,uint256,bytes)": {
-      (
-        to: string,
-        tokenId: number | BN | string,
-        metaData: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        to: string,
-        tokenId: number | BN | string,
-        metaData: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        to: string,
-        tokenId: number | BN | string,
-        metaData: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        to: string,
-        tokenId: number | BN | string,
-        metaData: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

@@ -20,21 +20,21 @@ contract UltimateChampionsNFT is
     Multicall,
     Pausable
 {
+    using Counters for Counters.Counter;
+
+    bytes32 public constant MINT_ROLE = keccak256("MINT_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
+
+    // Counter for token ID
+    Counters.Counter private _tokenIds;
 
     /**
      * @dev Create NFCHAMP contract.
-     *
-     * Setup predicate address as the predicate role.
-     * See https://github.com/maticnetwork/matic-docs/blob/ae7315656703ed5d1394640e830ca6c8f591a7e4/docs/develop/ethereum-polygon/mintable-assets.md#contract-to-be-deployed-on-ethereum
      */
-    constructor(address predicate)
-        ERC721("Non Fungible Ultimate Champions", "NFCHAMP")
-    {
+    constructor() ERC721("Non Fungible Ultimate Champions", "NFCHAMP") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINT_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
-        _grantRole(PREDICATE_ROLE, predicate);
     }
 
     /**
@@ -75,56 +75,20 @@ contract UltimateChampionsNFT is
     }
 
     /**
-     * @dev Decode token metadata from L2 to L1.
-     */
-    function setTokenMetadata(uint256 tokenId, bytes memory data)
-        internal
-        virtual
-    {
-        string memory uri = abi.decode(data, (string));
-        _setTokenURI(tokenId, uri);
-    }
-
-    /**
-     * @dev Called by predicate contract to mint tokens while withdrawing
+     * @dev Allow to mint a new NFCHAMP.
      *
      * Requirements:
      *
-     * - Caller must have role PREDICATE_ROLE.
+     * - Caller must have role MINT_ROLE.
      */
-    function mint(address to, uint256 tokenId)
-        external
-        onlyRole(PREDICATE_ROLE)
+    function safeMint(address to, string memory ipfsMedataURI)
+        public
+        onlyRole(MINT_ROLE)
     {
-        _mint(to, tokenId);
-    }
-
-    /**
-     * @dev Called by predicate contract to mint tokens while withdrawing
-     * Bring metadata associated with token from L2 to L1.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     * - `tokenId` must not exist.
-     * - Caller must have role PREDICATE_ROLE.
-     *
-     * Emits a {Transfer} event.
-     */
-    function mint(
-        address to,
-        uint256 tokenId,
-        bytes calldata metaData
-    ) external onlyRole(PREDICATE_ROLE) {
-        _safeMint(to, tokenId);
-        setTokenMetadata(tokenId, metaData);
-    }
-
-    /**
-     * @dev Check if token already exists, return true if it does exist
-     */
-    function exists(uint256 tokenId) external view returns (bool) {
-        return _exists(tokenId);
+        _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
+        _safeMint(to, newItemId);
+        _setTokenURI(newItemId, ipfsMedataURI);
     }
 
     /**

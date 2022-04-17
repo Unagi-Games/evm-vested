@@ -1,1 +1,0 @@
-module.exports = require("../src/migrations/2_deploy-layer-1")(web3);

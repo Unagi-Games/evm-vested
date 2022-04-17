@@ -7,7 +7,6 @@ import { AccessControlEnumerableContract } from "./AccessControlEnumerable";
 import { ChampTokenContract } from "./ChampToken";
 import { ChildChampTokenContract } from "./ChildChampToken";
 import { ChildMgcTokenContract } from "./ChildMgcToken";
-import { ChildUltimateChampionsNFTContract } from "./ChildUltimateChampionsNFT";
 import { ERC165Contract } from "./ERC165";
 import { ERC721Contract } from "./ERC721";
 import { ERC721URIStorageContract } from "./ERC721URIStorage";
@@ -48,9 +47,6 @@ declare global {
       require(name: "ChampToken"): ChampTokenContract;
       require(name: "ChildChampToken"): ChildChampTokenContract;
       require(name: "ChildMgcToken"): ChildMgcTokenContract;
-      require(
-        name: "ChildUltimateChampionsNFT"
-      ): ChildUltimateChampionsNFTContract;
       require(name: "ERC165"): ERC165Contract;
       require(name: "ERC721"): ERC721Contract;
       require(name: "ERC721URIStorage"): ERC721URIStorageContract;
@@ -101,10 +97,6 @@ export {
   ChildChampTokenInstance,
 } from "./ChildChampToken";
 export { ChildMgcTokenContract, ChildMgcTokenInstance } from "./ChildMgcToken";
-export {
-  ChildUltimateChampionsNFTContract,
-  ChildUltimateChampionsNFTInstance,
-} from "./ChildUltimateChampionsNFT";
 export { ERC165Contract, ERC165Instance } from "./ERC165";
 export { ERC721Contract, ERC721Instance } from "./ERC721";
 export {
