@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Unagi Contracts v1.0.0 (UltimateChampionsNFT.sol)
-pragma solidity ^0.8.0;
+pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -14,7 +14,12 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * See https://github.com/ethereum/EIPs/blob/34a2d1fcdf3185ca39969a7b076409548307b63b/EIPS/eip-721.md#specification
  * @custom:security-contact security@unagi.ch
  */
-contract UltimateChampionsNFT is ERC721URIStorage, AccessControl, Multicall, Pausable {
+contract UltimateChampionsNFT is
+    ERC721URIStorage,
+    AccessControl,
+    Multicall,
+    Pausable
+{
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
@@ -43,7 +48,7 @@ contract UltimateChampionsNFT is ERC721URIStorage, AccessControl, Multicall, Pau
         returns (bool)
     {
         return
-        ERC721.supportsInterface(interfaceId) ||
+            ERC721.supportsInterface(interfaceId) ||
             AccessControl.supportsInterface(interfaceId);
     }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Unagi Contracts v1.0.0 (UPaymentSplitter.sol)
+// Unagi Contracts v1.0.0 (VestingWalletMultiLinear.sol)
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/finance/VestingWallet.sol";
