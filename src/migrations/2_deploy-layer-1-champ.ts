@@ -34,8 +34,8 @@ import {
   TEAM_RESERVE_EDITABLE,
   TEAM_RESERVE_SCHEDULE,
   TEAM_RESERVE_START,
-  UNAGI_MAINTENANCE_MULTISIG,
-  UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER,
+  L1_UNAGI_MAINTENANCE_MULTISIG,
+  L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER,
   UNAGI_RESERVE,
   UNAGI_RESERVE_AMOUNT,
   UNAGI_RESERVE_EDITABLE,
@@ -87,16 +87,16 @@ async function buildVestingContract(
 
   await vestingContract.grantRole(
     DEFAULT_ADMIN_ROLE,
-    UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+    L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
   );
-  await vestingContract.grantRole(PAUSER_ROLE, UNAGI_MAINTENANCE_MULTISIG);
+  await vestingContract.grantRole(PAUSER_ROLE, L1_UNAGI_MAINTENANCE_MULTISIG);
   await vestingContract.grantRole(
     SCHEDULE_MANAGER_ROLE,
-    UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+    L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
   );
   await vestingContract.grantRole(
     BENEFICIARY_MANAGER_ROLE,
-    UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+    L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
   );
 
   await vestingContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
@@ -252,9 +252,12 @@ module.exports =
     const champTokenContract = await ChampToken.deployed();
     await champTokenContract.grantRole(
       DEFAULT_ADMIN_ROLE,
-      UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+      L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
-    await champTokenContract.grantRole(PAUSER_ROLE, UNAGI_MAINTENANCE_MULTISIG);
+    await champTokenContract.grantRole(
+      PAUSER_ROLE,
+      L1_UNAGI_MAINTENANCE_MULTISIG
+    );
     await champTokenContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
     await champTokenContract.renounceRole(PAUSER_ROLE, rootAccount);
 
@@ -270,6 +273,6 @@ module.exports =
     }
 
     await lockedChampTokenContract.transferOwnership(
-      UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+      L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
   };

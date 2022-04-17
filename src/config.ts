@@ -2,8 +2,13 @@ import moment from "moment";
 import { Address, CHAMPAmount, ScheduleStep, UnixTimestamp } from "./types";
 
 // Unagi maintenance accounts
-export const UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER: Address = "";
-export const UNAGI_MAINTENANCE_MULTISIG: Address = "";
+export const L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER: Address = "";
+export const L1_UNAGI_MAINTENANCE_MULTISIG: Address = "";
+export const L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER: Address = "";
+export const L2_UNAGI_MAINTENANCE_MULTISIG: Address = "";
+
+// Unagi minter
+export const L2_UNAGI_MINTER_BCI: Address = "";
 
 const GAME_LAUNCH = moment(0);
 const TGE = moment(0);
