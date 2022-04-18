@@ -4,8 +4,11 @@ import {
   ADVISOR_RESERVE_EDITABLE,
   ADVISOR_RESERVE_SCHEDULE,
   ADVISOR_RESERVE_START,
-  EMPLOYEE_REWARDS,
-  EMPLOYEE_REWARDS_AMOUNT,
+  EMPLOYEE_RESERVE,
+  EMPLOYEE_RESERVE_AMOUNT,
+  EMPLOYEE_RESERVE_EDITABLE,
+  EMPLOYEE_RESERVE_SCHEDULE,
+  EMPLOYEE_RESERVE_START,
   KOLS_RESERVE,
   KOLS_RESERVE_AMOUNT,
   KOLS_RESERVE_EDITABLE,
@@ -25,10 +28,6 @@ import {
   STACKING_RESERVE_EDITABLE,
   STACKING_RESERVE_SCHEDULE,
   STACKING_RESERVE_START,
-  SWAP_IFO,
-  SWAP_IFO_AMOUNT,
-  SWAP_LIQUIDITY,
-  SWAP_LIQUIDITY_AMOUNT,
   TEAM,
   TEAM_RESERVE_AMOUNT,
   TEAM_RESERVE_EDITABLE,
@@ -147,18 +146,6 @@ module.exports =
       });
     }
 
-    // Swap IFO
-    champHolders.push(SWAP_IFO);
-    champHoldersBalances.push(
-      web3.utils.toWei(String(SWAP_IFO_AMOUNT), "ether")
-    );
-
-    // Swap Liquidity
-    champHolders.push(SWAP_LIQUIDITY);
-    champHoldersBalances.push(
-      web3.utils.toWei(String(SWAP_LIQUIDITY_AMOUNT), "ether")
-    );
-
     // KOLs Reserve
     const kolsVesting = await buildVestingContract(
       KOLS_RESERVE,
@@ -241,10 +228,17 @@ module.exports =
       web3.utils.toWei(String(ADVISOR_RESERVE_AMOUNT), "ether")
     );
 
-    // Employee Rewards - 100% at TGE
-    champHolders.push(EMPLOYEE_REWARDS);
+    // Employees
+    const employeeVesting = await buildVestingContract(
+      EMPLOYEE_RESERVE,
+      EMPLOYEE_RESERVE_START,
+      EMPLOYEE_RESERVE_SCHEDULE,
+      EMPLOYEE_RESERVE_EDITABLE
+    );
+    console.log(`Employees vesting deployed at ${advisorVesting}`);
+    champHolders.push(employeeVesting);
     champHoldersBalances.push(
-      web3.utils.toWei(String(EMPLOYEE_REWARDS_AMOUNT), "ether")
+      web3.utils.toWei(String(EMPLOYEE_RESERVE_AMOUNT), "ether")
     );
 
     // Deploy and setup ChampToken
