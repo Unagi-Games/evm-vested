@@ -4,6 +4,7 @@
 
 import { AccessControlContract } from "./AccessControl";
 import { AccessControlEnumerableContract } from "./AccessControlEnumerable";
+import { ChampMarketplaceContract } from "./ChampMarketplace";
 import { ChampTokenContract } from "./ChampToken";
 import { ChildChampTokenContract } from "./ChildChampToken";
 import { ChildMgcTokenContract } from "./ChildMgcToken";
@@ -44,6 +45,7 @@ declare global {
     interface Artifacts {
       require(name: "AccessControl"): AccessControlContract;
       require(name: "AccessControlEnumerable"): AccessControlEnumerableContract;
+      require(name: "ChampMarketplace"): ChampMarketplaceContract;
       require(name: "ChampToken"): ChampTokenContract;
       require(name: "ChildChampToken"): ChildChampTokenContract;
       require(name: "ChildMgcToken"): ChildMgcTokenContract;
@@ -91,6 +93,10 @@ export {
   AccessControlEnumerableContract,
   AccessControlEnumerableInstance,
 } from "./AccessControlEnumerable";
+export {
+  ChampMarketplaceContract,
+  ChampMarketplaceInstance,
+} from "./ChampMarketplace";
 export { ChampTokenContract, ChampTokenInstance } from "./ChampToken";
 export {
   ChildChampTokenContract,

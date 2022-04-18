@@ -8,3 +8,5 @@ export const SCHEDULE_MANAGER_ROLE =
   "0x54217f7b85353d04ece159ebd69a45e9b8287dd2043746eaca469996a3d91aee";
 export const BENEFICIARY_MANAGER_ROLE =
   "0xc59ec23d1c349d9976a1aba1c27c681cc250eafcb2aaf5c7c3be1d0e6827bfb1";
+export const FEE_MANAGER_ROLE =
+  "0x6c0757dc3e6b28b2580c03fd9e96c274acf4f99d91fbec9b418fa1d70604ff1c";

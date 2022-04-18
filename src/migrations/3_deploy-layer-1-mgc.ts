@@ -12,6 +12,10 @@ const PREDICATE_PROXY = "0x932532aA4c0174b8453839A6E44eE09Cc615F2b7";
 module.exports =
   () =>
   async (deployer: Truffle.Deployer, network: Network, accounts: Address[]) => {
+    if (network === "test") {
+      console.log("Deployment disabled for tests");
+      return;
+    }
     const rootAccount = accounts[0];
 
     await deployer.deploy(Mgctoken, PREDICATE_PROXY);

@@ -1,1 +1,0 @@
-module.exports = require("../src/migrations/103_deploy-nfchamp")(web3);
