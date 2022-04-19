@@ -37,6 +37,14 @@ export const PRIVATE_SALE_SCHEDULE: ScheduleStep[] = [
 export const PRIVATE_SALE_EDITABLE = false;
 
 // ┌──────────────────────────────────────────────────────┐
+// │ Public Sale                                          │
+// │                                                      │
+// │ Full release on TGE                                  |
+// └──────────────────────────────────────────────────────┘
+export const PUBLIC_SALE_RESERVE: Address = "";
+export const PUBLIC_SALE_AMOUNT: CHAMPAmount = 0;
+
+// ┌──────────────────────────────────────────────────────┐
 // │ KOLs Reserve                                         │
 // │                                                      │
 // │ Release 5% at game launch then                       |

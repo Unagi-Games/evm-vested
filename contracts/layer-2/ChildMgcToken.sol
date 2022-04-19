@@ -9,7 +9,7 @@ import "./IChildToken.sol";
 
 /**
  * @title Layer 2 MgcToken
- * @dev See MgcToken@0x[TODO]
+ * @dev See MgcToken@0x960c1b741B4D4FFb8D5Dc6019534386ef764d69d
  * @custom:security-contact security@unagi.ch
  */
 contract ChildMgcToken is ERC777, IChildToken, AccessControl, Multicall {

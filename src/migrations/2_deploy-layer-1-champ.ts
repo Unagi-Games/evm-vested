@@ -40,6 +40,8 @@ import {
   UNAGI_RESERVE_EDITABLE,
   UNAGI_RESERVE_SCHEDULE,
   UNAGI_RESERVE_START,
+  PUBLIC_SALE_RESERVE,
+  PUBLIC_SALE_AMOUNT,
 } from "../config";
 import {
   Address,
@@ -145,6 +147,12 @@ module.exports =
         vestingWallet: investorVesting,
       });
     }
+
+    // Public sale
+    champHolders.push(PUBLIC_SALE_RESERVE);
+    champHoldersBalances.push(
+      web3.utils.toWei(String(PUBLIC_SALE_AMOUNT), "ether")
+    );
 
     // KOLs Reserve
     const kolsVesting = await buildVestingContract(

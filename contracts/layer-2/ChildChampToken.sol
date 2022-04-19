@@ -9,7 +9,7 @@ import "./IChildToken.sol";
 
 /**
  * @title Layer 2 ChampToken
- * @dev See ChampToken@0x[TODO]
+ * @dev See ChampToken@0x456125Cd98107ae0480Ba566f1b716D48Ba31453
  * @custom:security-contact security@unagi.ch
  */
 contract ChildChampToken is ERC777, IChildToken, AccessControl, Multicall {
