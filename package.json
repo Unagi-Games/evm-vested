@@ -24,7 +24,7 @@
     "dotenv": "^10.0.0",
     "moment": "^2.29.1",
     "solidity-bytes-utils": "^0.8.0",
-    "truffle": "^5.4.27",
+    "truffle": "^5.5.10",
     "ts-node": "^10.4.0",
     "typechain": "^6.1.0",
     "typescript": "^4.5.4"
