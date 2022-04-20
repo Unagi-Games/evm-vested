@@ -7,7 +7,7 @@ import { Address, Network } from "../types";
 
 const Mgctoken = artifacts.require("MgcToken");
 
-const PREDICATE_PROXY = "0x932532aA4c0174b8453839A6E44eE09Cc615F2b7";
+const PREDICATE_PROXY = "0x9923263fA127b3d1484cFD649df8f1831c2A74e4";
 
 module.exports =
   () =>
