@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/102_deploy-distribution-manager")(web3);
