@@ -1,7 +1,8 @@
-import { DEFAULT_ADMIN_ROLE, DISTRIBUTOR_ROLE } from "../roles";
+import { DEFAULT_ADMIN_ROLE, DISTRIBUTOR_ROLE, PAUSER_ROLE } from "../roles";
 import {
   L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER,
   L2_UNAGI_MINTER_BCI,
+  L2_UNAGI_MAINTENANCE_MULTISIG,
 } from "../config";
 import { Address, Network } from "../types";
 
@@ -36,6 +37,10 @@ module.exports =
       DEFAULT_ADMIN_ROLE,
       L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
+    await ultimateChampionsNFTContract.grantRole(
+      PAUSER_ROLE,
+      L2_UNAGI_MAINTENANCE_MULTISIG
+    );
     await distributionManagerContract.grantRole(
       DISTRIBUTOR_ROLE,
       L2_UNAGI_MINTER_BCI
@@ -44,6 +49,7 @@ module.exports =
       DEFAULT_ADMIN_ROLE,
       rootAccount
     );
+    await ultimateChampionsNFTContract.renounceRole(PAUSER_ROLE, rootAccount);
     await distributionManagerContract.renounceRole(
       DISTRIBUTOR_ROLE,
       rootAccount

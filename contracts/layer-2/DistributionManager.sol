@@ -5,6 +5,7 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts/token/ERC777/ERC777.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "./ChildMgcToken.sol";
 
 /**
@@ -12,7 +13,8 @@ import "./ChildMgcToken.sol";
  * @dev Allow to distribute a pack of assets only once.
  * @custom:security-contact security@unagi.ch
  */
-contract DistributionManager is AccessControl {
+contract DistributionManager is AccessControl, Pausable {
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
 
     IERC777 public immutable _CHAMP_TOKEN_CONTRACT;
@@ -32,7 +34,30 @@ contract DistributionManager is AccessControl {
         _NFCHAMP_CONTRACT = IERC721(nfChampAddress);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(PAUSER_ROLE, _msgSender());
         _setupRole(DISTRIBUTOR_ROLE, _msgSender());
+    }
+
+    /**
+     * @dev Pause token transfers.
+     *
+     * Requirements:
+     *
+     * - Caller must have role PAUSER_ROLE.
+     */
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause token transfers.
+     *
+     * Requirements:
+     *
+     * - Caller must have role PAUSER_ROLE.
+     */
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
     }
 
     /**
@@ -47,6 +72,7 @@ contract DistributionManager is AccessControl {
      *
      * Requirements:
      *
+     * - The contract must not be paused.
      * - Caller must have role DISTRIBUTOR_ROLE.
      * - UID must not have been already distributed.
      */
@@ -56,7 +82,7 @@ contract DistributionManager is AccessControl {
         uint256 champAmount,
         uint256 mgcAmount,
         uint256[] memory tokenIds
-    ) external onlyRole(DISTRIBUTOR_ROLE) {
+    ) external onlyRole(DISTRIBUTOR_ROLE) whenNotPaused {
         _reserveUID(UID);
 
         if (champAmount > 0) {

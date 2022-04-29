@@ -23,6 +23,14 @@ export interface Distribute {
   };
 }
 
+export interface Paused {
+  name: "Paused";
+  args: {
+    account: string;
+    0: string;
+  };
+}
+
 export interface RoleAdminChanged {
   name: "RoleAdminChanged";
   args: {
@@ -59,12 +67,28 @@ export interface RoleRevoked {
   };
 }
 
-type AllEvents = Distribute | RoleAdminChanged | RoleGranted | RoleRevoked;
+export interface Unpaused {
+  name: "Unpaused";
+  args: {
+    account: string;
+    0: string;
+  };
+}
+
+type AllEvents =
+  | Distribute
+  | Paused
+  | RoleAdminChanged
+  | RoleGranted
+  | RoleRevoked
+  | Unpaused;
 
 export interface DistributionManagerInstance extends Truffle.ContractInstance {
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   DISTRIBUTOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  PAUSER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   _CHAMP_TOKEN_CONTRACT(
     txDetails?: Truffle.TransactionDetails
@@ -116,6 +140,11 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     account: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
+
+  /**
+   * Returns true if the contract is paused, and false otherwise.
+   */
+  paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
 
   /**
    * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
@@ -178,6 +207,30 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
+   * Pause token transfers. Requirements: - Caller must have role PAUSER_ROLE.
+   */
+  pause: {
+    (txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+  };
+
+  /**
+   * Unpause token transfers. Requirements: - Caller must have role PAUSER_ROLE.
+   */
+  unpause: {
+    (txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+  };
+
+  /**
    * Returns true if UID is already distributed
    */
   isDistributed(
@@ -186,7 +239,7 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
-   * Distribute a pack of assets. Requirements: - Caller must have role DISTRIBUTOR_ROLE. - UID must not have been already distributed.
+   * Distribute a pack of assets. Requirements: - The contract must not be paused. - Caller must have role DISTRIBUTOR_ROLE. - UID must not have been already distributed.
    */
   distribute: {
     (
@@ -227,6 +280,8 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     DISTRIBUTOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    PAUSER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     _CHAMP_TOKEN_CONTRACT(
       txDetails?: Truffle.TransactionDetails
@@ -280,6 +335,11 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
+
+    /**
+     * Returns true if the contract is paused, and false otherwise.
+     */
+    paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
 
     /**
      * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
@@ -342,6 +402,30 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
+     * Pause token transfers. Requirements: - Caller must have role PAUSER_ROLE.
+     */
+    pause: {
+      (txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+    };
+
+    /**
+     * Unpause token transfers. Requirements: - Caller must have role PAUSER_ROLE.
+     */
+    unpause: {
+      (txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+    };
+
+    /**
      * Returns true if UID is already distributed
      */
     isDistributed(
@@ -350,7 +434,7 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
-     * Distribute a pack of assets. Requirements: - Caller must have role DISTRIBUTOR_ROLE. - UID must not have been already distributed.
+     * Distribute a pack of assets. Requirements: - The contract must not be paused. - Caller must have role DISTRIBUTOR_ROLE. - UID must not have been already distributed.
      */
     distribute: {
       (

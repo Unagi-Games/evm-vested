@@ -158,4 +158,39 @@ contract("DistributionManager", (accounts) => {
       });
     });
   });
+
+  describe("Pause", function () {
+    it("Pause transfer", async () => {
+      await distributionContract.pause();
+
+      try {
+        await distributionContract.distribute("ANY_UID", accounts[0], 0, 0, []);
+        assert.fail("distribute() did not throw.");
+      } catch (e) {
+        expect((e as Error).message).to.includes("Pausable: paused");
+      }
+
+      await distributionContract.unpause();
+    });
+
+    it("Requires PAUSER_ROLE to pause", async () => {
+      try {
+        await distributionContract.pause({ from: accounts[1] });
+        assert.fail("pause() did not throw.");
+      } catch (e) {
+        expect((e as Error).message).to.includes("missing role");
+      }
+    });
+
+    it("Requires PAUSER_ROLE to unpause", async () => {
+      await distributionContract.pause();
+
+      try {
+        await distributionContract.unpause({ from: accounts[1] });
+        assert.fail("unpause() did not throw.");
+      } catch (e) {
+        expect((e as Error).message).to.includes("missing role");
+      }
+    });
+  });
 });
