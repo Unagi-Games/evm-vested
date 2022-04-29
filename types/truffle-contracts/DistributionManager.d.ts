@@ -191,7 +191,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
   distribute: {
     (
       UID: string,
-      from: string,
       to: string,
       champAmount: number | BN | string,
       mgcAmount: number | BN | string,
@@ -200,7 +199,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
       UID: string,
-      from: string,
       to: string,
       champAmount: number | BN | string,
       mgcAmount: number | BN | string,
@@ -209,7 +207,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     ): Promise<void>;
     sendTransaction(
       UID: string,
-      from: string,
       to: string,
       champAmount: number | BN | string,
       mgcAmount: number | BN | string,
@@ -218,7 +215,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     ): Promise<string>;
     estimateGas(
       UID: string,
-      from: string,
       to: string,
       champAmount: number | BN | string,
       mgcAmount: number | BN | string,
@@ -359,7 +355,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
     distribute: {
       (
         UID: string,
-        from: string,
         to: string,
         champAmount: number | BN | string,
         mgcAmount: number | BN | string,
@@ -368,7 +363,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
         UID: string,
-        from: string,
         to: string,
         champAmount: number | BN | string,
         mgcAmount: number | BN | string,
@@ -377,7 +371,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
       ): Promise<void>;
       sendTransaction(
         UID: string,
-        from: string,
         to: string,
         champAmount: number | BN | string,
         mgcAmount: number | BN | string,
@@ -386,7 +379,6 @@ export interface DistributionManagerInstance extends Truffle.ContractInstance {
       ): Promise<string>;
       estimateGas(
         UID: string,
-        from: string,
         to: string,
         champAmount: number | BN | string,
         mgcAmount: number | BN | string,

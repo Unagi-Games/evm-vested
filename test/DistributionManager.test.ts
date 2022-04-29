@@ -60,7 +60,6 @@ contract("DistributionManager", (accounts) => {
       try {
         await distributionContract.distribute(
           "ANY_UID",
-          accounts[0],
           accounts[1],
           1,
           1,
@@ -80,17 +79,10 @@ contract("DistributionManager", (accounts) => {
 
       before(async function () {
         try {
-          await distributionContract.distribute(
-            UID,
-            distributor,
-            accounts[1],
-            1000,
-            1000,
-            [
-              ...nftIds,
-              500, // Not in distributor collection
-            ]
-          );
+          await distributionContract.distribute(UID, accounts[1], 1000, 1000, [
+            ...nftIds,
+            500, // Not in distributor collection
+          ]);
         } catch (_e) {
           // Ignore
         }
@@ -124,7 +116,6 @@ contract("DistributionManager", (accounts) => {
     before(async function () {
       distribution = await distributionContract.distribute(
         UID,
-        distributor,
         receiver,
         champAmount,
         mgcAmount,
@@ -159,14 +150,7 @@ contract("DistributionManager", (accounts) => {
 
       it("Deny a duplicate distribution", async function () {
         try {
-          await distributionContract.distribute(
-            UID,
-            distributor,
-            receiver,
-            0,
-            0,
-            []
-          );
+          await distributionContract.distribute(UID, receiver, 0, 0, []);
           assert.fail("distribute() did not throw.");
         } catch (e) {
           expect((e as Error).message).to.includes("UID must be free");

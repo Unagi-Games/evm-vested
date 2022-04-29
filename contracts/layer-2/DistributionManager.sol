@@ -52,7 +52,6 @@ contract DistributionManager is AccessControl {
      */
     function distribute(
         string memory UID,
-        address from,
         address to,
         uint256 champAmount,
         uint256 mgcAmount,
@@ -61,7 +60,13 @@ contract DistributionManager is AccessControl {
         _reserveUID(UID);
 
         if (champAmount > 0) {
-            _CHAMP_TOKEN_CONTRACT.operatorSend(from, to, champAmount, "", "");
+            _CHAMP_TOKEN_CONTRACT.operatorSend(
+                _msgSender(),
+                to,
+                champAmount,
+                "",
+                ""
+            );
         }
 
         if (mgcAmount > 0) {
@@ -69,7 +74,7 @@ contract DistributionManager is AccessControl {
         }
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            _NFCHAMP_CONTRACT.safeTransferFrom(from, to, tokenIds[i]);
+            _NFCHAMP_CONTRACT.safeTransferFrom(_msgSender(), to, tokenIds[i]);
         }
 
         emit Distribute(UID);
