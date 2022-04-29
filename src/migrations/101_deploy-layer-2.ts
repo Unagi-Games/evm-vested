@@ -1,7 +1,7 @@
 import {
   DEFAULT_ADMIN_ROLE,
   FEE_MANAGER_ROLE,
-  MINTER_ROLE,
+  MINT_ROLE,
   PAUSER_ROLE,
 } from "../roles";
 import {
@@ -56,10 +56,10 @@ module.exports =
         PAUSER_ROLE,
         L2_UNAGI_MAINTENANCE_MULTISIG
       );
-      await childMgcTokenContract.grantRole(MINTER_ROLE, L2_UNAGI_MINTER_BCI);
+      await childMgcTokenContract.grantRole(MINT_ROLE, L2_UNAGI_MINTER_BCI);
       await childMgcTokenContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
       await childMgcTokenContract.renounceRole(PAUSER_ROLE, rootAccount);
-      await childMgcTokenContract.renounceRole(MINTER_ROLE, rootAccount);
+      await childMgcTokenContract.renounceRole(MINT_ROLE, rootAccount);
     }
 
     await deployer.deploy(UltimateChampionsNFT);
@@ -76,7 +76,7 @@ module.exports =
         L2_UNAGI_MAINTENANCE_MULTISIG
       );
       await ultimateChampionsNFTContract.grantRole(
-        MINTER_ROLE,
+        MINT_ROLE,
         L2_UNAGI_MINTER_BCI
       );
       await ultimateChampionsNFTContract.renounceRole(
@@ -84,7 +84,7 @@ module.exports =
         rootAccount
       );
       await ultimateChampionsNFTContract.renounceRole(PAUSER_ROLE, rootAccount);
-      await ultimateChampionsNFTContract.renounceRole(MINTER_ROLE, rootAccount);
+      await ultimateChampionsNFTContract.renounceRole(MINT_ROLE, rootAccount);
     }
 
     await deployer.deploy(
