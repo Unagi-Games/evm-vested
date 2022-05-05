@@ -5,11 +5,21 @@
 import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
-export interface IAccessControlEnumerableContract
-  extends Truffle.Contract<IAccessControlEnumerableInstance> {
-  "new"(
-    meta?: Truffle.TransactionDetails
-  ): Promise<IAccessControlEnumerableInstance>;
+export interface PaymentRelayContract
+  extends Truffle.Contract<PaymentRelayInstance> {
+  "new"(meta?: Truffle.TransactionDetails): Promise<PaymentRelayInstance>;
+}
+
+export interface PaymentSent {
+  name: "PaymentSent";
+  args: {
+    UID: string;
+    token: string;
+    amount: BN;
+    0: string;
+    1: string;
+    2: BN;
+  };
 }
 
 export interface RoleAdminChanged {
@@ -48,12 +58,17 @@ export interface RoleRevoked {
   };
 }
 
-type AllEvents = RoleAdminChanged | RoleGranted | RoleRevoked;
+type AllEvents = PaymentSent | RoleAdminChanged | RoleGranted | RoleRevoked;
 
-export interface IAccessControlEnumerableInstance
-  extends Truffle.ContractInstance {
+export interface PaymentRelayInstance extends Truffle.ContractInstance {
+  DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  PAYMENT_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
   /**
-   * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {AccessControl-_setRoleAdmin}.
+   * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
    */
   getRoleAdmin(
     role: string,
@@ -65,22 +80,22 @@ export interface IAccessControlEnumerableInstance
    */
   grantRole: {
     (
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
@@ -96,7 +111,7 @@ export interface IAccessControlEnumerableInstance
   ): Promise<boolean>;
 
   /**
-   * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
+   * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
    */
   renounceRole: {
     (
@@ -148,25 +163,71 @@ export interface IAccessControlEnumerableInstance
   };
 
   /**
-   * Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.
+   * See {IERC165-supportsInterface}.
    */
-  getRoleMember(
-    role: string,
-    index: number | BN | string,
+  supportsInterface(
+    interfaceId: string,
     txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
+  ): Promise<boolean>;
 
-  /**
-   * Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.
-   */
-  getRoleMemberCount(
-    role: string,
+  isPaymentProcessed(
+    UID: string,
     txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
+  ): Promise<boolean>;
+
+  getPayment(
+    UID: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<{ 0: string; 1: BN }>;
+
+  tokensReceived: {
+    (
+      operator: string,
+      arg1: string,
+      arg2: string,
+      amount: number | BN | string,
+      userData: string,
+      operatorData: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      operator: string,
+      arg1: string,
+      arg2: string,
+      amount: number | BN | string,
+      userData: string,
+      operatorData: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      operator: string,
+      arg1: string,
+      arg2: string,
+      amount: number | BN | string,
+      userData: string,
+      operatorData: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      operator: string,
+      arg1: string,
+      arg2: string,
+      amount: number | BN | string,
+      userData: string,
+      operatorData: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   methods: {
+    DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    PAYMENT_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
     /**
-     * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {AccessControl-_setRoleAdmin}.
+     * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
      */
     getRoleAdmin(
       role: string,
@@ -178,22 +239,22 @@ export interface IAccessControlEnumerableInstance
      */
     grantRole: {
       (
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
@@ -209,7 +270,7 @@ export interface IAccessControlEnumerableInstance
     ): Promise<boolean>;
 
     /**
-     * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
+     * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
      */
     renounceRole: {
       (
@@ -261,21 +322,61 @@ export interface IAccessControlEnumerableInstance
     };
 
     /**
-     * Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.
+     * See {IERC165-supportsInterface}.
      */
-    getRoleMember(
-      role: string,
-      index: number | BN | string,
+    supportsInterface(
+      interfaceId: string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
+    ): Promise<boolean>;
 
-    /**
-     * Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.
-     */
-    getRoleMemberCount(
-      role: string,
+    isPaymentProcessed(
+      UID: string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
+    ): Promise<boolean>;
+
+    getPayment(
+      UID: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<{ 0: string; 1: BN }>;
+
+    tokensReceived: {
+      (
+        operator: string,
+        arg1: string,
+        arg2: string,
+        amount: number | BN | string,
+        userData: string,
+        operatorData: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        operator: string,
+        arg1: string,
+        arg2: string,
+        amount: number | BN | string,
+        userData: string,
+        operatorData: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        operator: string,
+        arg1: string,
+        arg2: string,
+        amount: number | BN | string,
+        userData: string,
+        operatorData: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        operator: string,
+        arg1: string,
+        arg2: string,
+        amount: number | BN | string,
+        userData: string,
+        operatorData: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
   };
 
   getPastEvents(event: string): Promise<EventData[]>;
