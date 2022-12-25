@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
 export interface IAccessControlContract

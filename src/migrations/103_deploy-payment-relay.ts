@@ -1,10 +1,13 @@
-import { DEFAULT_ADMIN_ROLE, PAYMENT_ROLE, TOKEN_ROLE } from "../roles";
-import { L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER, L2_UNAGI_MINTER_BCI, } from "../config";
+import { DEFAULT_ADMIN_ROLE, RECEIVER_ROLE, TOKEN_ROLE } from "../roles";
+import { L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER, } from "../config";
 import { Address, Network } from "../types";
 
 const ChildChamp = artifacts.require("ChildChampToken");
 const ChildMgc = artifacts.require("ChildMgcToken");
 const PaymentRelay = artifacts.require("PaymentRelay");
+
+const paymentRelay_V0 = "";
+const receiver = "";
 
 module.exports =
   () =>
@@ -16,38 +19,38 @@ module.exports =
 
     const rootAccount = accounts[0];
 
-    await deployer.deploy(PaymentRelay);
+    await deployer.deploy(PaymentRelay, paymentRelay_V0);
 
-    const distributionManagerContract = await PaymentRelay.deployed();
+    const paymentRelayContract = await PaymentRelay.deployed();
     const champContract = await ChildChamp.deployed();
     const mgcContract = await ChildMgc.deployed();
 
-    await distributionManagerContract.grantRole(
+    await paymentRelayContract.grantRole(
       DEFAULT_ADMIN_ROLE,
       L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
-    await distributionManagerContract.grantRole(
-      PAYMENT_ROLE,
-      L2_UNAGI_MINTER_BCI
+    await paymentRelayContract.grantRole(
+      RECEIVER_ROLE,
+      receiver
     );
-    await distributionManagerContract.grantRole(
+    await paymentRelayContract.grantRole(
       TOKEN_ROLE,
       champContract.address
     );
-    await distributionManagerContract.grantRole(
+    await paymentRelayContract.grantRole(
       TOKEN_ROLE,
       mgcContract.address
     );
-    await distributionManagerContract.renounceRole(
+    await paymentRelayContract.renounceRole(
       DEFAULT_ADMIN_ROLE,
       rootAccount
     );
-    await distributionManagerContract.renounceRole(
+    await paymentRelayContract.renounceRole(
       TOKEN_ROLE,
       rootAccount
     );
-    await distributionManagerContract.renounceRole(
-      PAYMENT_ROLE,
+    await paymentRelayContract.renounceRole(
+      RECEIVER_ROLE,
       rootAccount
     );
   };

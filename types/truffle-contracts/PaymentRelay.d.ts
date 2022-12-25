@@ -7,18 +7,23 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 
 export interface PaymentRelayContract
   extends Truffle.Contract<PaymentRelayInstance> {
-  "new"(meta?: Truffle.TransactionDetails): Promise<PaymentRelayInstance>;
+  "new"(
+    paymentRelayV0: string,
+    meta?: Truffle.TransactionDetails
+  ): Promise<PaymentRelayInstance>;
 }
 
 export interface PaymentSent {
   name: "PaymentSent";
   args: {
     UID: string;
+    from: string;
     token: string;
     amount: BN;
     0: string;
     1: string;
-    2: BN;
+    2: string;
+    3: BN;
   };
 }
 
@@ -63,9 +68,11 @@ type AllEvents = PaymentSent | RoleAdminChanged | RoleGranted | RoleRevoked;
 export interface PaymentRelayInstance extends Truffle.ContractInstance {
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  PAYMENT_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  _PAYMENT_RELAY_V0(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
    * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
@@ -170,20 +177,28 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
+  getPaymentKey(
+    UID: string,
+    from: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
   isPaymentProcessed(
     UID: string,
+    from: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
   getPayment(
     UID: string,
+    from: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: string; 1: BN }>;
 
   tokensReceived: {
     (
-      operator: string,
-      arg1: string,
+      arg0: string,
+      from: string,
       arg2: string,
       amount: number | BN | string,
       userData: string,
@@ -191,8 +206,8 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      operator: string,
-      arg1: string,
+      arg0: string,
+      from: string,
       arg2: string,
       amount: number | BN | string,
       userData: string,
@@ -200,8 +215,8 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      operator: string,
-      arg1: string,
+      arg0: string,
+      from: string,
       arg2: string,
       amount: number | BN | string,
       userData: string,
@@ -209,8 +224,8 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      operator: string,
-      arg1: string,
+      arg0: string,
+      from: string,
       arg2: string,
       amount: number | BN | string,
       userData: string,
@@ -222,9 +237,11 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
   methods: {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    PAYMENT_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    _PAYMENT_RELAY_V0(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
      * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
@@ -329,20 +346,28 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
 
+    getPaymentKey(
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
     isPaymentProcessed(
       UID: string,
+      from: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
 
     getPayment(
       UID: string,
+      from: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: string; 1: BN }>;
 
     tokensReceived: {
       (
-        operator: string,
-        arg1: string,
+        arg0: string,
+        from: string,
         arg2: string,
         amount: number | BN | string,
         userData: string,
@@ -350,8 +375,8 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        operator: string,
-        arg1: string,
+        arg0: string,
+        from: string,
         arg2: string,
         amount: number | BN | string,
         userData: string,
@@ -359,8 +384,8 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        operator: string,
-        arg1: string,
+        arg0: string,
+        from: string,
         arg2: string,
         amount: number | BN | string,
         userData: string,
@@ -368,8 +393,8 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        operator: string,
-        arg1: string,
+        arg0: string,
+        from: string,
         arg2: string,
         amount: number | BN | string,
         userData: string,
