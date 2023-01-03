@@ -30,6 +30,18 @@ export interface MarketplaceFeesUpdated {
   };
 }
 
+export interface OptionSet {
+  name: "OptionSet";
+  args: {
+    tokenId: BN;
+    buyer: string;
+    until: BN;
+    0: BN;
+    1: string;
+    2: BN;
+  };
+}
+
 export interface RoleAdminChanged {
   name: "RoleAdminChanged";
   args: {
@@ -117,6 +129,7 @@ export interface SaleEdited {
 type AllEvents =
   | MarketplaceFeesReceiverUpdated
   | MarketplaceFeesUpdated
+  | OptionSet
   | RoleAdminChanged
   | RoleGranted
   | RoleRevoked
@@ -129,6 +142,8 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   FEE_MANAGER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  OPTION_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   _CHAMP_TOKEN_CONTRACT(
     txDetails?: Truffle.TransactionDetails
@@ -278,84 +293,12 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
-   * Returns true if a tokenID is on sale.
-   */
-  hasSale(
-    tokenId: number | BN | string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<boolean>;
-
-  /**
-   * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
-   */
-  getSale(
-    tokenId: number | BN | string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
-
-  /**
-   * Setter for the marketplace fees. Emits a {MarketplaceFeesUpdated} event. Requirements: - nMarketplacePercentFees must be a percentage (Between 0 and 100 included). - Caller must have role FEE_MANAGER_ROLE.
-   */
-  setMarketplacePercentFees: {
-    (
-      nMarketplacePercentFees: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      nMarketplacePercentFees: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      nMarketplacePercentFees: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      nMarketplacePercentFees: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * Getter for the marketplace fees.
-   */
-  marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-  /**
    * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
    */
   computeSaleShares(
     weiPrice: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: BN; 1: BN }>;
-
-  /**
-   * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
-   */
-  setMarketplaceFeesReceiver: {
-    (
-      nMarketplaceFeesReceiver: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      nMarketplaceFeesReceiver: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      nMarketplaceFeesReceiver: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      nMarketplaceFeesReceiver: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * Getter for the marketplace fees receiver address.
-   */
-  marketplaceFeesReceiver(
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
 
   /**
    * Allow to create a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleCreated} event. Requirements: - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID. - NFCHAMP ID should not be on sale.
@@ -388,7 +331,33 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Allow to edit a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleEdited} event. Requirements: - NFCHAMP ID should be on sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+   * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+   */
+  destroySaleFrom: {
+    (
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Allow to edit a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleEdited} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
    */
   editSaleFrom: {
     (
@@ -418,9 +387,99 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
    */
-  destroySaleFrom: {
+  getOption(
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<{ 0: string; 1: BN }>;
+
+  /**
+   * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
+   */
+  getSale(
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
+
+  /**
+   * Returns true if the given address has an option on a sale for the specified NFT. If no option is set on the sale, it means that anyone can purchase the NFT.
+   * @param from the address to check for an option
+   * @param tokenId the ID of the NFT to check for an option
+   */
+  hasOption(
+    from: string,
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
+  /**
+   * Returns true if a tokenID is on sale.
+   */
+  hasSale(
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
+  /**
+   * Getter for the marketplace fees receiver address.
+   */
+  marketplaceFeesReceiver(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  /**
+   * Getter for the marketplace fees.
+   */
+  marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+  /**
+   * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
+   */
+  setMarketplaceFeesReceiver: {
+    (
+      nMarketplaceFeesReceiver: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      nMarketplaceFeesReceiver: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      nMarketplaceFeesReceiver: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      nMarketplaceFeesReceiver: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Setter for the marketplace fees. Emits a {MarketplaceFeesUpdated} event. Requirements: - nMarketplacePercentFees must be a percentage (Between 0 and 100 included). - Caller must have role FEE_MANAGER_ROLE.
+   */
+  setMarketplacePercentFees: {
+    (
+      nMarketplacePercentFees: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      nMarketplacePercentFees: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      nMarketplacePercentFees: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      nMarketplacePercentFees: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Set an option on a sale. Emits a {OptionSet} event. Requirements: - msg.sender should be an authorized operator of from - NFCHAMP ID should be on sale. - from can interact with the sale. - from should not have any other active option. - from should not be rate limited.
+   */
+  setOption: {
     (
       from: string,
       tokenId: number | BN | string,
@@ -444,7 +503,18 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Called by an {IERC777} CHAMP token contract whenever tokens are being sent to the ChampMarketplace contract. This function is used to buy a NFCHAMP listed on the ChampMarketplace contract. To buy a NFCHAMP, a CHAMP holder must send CHAMP wei price (or above) to the ChampMarketplace contract with some extra data: - MANDATORY: Bytes 0 to 7 (8 bytes, uint64) corresponds to the NFCHAMP ID to buy - OPTIONAL: Bytes 8 to 27 (20 bytes, address) can be provided to customize the wallet that will receive the NFCHAMP if the sale is executed. Once a NFT is sold, a fee will be applied on the CHAMP payment and forwarded to the marketplace fees receiver. Emits a {SaleAccepted} event. Requirements: - Received tokens must be CHAMP. - NFCHAMP ID must be on sale. - Received tokens amount must be greater than sale price.
+   * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
+   * @param from the address to check for permission to interact
+   * @param tokenId the ID of the NFT to check for interaction permission
+   */
+  canInteract(
+    from: string,
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
+  /**
+   * Called by an {IERC777} CHAMP token contract whenever tokens are being sent to the ChampMarketplace contract. This function is used to buy a NFCHAMP listed on the ChampMarketplace contract. To buy a NFCHAMP, a CHAMP holder must send CHAMP wei price (or above) to the ChampMarketplace contract with some extra data: - MANDATORY: Bytes 0 to 7 (8 bytes, uint64) corresponds to the NFCHAMP ID to buy - OPTIONAL: Bytes 8 to 27 (20 bytes, address) can be provided to customize the wallet that will receive the NFCHAMP if the sale is executed. Once a NFT is sold, a fee will be applied on the CHAMP payment and forwarded to the marketplace fees receiver. Emits a {SaleAccepted} event. Requirements: - Received tokens must be CHAMP. - NFCHAMP ID must be on sale. - nftReceiver can interact with the sale. - Received tokens amount must be greater than sale price.
    */
   tokensReceived: {
     (
@@ -489,6 +559,8 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     FEE_MANAGER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    OPTION_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     _CHAMP_TOKEN_CONTRACT(
       txDetails?: Truffle.TransactionDetails
@@ -638,84 +710,12 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
-     * Returns true if a tokenID is on sale.
-     */
-    hasSale(
-      tokenId: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
-
-    /**
-     * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
-     */
-    getSale(
-      tokenId: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
-
-    /**
-     * Setter for the marketplace fees. Emits a {MarketplaceFeesUpdated} event. Requirements: - nMarketplacePercentFees must be a percentage (Between 0 and 100 included). - Caller must have role FEE_MANAGER_ROLE.
-     */
-    setMarketplacePercentFees: {
-      (
-        nMarketplacePercentFees: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        nMarketplacePercentFees: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        nMarketplacePercentFees: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        nMarketplacePercentFees: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Getter for the marketplace fees.
-     */
-    marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-    /**
      * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
      */
     computeSaleShares(
       weiPrice: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: BN; 1: BN }>;
-
-    /**
-     * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
-     */
-    setMarketplaceFeesReceiver: {
-      (
-        nMarketplaceFeesReceiver: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        nMarketplaceFeesReceiver: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        nMarketplaceFeesReceiver: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        nMarketplaceFeesReceiver: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Getter for the marketplace fees receiver address.
-     */
-    marketplaceFeesReceiver(
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
 
     /**
      * Allow to create a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleCreated} event. Requirements: - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID. - NFCHAMP ID should not be on sale.
@@ -748,7 +748,33 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Allow to edit a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleEdited} event. Requirements: - NFCHAMP ID should be on sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+     * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+     */
+    destroySaleFrom: {
+      (
+        from: string,
+        tokenId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        from: string,
+        tokenId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        from: string,
+        tokenId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        from: string,
+        tokenId: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Allow to edit a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleEdited} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
      */
     editSaleFrom: {
       (
@@ -778,9 +804,99 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
      */
-    destroySaleFrom: {
+    getOption(
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<{ 0: string; 1: BN }>;
+
+    /**
+     * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
+     */
+    getSale(
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
+
+    /**
+     * Returns true if the given address has an option on a sale for the specified NFT. If no option is set on the sale, it means that anyone can purchase the NFT.
+     * @param from the address to check for an option
+     * @param tokenId the ID of the NFT to check for an option
+     */
+    hasOption(
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
+    /**
+     * Returns true if a tokenID is on sale.
+     */
+    hasSale(
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
+    /**
+     * Getter for the marketplace fees receiver address.
+     */
+    marketplaceFeesReceiver(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    /**
+     * Getter for the marketplace fees.
+     */
+    marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+    /**
+     * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
+     */
+    setMarketplaceFeesReceiver: {
+      (
+        nMarketplaceFeesReceiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        nMarketplaceFeesReceiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        nMarketplaceFeesReceiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        nMarketplaceFeesReceiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Setter for the marketplace fees. Emits a {MarketplaceFeesUpdated} event. Requirements: - nMarketplacePercentFees must be a percentage (Between 0 and 100 included). - Caller must have role FEE_MANAGER_ROLE.
+     */
+    setMarketplacePercentFees: {
+      (
+        nMarketplacePercentFees: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        nMarketplacePercentFees: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        nMarketplacePercentFees: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        nMarketplacePercentFees: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Set an option on a sale. Emits a {OptionSet} event. Requirements: - msg.sender should be an authorized operator of from - NFCHAMP ID should be on sale. - from can interact with the sale. - from should not have any other active option. - from should not be rate limited.
+     */
+    setOption: {
       (
         from: string,
         tokenId: number | BN | string,
@@ -804,7 +920,18 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Called by an {IERC777} CHAMP token contract whenever tokens are being sent to the ChampMarketplace contract. This function is used to buy a NFCHAMP listed on the ChampMarketplace contract. To buy a NFCHAMP, a CHAMP holder must send CHAMP wei price (or above) to the ChampMarketplace contract with some extra data: - MANDATORY: Bytes 0 to 7 (8 bytes, uint64) corresponds to the NFCHAMP ID to buy - OPTIONAL: Bytes 8 to 27 (20 bytes, address) can be provided to customize the wallet that will receive the NFCHAMP if the sale is executed. Once a NFT is sold, a fee will be applied on the CHAMP payment and forwarded to the marketplace fees receiver. Emits a {SaleAccepted} event. Requirements: - Received tokens must be CHAMP. - NFCHAMP ID must be on sale. - Received tokens amount must be greater than sale price.
+     * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
+     * @param from the address to check for permission to interact
+     * @param tokenId the ID of the NFT to check for interaction permission
+     */
+    canInteract(
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
+    /**
+     * Called by an {IERC777} CHAMP token contract whenever tokens are being sent to the ChampMarketplace contract. This function is used to buy a NFCHAMP listed on the ChampMarketplace contract. To buy a NFCHAMP, a CHAMP holder must send CHAMP wei price (or above) to the ChampMarketplace contract with some extra data: - MANDATORY: Bytes 0 to 7 (8 bytes, uint64) corresponds to the NFCHAMP ID to buy - OPTIONAL: Bytes 8 to 27 (20 bytes, address) can be provided to customize the wallet that will receive the NFCHAMP if the sale is executed. Once a NFT is sold, a fee will be applied on the CHAMP payment and forwarded to the marketplace fees receiver. Emits a {SaleAccepted} event. Requirements: - Received tokens must be CHAMP. - NFCHAMP ID must be on sale. - nftReceiver can interact with the sale. - Received tokens amount must be greater than sale price.
      */
     tokensReceived: {
       (
