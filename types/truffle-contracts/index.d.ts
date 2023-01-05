@@ -27,7 +27,7 @@ import { IERC721ReceiverContract } from "./IERC721Receiver";
 import { IERC777Contract } from "./IERC777";
 import { IERC777RecipientContract } from "./IERC777Recipient";
 import { IERC777SenderContract } from "./IERC777Sender";
-import { IPaymentRelayV0Contract } from "./IPaymentRelayV0";
+import { IPaymentRelay_V0Contract } from "./IPaymentRelay_V0";
 import { LockableContract } from "./Lockable";
 import { LockedChampTokenContract } from "./LockedChampToken";
 import { MgcTokenContract } from "./MgcToken";
@@ -38,7 +38,7 @@ import { PausableContract } from "./Pausable";
 import { PaymentRelayContract } from "./PaymentRelay";
 import { PaymentSplitterContract } from "./PaymentSplitter";
 import { TestLockableContract } from "./TestLockable";
-import { TestPaymentRelayV0Contract } from "./TestPaymentRelayV0";
+import { TestPaymentRelay_V0Contract } from "./TestPaymentRelay_V0";
 import { UltimateChampionsNFTContract } from "./UltimateChampionsNFT";
 import { UPaymentSplitterContract } from "./UPaymentSplitter";
 import { VestingWalletContract } from "./VestingWallet";
@@ -74,7 +74,7 @@ declare global {
       require(name: "IERC777"): IERC777Contract;
       require(name: "IERC777Recipient"): IERC777RecipientContract;
       require(name: "IERC777Sender"): IERC777SenderContract;
-      require(name: "IPaymentRelay_V0"): IPaymentRelayV0Contract;
+      require(name: "IPaymentRelay_V0"): IPaymentRelay_V0Contract;
       require(name: "Lockable"): LockableContract;
       require(name: "LockedChampToken"): LockedChampTokenContract;
       require(name: "MgcToken"): MgcTokenContract;
@@ -85,7 +85,7 @@ declare global {
       require(name: "PaymentRelay"): PaymentRelayContract;
       require(name: "PaymentSplitter"): PaymentSplitterContract;
       require(name: "TestLockable"): TestLockableContract;
-      require(name: "TestPaymentRelay_V0"): TestPaymentRelayV0Contract;
+      require(name: "TestPaymentRelay_V0"): TestPaymentRelay_V0Contract;
       require(name: "UltimateChampionsNFT"): UltimateChampionsNFTContract;
       require(name: "UPaymentSplitter"): UPaymentSplitterContract;
       require(name: "VestingWallet"): VestingWalletContract;
@@ -161,9 +161,9 @@ export {
 } from "./IERC777Recipient";
 export { IERC777SenderContract, IERC777SenderInstance } from "./IERC777Sender";
 export {
-  IPaymentRelayV0Contract,
-  IPaymentRelayV0Instance,
-} from "./IPaymentRelayV0";
+  IPaymentRelay_V0Contract,
+  IPaymentRelay_V0Instance,
+} from "./IPaymentRelay_V0";
 export { LockableContract, LockableInstance } from "./Lockable";
 export {
   LockedChampTokenContract,
@@ -181,9 +181,9 @@ export {
 } from "./PaymentSplitter";
 export { TestLockableContract, TestLockableInstance } from "./TestLockable";
 export {
-  TestPaymentRelayV0Contract,
-  TestPaymentRelayV0Instance,
-} from "./TestPaymentRelayV0";
+  TestPaymentRelay_V0Contract,
+  TestPaymentRelay_V0Instance,
+} from "./TestPaymentRelay_V0";
 export {
   UltimateChampionsNFTContract,
   UltimateChampionsNFTInstance,
