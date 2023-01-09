@@ -5,6 +5,7 @@
 import { AccessControlContract } from "./AccessControl";
 import { AccessControlEnumerableContract } from "./AccessControlEnumerable";
 import { ChampMarketplaceContract } from "./ChampMarketplace";
+import { ChampMarketplace2Contract } from "./ChampMarketplace2";
 import { ChampTokenContract } from "./ChampToken";
 import { ChildChampTokenContract } from "./ChildChampToken";
 import { ChildMgcTokenContract } from "./ChildMgcToken";
@@ -27,6 +28,7 @@ import { IERC721ReceiverContract } from "./IERC721Receiver";
 import { IERC777Contract } from "./IERC777";
 import { IERC777RecipientContract } from "./IERC777Recipient";
 import { IERC777SenderContract } from "./IERC777Sender";
+import { InitializableContract } from "./Initializable";
 import { IPaymentRelay_V0Contract } from "./IPaymentRelay_V0";
 import { LockableContract } from "./Lockable";
 import { LockedChampTokenContract } from "./LockedChampToken";
@@ -50,6 +52,7 @@ declare global {
       require(name: "AccessControl"): AccessControlContract;
       require(name: "AccessControlEnumerable"): AccessControlEnumerableContract;
       require(name: "ChampMarketplace"): ChampMarketplaceContract;
+      require(name: "ChampMarketplace2"): ChampMarketplace2Contract;
       require(name: "ChampToken"): ChampTokenContract;
       require(name: "ChildChampToken"): ChildChampTokenContract;
       require(name: "ChildMgcToken"): ChildMgcTokenContract;
@@ -74,6 +77,7 @@ declare global {
       require(name: "IERC777"): IERC777Contract;
       require(name: "IERC777Recipient"): IERC777RecipientContract;
       require(name: "IERC777Sender"): IERC777SenderContract;
+      require(name: "Initializable"): InitializableContract;
       require(name: "IPaymentRelay_V0"): IPaymentRelay_V0Contract;
       require(name: "Lockable"): LockableContract;
       require(name: "LockedChampToken"): LockedChampTokenContract;
@@ -105,6 +109,10 @@ export {
   ChampMarketplaceContract,
   ChampMarketplaceInstance,
 } from "./ChampMarketplace";
+export {
+  ChampMarketplace2Contract,
+  ChampMarketplace2Instance,
+} from "./ChampMarketplace2";
 export { ChampTokenContract, ChampTokenInstance } from "./ChampToken";
 export {
   ChildChampTokenContract,
@@ -160,6 +168,7 @@ export {
   IERC777RecipientInstance,
 } from "./IERC777Recipient";
 export { IERC777SenderContract, IERC777SenderInstance } from "./IERC777Sender";
+export { InitializableContract, InitializableInstance } from "./Initializable";
 export {
   IPaymentRelay_V0Contract,
   IPaymentRelay_V0Instance,

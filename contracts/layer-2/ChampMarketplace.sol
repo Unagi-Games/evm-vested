@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
-import "@openzeppelin/contracts/utils/Multicall.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @title ChampMarketplace
@@ -44,7 +44,7 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 contract ChampMarketplace is
     AccessControlEnumerable,
     IERC777Recipient,
-    Multicall
+    Initializable
 {
     using SafeMath for uint256;
 
@@ -66,8 +66,8 @@ contract ChampMarketplace is
     bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
     bytes32 public constant OPTION_ROLE = keccak256("OPTION_ROLE");
 
-    IERC777 public immutable _CHAMP_TOKEN_CONTRACT;
-    IERC721 public immutable _NFCHAMP_CONTRACT;
+    IERC777 public _CHAMP_TOKEN_CONTRACT;
+    IERC721 public _NFCHAMP_CONTRACT;
 
     IERC1820Registry internal constant _ERC1820_REGISTRY =
         IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
@@ -92,7 +92,7 @@ contract ChampMarketplace is
     // Fees receiver address
     address private _marketplaceFeesReceiver;
 
-    constructor(address champTokenAddress, address nfChampAddress) {
+    function initialize(address champTokenAddress, address nfChampAddress) initializer public {
         _CHAMP_TOKEN_CONTRACT = IERC777(champTokenAddress);
         _NFCHAMP_CONTRACT = IERC721(nfChampAddress);
 
@@ -595,4 +595,6 @@ contract ChampMarketplace is
     event SaleDestroyed(uint64 tokenId, address seller);
 
     event OptionSet(uint64 tokenId, address buyer, uint256 until);
+
+    uint256[50] __gap;
 }

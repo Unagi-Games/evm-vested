@@ -3,16 +3,15 @@ import {
   ChildChampTokenInstance,
   UltimateChampionsNFTInstance,
 } from "../types/truffle-contracts";
+import { NewChampMarketplace } from "./ChampMarketplace.service";
 
 const NFT = artifacts.require("UltimateChampionsNFT");
 const Token = artifacts.require("ChildChampToken");
-const Market = artifacts.require("ChampMarketplace");
 
 contract("Marketplace", (accounts) => {
   let marketContract: ChampMarketplaceInstance;
-
   before(async () => {
-    marketContract = await Market.new(
+    marketContract = await NewChampMarketplace(
       (
         await Token.new(accounts[0])
       ).address,
@@ -105,7 +104,7 @@ contract("Marketplace", (accounts) => {
     beforeEach(async function () {
       nftContract = await NFT.new();
       tokenContract = await Token.new(accounts[0]);
-      marketContract = await Market.new(
+      marketContract = await NewChampMarketplace(
         tokenContract.address,
         nftContract.address
       );

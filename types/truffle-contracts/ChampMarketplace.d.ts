@@ -7,11 +7,15 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 
 export interface ChampMarketplaceContract
   extends Truffle.Contract<ChampMarketplaceInstance> {
-  "new"(
-    champTokenAddress: string,
-    nfChampAddress: string,
-    meta?: Truffle.TransactionDetails
-  ): Promise<ChampMarketplaceInstance>;
+  "new"(meta?: Truffle.TransactionDetails): Promise<ChampMarketplaceInstance>;
+}
+
+export interface Initialized {
+  name: "Initialized";
+  args: {
+    version: BN;
+    0: BN;
+  };
 }
 
 export interface MarketplaceFeesReceiverUpdated {
@@ -127,6 +131,7 @@ export interface SaleEdited {
 }
 
 type AllEvents =
+  | Initialized
   | MarketplaceFeesReceiverUpdated
   | MarketplaceFeesUpdated
   | OptionSet
@@ -212,27 +217,6 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
-   * Receives and executes a batch of function calls on this contract.
-   */
-  multicall: {
-    (data: string[], txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      data: string[],
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string[]>;
-    sendTransaction(
-      data: string[],
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      data: string[],
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
    * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
    */
   renounceRole: {
@@ -291,6 +275,29 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     interfaceId: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
+
+  initialize: {
+    (
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   /**
    * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
@@ -629,27 +636,6 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
-     * Receives and executes a batch of function calls on this contract.
-     */
-    multicall: {
-      (data: string[], txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(
-        data: string[],
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string[]>;
-      sendTransaction(
-        data: string[],
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        data: string[],
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
      * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.
      */
     renounceRole: {
@@ -708,6 +694,29 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
       interfaceId: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
+
+    initialize: {
+      (
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     /**
      * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
