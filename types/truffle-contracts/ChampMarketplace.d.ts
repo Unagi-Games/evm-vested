@@ -118,8 +118,8 @@ export interface SaleDestroyed {
   };
 }
 
-export interface SaleEdited {
-  name: "SaleEdited";
+export interface SaleUpdated {
+  name: "SaleUpdated";
   args: {
     tokenId: BN;
     tokenWeiPrice: BN;
@@ -141,7 +141,7 @@ type AllEvents =
   | SaleAccepted
   | SaleCreated
   | SaleDestroyed
-  | SaleEdited;
+  | SaleUpdated;
 
 export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
@@ -364,9 +364,9 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Allow to edit a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleEdited} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+   * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
    */
-  editSaleFrom: {
+  updateSaleFrom: {
     (
       from: string,
       tokenId: number | BN | string,
@@ -783,9 +783,9 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Allow to edit a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleEdited} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+     * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
      */
-    editSaleFrom: {
+    updateSaleFrom: {
       (
         from: string,
         tokenId: number | BN | string,

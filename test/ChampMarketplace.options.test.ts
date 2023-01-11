@@ -132,8 +132,8 @@ contract("Marketplace", (accounts) => {
         await marketContract.setOption(buyer, nft, { from: buyer });
 
         try {
-          await marketContract.editSaleFrom(seller, nft, 2, { from: seller });
-          assert.fail("editSaleFrom did not throw.");
+          await marketContract.updateSaleFrom(seller, nft, 2, { from: seller });
+          assert.fail("updateSaleFrom did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("An option exists on this sale");
         }

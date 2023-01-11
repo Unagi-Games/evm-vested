@@ -226,7 +226,7 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
 
-        await marketContract.editSaleFrom(seller, nft, NEW_SALE_PRICE, {
+        await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, {
           from: seller,
         });
 
@@ -245,7 +245,7 @@ contract("Marketplace", (accounts) => {
         }
       });
 
-      it("Should emit SaleEdited event", async () => {
+      it("Should emit SaleUpdated event", async () => {
         const NEW_SALE_PRICE = 100;
 
         // Create the sale
@@ -256,7 +256,7 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
 
-        const { receipt: editSaleReceipt } = await marketContract.editSaleFrom(
+        const { receipt: updateSaleReceipt } = await marketContract.updateSaleFrom(
           seller,
           nft,
           NEW_SALE_PRICE,
@@ -264,12 +264,12 @@ contract("Marketplace", (accounts) => {
             from: seller,
           }
         );
-        const editSaleEvent = editSaleReceipt.logs.find(
-          ({ event }) => event === "SaleEdited"
+        const updateSaleEvent = updateSaleReceipt.logs.find(
+          ({ event }) => event === "SaleUpdated"
         );
-        expect(editSaleEvent.args.seller).to.equals(seller);
-        expect(editSaleEvent.args.tokenId.toNumber()).to.equals(nft);
-        expect(editSaleEvent.args.tokenWeiPrice.toNumber()).to.equals(
+        expect(updateSaleEvent.args.seller).to.equals(seller);
+        expect(updateSaleEvent.args.tokenId.toNumber()).to.equals(nft);
+        expect(updateSaleEvent.args.tokenWeiPrice.toNumber()).to.equals(
           NEW_SALE_PRICE
         );
       });
@@ -285,12 +285,12 @@ contract("Marketplace", (accounts) => {
 
         const notOwner = accounts[5];
         try {
-          await marketContract.editSaleFrom(notOwner, nft, 2, {
+          await marketContract.updateSaleFrom(notOwner, nft, 2, {
             from: notOwner,
           });
-          assert.fail("editSaleFrom() did not throw.");
+          assert.fail("updateSaleFrom() did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes("Edit sale of token that is not own");
+          expect(e.message).to.includes("Update sale of token that is not own");
         }
       });
 
@@ -304,16 +304,16 @@ contract("Marketplace", (accounts) => {
         });
 
         try {
-          await marketContract.editSaleFrom(seller, nft, -1, {
+          await marketContract.updateSaleFrom(seller, nft, -1, {
             from: seller,
           });
-          assert.fail("editSaleFrom() did not throw.");
+          assert.fail("updateSaleFrom() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("value out-of-bounds");
         }
 
         try {
-          await marketContract.editSaleFrom(seller, nft, 0, { from: seller });
+          await marketContract.updateSaleFrom(seller, nft, 0, { from: seller });
           assert.fail("createSaleFrom() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("Price should be strictly positive");
@@ -604,7 +604,7 @@ contract("Marketplace", (accounts) => {
       });
     });
 
-    it("Edit sale", async () => {
+    it("Update sale", async () => {
       const INITIAL_SALE_PRICE = 1;
       const NEW_SALE_PRICE = 100;
 
@@ -614,17 +614,17 @@ contract("Marketplace", (accounts) => {
       await marketContract.createSaleFrom(seller, nft, INITIAL_SALE_PRICE, {
         from: operator,
       });
-      const { receipt: editSaleReceipt } = await marketContract.editSaleFrom(
+      const { receipt: updateSaleReceipt } = await marketContract.updateSaleFrom(
         seller,
         nft,
         NEW_SALE_PRICE,
         { from: operator }
       );
-      const saleEditedEvent = editSaleReceipt.logs.find(
-        ({ event }) => event === "SaleEdited"
+      const saleUpdatedEvent = updateSaleReceipt.logs.find(
+        ({ event }) => event === "SaleUpdated"
       );
-      expect(saleEditedEvent.args.tokenId.toNumber()).to.equals(nft);
-      expect(saleEditedEvent.args.tokenWeiPrice.toNumber()).to.equals(
+      expect(saleUpdatedEvent.args.tokenId.toNumber()).to.equals(nft);
+      expect(saleUpdatedEvent.args.tokenWeiPrice.toNumber()).to.equals(
         NEW_SALE_PRICE
       );
 

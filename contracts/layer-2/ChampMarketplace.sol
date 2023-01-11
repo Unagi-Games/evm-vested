@@ -16,7 +16,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * @dev This contract allows CHAMP (Ultimate Champions Token) and NFCHAMP
  * (Non Fungible Ultimate Champions) holders to exchange theirs assets.
  *
- * A NFT holder can create, edit or delete a sale for one of his NFTs.
+ * A NFT holder can create, update or delete a sale for one of his NFTs.
  * To create a sale, the NFT holder must give his approval for the ChampMarketplace
  * on the NFT he wants to sell. Then, the NFT holder must call the function
  * `createSaleFrom`. To remove the sale, the NFT holder must call the function
@@ -206,9 +206,9 @@ contract ChampMarketplace is
     }
 
     /**
-     * @dev Allow to edit a sale for a given NFCHAMP ID at a given CHAMP wei price.
+     * @dev Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price.
      *
-     * Emits a {SaleEdited} event.
+     * Emits a {SaleUpdated} event.
      *
      * Requirements:
      *
@@ -219,7 +219,7 @@ contract ChampMarketplace is
      * - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner.
      * - ChampMarketplace contract should be approved for the given NFCHAMP ID.
      */
-    function editSaleFrom(
+    function updateSaleFrom(
         address from,
         uint64 tokenId,
         uint256 tokenWeiPrice
@@ -232,12 +232,12 @@ contract ChampMarketplace is
         address nftOwner = _NFCHAMP_CONTRACT.ownerOf(tokenId);
         require(
             nftOwner == from,
-            "ChampMarketplace: Edit sale of token that is not own"
+            "ChampMarketplace: Update sale of token that is not own"
         );
         require(
             nftOwner == msg.sender ||
                 _NFCHAMP_CONTRACT.isApprovedForAll(nftOwner, msg.sender),
-            "ChampMarketplace: Only the token owner or its operator are allowed to edit a sale."
+            "ChampMarketplace: Only the token owner or its operator are allowed to update a sale."
         );
         require(
             tokenWeiPrice > 0,
@@ -246,7 +246,7 @@ contract ChampMarketplace is
 
         _sales[tokenId] = tokenWeiPrice;
 
-        emit SaleEdited(tokenId, tokenWeiPrice, nftOwner);
+        emit SaleUpdated(tokenId, tokenWeiPrice, nftOwner);
     }
 
     /**
@@ -583,7 +583,7 @@ contract ChampMarketplace is
 
     event SaleCreated(uint64 tokenId, uint256 tokenWeiPrice, address seller);
 
-    event SaleEdited(uint64 tokenId, uint256 tokenWeiPrice, address seller);
+    event SaleUpdated(uint64 tokenId, uint256 tokenWeiPrice, address seller);
 
     event SaleAccepted(
         uint64 tokenId,
