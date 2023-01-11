@@ -10,8 +10,11 @@ services:
       - evm-emulator:evm-emulator
     volumes:
       - .:/usr/src
+      - node-home:/home/node
   evm-emulator:
     image: trufflesuite/ganache:v7.7.2
     ports:
       - 8545:8545
-    command: -f https://data-seed-prebsc-1-s1.binance.org:8545
+    command: -f https://polygon-rpc.com/
+volumes:
+  node-home:

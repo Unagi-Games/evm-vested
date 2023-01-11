@@ -35,6 +35,7 @@ module.exports = {
       host: "evm-emulator",
       port: 8545,
       network_id: "*",
+      disableConfirmationListener: true,
     },
     development: {
       host: "evm-emulator",

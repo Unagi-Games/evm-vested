@@ -5,9 +5,11 @@
 import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
-export interface ChampMarketplaceContract
-  extends Truffle.Contract<ChampMarketplaceInstance> {
-  "new"(meta?: Truffle.TransactionDetails): Promise<ChampMarketplaceInstance>;
+export interface TestChampMarketplaceContract
+  extends Truffle.Contract<TestChampMarketplaceInstance> {
+  "new"(
+    meta?: Truffle.TransactionDetails
+  ): Promise<TestChampMarketplaceInstance>;
 }
 
 export interface Initialized {
@@ -143,7 +145,7 @@ type AllEvents =
   | SaleDestroyed
   | SaleUpdated;
 
-export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
+export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   FEE_MANAGER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
@@ -157,147 +159,15 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   _NFCHAMP_CONTRACT(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
-   * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
+   * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
+   * @param from the address to check for permission to interact
+   * @param tokenId the ID of the NFT to check for interaction permission
    */
-  getRoleAdmin(
-    role: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
-
-  /**
-   * Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.
-   */
-  getRoleMember(
-    role: string,
-    index: number | BN | string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
-
-  /**
-   * Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.
-   */
-  getRoleMemberCount(
-    role: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
-
-  /**
-   * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.
-   */
-  grantRole: {
-    (
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * Returns `true` if `account` has been granted `role`.
-   */
-  hasRole(
-    role: string,
-    account: string,
+  canInteract(
+    from: string,
+    tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
-
-  /**
-   * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event.
-   */
-  renounceRole: {
-    (
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.
-   */
-  revokeRole: {
-    (
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      role: string,
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * See {IERC165-supportsInterface}.
-   */
-  supportsInterface(
-    interfaceId: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<boolean>;
-
-  initialize: {
-    (
-      champTokenAddress: string,
-      nfChampAddress: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      champTokenAddress: string,
-      nfChampAddress: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      champTokenAddress: string,
-      nfChampAddress: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      champTokenAddress: string,
-      nfChampAddress: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
 
   /**
    * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
@@ -364,41 +234,36 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
-   */
-  updateSaleFrom: {
-    (
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
    */
   getOption(
     tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: string; 1: BN }>;
+
+  /**
+   * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
+   */
+  getRoleAdmin(
+    role: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  /**
+   * Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.
+   */
+  getRoleMember(
+    role: string,
+    index: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  /**
+   * Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.
+   */
+  getRoleMemberCount(
+    role: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
 
   /**
    * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
@@ -407,6 +272,32 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<BN>;
+
+  /**
+   * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.
+   */
+  grantRole: {
+    (
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   /**
    * Returns true if the given address has an option on a sale for the specified NFT. If no option is set on the sale, it means that anyone can purchase the NFT.
@@ -420,12 +311,44 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
+   * Returns `true` if `account` has been granted `role`.
+   */
+  hasRole(
+    role: string,
+    account: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
+  /**
    * Returns true if a tokenID is on sale.
    */
   hasSale(
     tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
+
+  initialize: {
+    (
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      champTokenAddress: string,
+      nfChampAddress: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   /**
    * Getter for the marketplace fees receiver address.
@@ -438,6 +361,58 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
    * Getter for the marketplace fees.
    */
   marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+  /**
+   * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event.
+   */
+  renounceRole: {
+    (
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.
+   */
+  revokeRole: {
+    (
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   /**
    * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
@@ -510,13 +485,10 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
-   * @param from the address to check for permission to interact
-   * @param tokenId the ID of the NFT to check for interaction permission
+   * See {IERC165-supportsInterface}.
    */
-  canInteract(
-    from: string,
-    tokenId: number | BN | string,
+  supportsInterface(
+    interfaceId: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
@@ -562,6 +534,36 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
+  /**
+   * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+   */
+  updateSaleFrom: {
+    (
+      from: string,
+      tokenId: number | BN | string,
+      tokenWeiPrice: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      from: string,
+      tokenId: number | BN | string,
+      tokenWeiPrice: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      from: string,
+      tokenId: number | BN | string,
+      tokenWeiPrice: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      from: string,
+      tokenId: number | BN | string,
+      tokenWeiPrice: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
   methods: {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -576,147 +578,15 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     _NFCHAMP_CONTRACT(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
-     * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
+     * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
+     * @param from the address to check for permission to interact
+     * @param tokenId the ID of the NFT to check for interaction permission
      */
-    getRoleAdmin(
-      role: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-
-    /**
-     * Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.
-     */
-    getRoleMember(
-      role: string,
-      index: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-
-    /**
-     * Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.
-     */
-    getRoleMemberCount(
-      role: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
-
-    /**
-     * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.
-     */
-    grantRole: {
-      (
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Returns `true` if `account` has been granted `role`.
-     */
-    hasRole(
-      role: string,
-      account: string,
+    canInteract(
+      from: string,
+      tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
-
-    /**
-     * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event.
-     */
-    renounceRole: {
-      (
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.
-     */
-    revokeRole: {
-      (
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        role: string,
-        account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * See {IERC165-supportsInterface}.
-     */
-    supportsInterface(
-      interfaceId: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
-
-    initialize: {
-      (
-        champTokenAddress: string,
-        nfChampAddress: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        champTokenAddress: string,
-        nfChampAddress: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        champTokenAddress: string,
-        nfChampAddress: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        champTokenAddress: string,
-        nfChampAddress: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
 
     /**
      * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
@@ -783,41 +653,36 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
-     */
-    updateSaleFrom: {
-      (
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
      */
     getOption(
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: string; 1: BN }>;
+
+    /**
+     * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
+     */
+    getRoleAdmin(
+      role: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    /**
+     * Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.
+     */
+    getRoleMember(
+      role: string,
+      index: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    /**
+     * Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.
+     */
+    getRoleMemberCount(
+      role: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
 
     /**
      * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
@@ -826,6 +691,32 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<BN>;
+
+    /**
+     * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.
+     */
+    grantRole: {
+      (
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     /**
      * Returns true if the given address has an option on a sale for the specified NFT. If no option is set on the sale, it means that anyone can purchase the NFT.
@@ -839,12 +730,44 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
+     * Returns `true` if `account` has been granted `role`.
+     */
+    hasRole(
+      role: string,
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
+    /**
      * Returns true if a tokenID is on sale.
      */
     hasSale(
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
+
+    initialize: {
+      (
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        champTokenAddress: string,
+        nfChampAddress: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     /**
      * Getter for the marketplace fees receiver address.
@@ -857,6 +780,58 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
      * Getter for the marketplace fees.
      */
     marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+    /**
+     * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event.
+     */
+    renounceRole: {
+      (
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.
+     */
+    revokeRole: {
+      (
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        role: string,
+        account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     /**
      * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
@@ -929,13 +904,10 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
-     * @param from the address to check for permission to interact
-     * @param tokenId the ID of the NFT to check for interaction permission
+     * See {IERC165-supportsInterface}.
      */
-    canInteract(
-      from: string,
-      tokenId: number | BN | string,
+    supportsInterface(
+      interfaceId: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
 
@@ -977,6 +949,36 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
         amount: number | BN | string,
         userData: string,
         arg5: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+     */
+    updateSaleFrom: {
+      (
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

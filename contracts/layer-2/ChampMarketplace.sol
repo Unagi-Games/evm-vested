@@ -2,14 +2,15 @@
 // Unagi Contracts v1.0.0 (ChampMarketplace.sol)
 pragma solidity 0.8.12;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
-import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
-import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC777/IERC777Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC777/IERC777RecipientUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC1820RegistryUpgradeable.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
 /**
  * @title ChampMarketplace
@@ -42,11 +43,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * @custom:security-contact security@unagi.ch
  */
 contract ChampMarketplace is
-    AccessControlEnumerable,
-    IERC777Recipient,
-    Initializable
+    AccessControlEnumerableUpgradeable,
+    IERC777RecipientUpgradeable
 {
-    using SafeMath for uint256;
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct Option {
         address buyer;
@@ -66,11 +67,11 @@ contract ChampMarketplace is
     bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
     bytes32 public constant OPTION_ROLE = keccak256("OPTION_ROLE");
 
-    IERC777 public _CHAMP_TOKEN_CONTRACT;
-    IERC721 public _NFCHAMP_CONTRACT;
+    IERC777Upgradeable public _CHAMP_TOKEN_CONTRACT;
+    IERC721Upgradeable public _NFCHAMP_CONTRACT;
 
-    IERC1820Registry internal constant _ERC1820_REGISTRY =
-        IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
+    IERC1820RegistryUpgradeable internal constant _ERC1820_REGISTRY =
+        IERC1820RegistryUpgradeable(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
     bytes32 private constant _TOKENS_RECIPIENT_INTERFACE_HASH =
         keccak256("ERC777TokensRecipient");
 
@@ -92,9 +93,17 @@ contract ChampMarketplace is
     // Fees receiver address
     address private _marketplaceFeesReceiver;
 
-    function initialize(address champTokenAddress, address nfChampAddress) initializer public {
-        _CHAMP_TOKEN_CONTRACT = IERC777(champTokenAddress);
-        _NFCHAMP_CONTRACT = IERC721(nfChampAddress);
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address champTokenAddress, address nfChampAddress)
+        public
+        initializer
+    {
+        _CHAMP_TOKEN_CONTRACT = IERC777Upgradeable(champTokenAddress);
+        _NFCHAMP_CONTRACT = IERC721Upgradeable(nfChampAddress);
 
         _ERC1820_REGISTRY.setInterfaceImplementer(
             address(this),
@@ -168,6 +177,24 @@ contract ChampMarketplace is
         _sales[tokenId] = tokenWeiPrice;
 
         emit SaleCreated(tokenId, tokenWeiPrice, nftOwner);
+    }
+
+    /**
+     * @dev See _acceptSale(uint64,uint256,address)
+     */
+    function acceptSale(uint64 tokenId, uint256 salePrice) external {
+        _acceptSale(tokenId, salePrice, msg.sender);
+    }
+
+    /**
+     * @dev See _acceptSale(uint64,uint256,address)
+     */
+    function acceptSale(
+        uint64 tokenId,
+        uint256 salePrice,
+        address nftReceiver
+    ) external {
+        _acceptSale(tokenId, salePrice, nftReceiver);
     }
 
     /**
@@ -478,6 +505,93 @@ contract ChampMarketplace is
         delete _optionLock[from];
 
         emit OptionSet(tokenId, from, 0);
+    }
+
+    /**
+     * @dev Allow to accept a sale for a given NFCHAMP ID at a given CHAMP wei price. NFCHAMP will be sent to nftReceiver wallet.
+     *
+     * This function is used to buy a NFCHAMP listed on the ChampMarketplace contract.
+     * To buy a NFCHAMP, a CHAMP holder must approve ChampMarketplace contract as a spender.
+     *
+     * Once a NFT is sold, a fee will be applied on the CHAMP payment and forwarded
+     * to the marketplace fees receiver.
+     *
+     * Emits a {SaleAccepted} event.
+     *
+     * Requirements:
+     *
+     * - NFCHAMP ID must be on sale.
+     * - salePrice must match sale price.
+     * - nftReceiver can interact with the sale.
+     * - ChampMarketplace allowance must be greater than sale price.
+     */
+    function _acceptSale(
+        uint64 tokenId,
+        uint256 salePrice_,
+        address nftReceiver
+    ) private {
+        IERC20Upgradeable champTokenERC20 = IERC20Upgradeable(
+            address(_CHAMP_TOKEN_CONTRACT)
+        );
+        uint256 salePrice = getSale(tokenId);
+
+        //
+        // 1.
+        // Requirements
+        //
+        require(hasSale(tokenId), "ChampMarketplace: Sale does not exists");
+        require(
+            salePrice_ == salePrice,
+            "ChampMarketplace: Sale price does not match"
+        );
+        require(
+            canInteract(nftReceiver, tokenId),
+            "ChampMarketplace: An option exists on this sale"
+        );
+        require(
+            champTokenERC20.allowance(msg.sender, address(this)) >= salePrice,
+            "ChampMarketplace: Allowance is lower than sale price"
+        );
+
+        //
+        // 2.
+        // Process sale
+        //
+        address seller = _NFCHAMP_CONTRACT.ownerOf(tokenId);
+        uint256 sellerTokenWeiShare;
+        uint256 marketplaceFeesTokenWeiShare;
+        (sellerTokenWeiShare, marketplaceFeesTokenWeiShare) = computeSaleShares(
+            salePrice
+        );
+
+        //
+        // 3.
+        // Execute sale
+        //
+        delete _sales[tokenId];
+        _NFCHAMP_CONTRACT.safeTransferFrom(seller, nftReceiver, tokenId);
+        champTokenERC20.safeTransferFrom(
+            msg.sender,
+            seller,
+            sellerTokenWeiShare
+        );
+        if (marketplaceFeesTokenWeiShare > 0) {
+            champTokenERC20.safeTransferFrom(
+                msg.sender,
+                marketplaceFeesReceiver(),
+                marketplaceFeesTokenWeiShare
+            );
+        }
+
+        //
+        // 4.
+        // Clean state
+        //
+        if (hasOption(nftReceiver, tokenId)) {
+            _unsetOption(nftReceiver, tokenId);
+        }
+
+        emit SaleAccepted(tokenId, salePrice, seller, nftReceiver);
     }
 
     /**

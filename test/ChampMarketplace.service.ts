@@ -1,4 +1,6 @@
-const Market = artifacts.require("ChampMarketplace");
+import { ChampMarketplaceInstance } from "../types/truffle-contracts";
+
+const Market = artifacts.require("TestChampMarketplace");
 
 export async function NewChampMarketplace(tokenContract: string, nftContract: string) {
   const marketContract = await Market.new();
@@ -6,5 +8,5 @@ export async function NewChampMarketplace(tokenContract: string, nftContract: st
     tokenContract,
     nftContract
   );
-  return marketContract;
+  return marketContract as ChampMarketplaceInstance;
 }
