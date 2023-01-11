@@ -300,6 +300,18 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
+   * Approves ERC777Proxy with underlying ERC20
+   */
+  approveERC777Proxy: {
+    (txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+  };
+
+  /**
    * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
    */
   computeSaleShares(
@@ -716,6 +728,18 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
         nfChampAddress: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
+    };
+
+    /**
+     * Approves ERC777Proxy with underlying ERC20
+     */
+    approveERC777Proxy: {
+      (txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
     };
 
     /**

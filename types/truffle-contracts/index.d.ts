@@ -14,10 +14,12 @@ import { ContextUpgradeableContract } from "./ContextUpgradeable";
 import { DistributionManagerContract } from "./DistributionManager";
 import { ERC165Contract } from "./ERC165";
 import { ERC165UpgradeableContract } from "./ERC165Upgradeable";
+import { ERC20Contract } from "./ERC20";
 import { ERC721Contract } from "./ERC721";
 import { ERC721URIStorageContract } from "./ERC721URIStorage";
 import { ERC777Contract } from "./ERC777";
 import { ERC777PresetFixedSupplyContract } from "./ERC777PresetFixedSupply";
+import { ERC777ProxyContract } from "./ERC777Proxy";
 import { IAccessControlContract } from "./IAccessControl";
 import { IAccessControlEnumerableContract } from "./IAccessControlEnumerable";
 import { IAccessControlEnumerableUpgradeableContract } from "./IAccessControlEnumerableUpgradeable";
@@ -36,6 +38,7 @@ import { IERC721MetadataContract } from "./IERC721Metadata";
 import { IERC721ReceiverContract } from "./IERC721Receiver";
 import { IERC721UpgradeableContract } from "./IERC721Upgradeable";
 import { IERC777Contract } from "./IERC777";
+import { IERC777ProxyContract } from "./IERC777Proxy";
 import { IERC777RecipientContract } from "./IERC777Recipient";
 import { IERC777RecipientUpgradeableContract } from "./IERC777RecipientUpgradeable";
 import { IERC777SenderContract } from "./IERC777Sender";
@@ -52,6 +55,7 @@ import { PausableContract } from "./Pausable";
 import { PaymentRelayContract } from "./PaymentRelay";
 import { PaymentSplitterContract } from "./PaymentSplitter";
 import { TestChampMarketplaceContract } from "./TestChampMarketplace";
+import { TestERC20Contract } from "./TestERC20";
 import { TestLockableContract } from "./TestLockable";
 import { TestPaymentRelay_V0Contract } from "./TestPaymentRelay_V0";
 import { UltimateChampionsNFTContract } from "./UltimateChampionsNFT";
@@ -78,10 +82,12 @@ declare global {
       require(name: "DistributionManager"): DistributionManagerContract;
       require(name: "ERC165"): ERC165Contract;
       require(name: "ERC165Upgradeable"): ERC165UpgradeableContract;
+      require(name: "ERC20"): ERC20Contract;
       require(name: "ERC721"): ERC721Contract;
       require(name: "ERC721URIStorage"): ERC721URIStorageContract;
       require(name: "ERC777"): ERC777Contract;
       require(name: "ERC777PresetFixedSupply"): ERC777PresetFixedSupplyContract;
+      require(name: "ERC777Proxy"): ERC777ProxyContract;
       require(name: "IAccessControl"): IAccessControlContract;
       require(
         name: "IAccessControlEnumerable"
@@ -108,6 +114,7 @@ declare global {
       require(name: "IERC721Receiver"): IERC721ReceiverContract;
       require(name: "IERC721Upgradeable"): IERC721UpgradeableContract;
       require(name: "IERC777"): IERC777Contract;
+      require(name: "IERC777Proxy"): IERC777ProxyContract;
       require(name: "IERC777Recipient"): IERC777RecipientContract;
       require(
         name: "IERC777RecipientUpgradeable"
@@ -126,6 +133,7 @@ declare global {
       require(name: "PaymentRelay"): PaymentRelayContract;
       require(name: "PaymentSplitter"): PaymentSplitterContract;
       require(name: "TestChampMarketplace"): TestChampMarketplaceContract;
+      require(name: "TestERC20"): TestERC20Contract;
       require(name: "TestLockable"): TestLockableContract;
       require(name: "TestPaymentRelay_V0"): TestPaymentRelay_V0Contract;
       require(name: "UltimateChampionsNFT"): UltimateChampionsNFTContract;
@@ -174,6 +182,7 @@ export {
   ERC165UpgradeableContract,
   ERC165UpgradeableInstance,
 } from "./ERC165Upgradeable";
+export { ERC20Contract, ERC20Instance } from "./ERC20";
 export { ERC721Contract, ERC721Instance } from "./ERC721";
 export {
   ERC721URIStorageContract,
@@ -184,6 +193,7 @@ export {
   ERC777PresetFixedSupplyContract,
   ERC777PresetFixedSupplyInstance,
 } from "./ERC777PresetFixedSupply";
+export { ERC777ProxyContract, ERC777ProxyInstance } from "./ERC777Proxy";
 export {
   IAccessControlContract,
   IAccessControlInstance,
@@ -241,6 +251,7 @@ export {
   IERC721UpgradeableInstance,
 } from "./IERC721Upgradeable";
 export { IERC777Contract, IERC777Instance } from "./IERC777";
+export { IERC777ProxyContract, IERC777ProxyInstance } from "./IERC777Proxy";
 export {
   IERC777RecipientContract,
   IERC777RecipientInstance,
@@ -278,6 +289,7 @@ export {
   TestChampMarketplaceContract,
   TestChampMarketplaceInstance,
 } from "./TestChampMarketplace";
+export { TestERC20Contract, TestERC20Instance } from "./TestERC20";
 export { TestLockableContract, TestLockableInstance } from "./TestLockable";
 export {
   TestPaymentRelay_V0Contract,

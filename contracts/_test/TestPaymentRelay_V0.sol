@@ -7,7 +7,7 @@ import "../layer-2/IPaymentRelay_V0.sol";
 contract TestPaymentRelay_V0 is IPaymentRelay_V0 {
     constructor() {}
 
-    function getPayment(bytes32 UID) external view returns (address, uint256) {
+    function getPayment(bytes32) external pure returns (address, uint256) {
         return (address(0), 0);
     }
 }

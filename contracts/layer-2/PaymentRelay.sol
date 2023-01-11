@@ -47,26 +47,42 @@ contract PaymentRelay is AccessControl, IERC777Recipient {
         _setupRole(RECEIVER_ROLE, _msgSender());
     }
 
-    function getPaymentKey(bytes32 UID, address from) public pure returns (bytes32) {
+    function getPaymentKey(bytes32 UID, address from)
+        public
+        pure
+        returns (bytes32)
+    {
         return keccak256(abi.encodePacked(UID, from));
     }
 
-    function isPaymentProcessed(bytes32 UID, address from) public view returns (bool) {
+    function isPaymentProcessed(bytes32 UID, address from)
+        public
+        view
+        returns (bool)
+    {
         Payment memory payment = _getPayment(UID, from);
         return payment.amount > 0;
     }
 
-    function getPayment(bytes32 UID, address from) external view returns (address, uint256) {
+    function getPayment(bytes32 UID, address from)
+        external
+        view
+        returns (address, uint256)
+    {
         Payment memory payment = _getPayment(UID, from);
         return (payment.token, payment.amount);
     }
 
-    function _getPayment(bytes32 UID, address from) private view returns (Payment memory) {
+    function _getPayment(bytes32 UID, address from)
+        private
+        view
+        returns (Payment memory)
+    {
         // Start backward compatibility
         address token;
         uint256 amount;
         (token, amount) = _PAYMENT_RELAY_V0.getPayment(UID);
-        if(amount > 0) {
+        if (amount > 0) {
             return Payment(token, amount);
         }
         // End backward compatibility
@@ -74,8 +90,16 @@ contract PaymentRelay is AccessControl, IERC777Recipient {
         return _payments[getPaymentKey(UID, from)];
     }
 
-    function _reservePayment(bytes32 UID, address from, address token, uint256 amount) private {
-        require(!isPaymentProcessed(UID, from), "PaymentRelay: Payment already processed");
+    function _reservePayment(
+        bytes32 UID,
+        address from,
+        address token,
+        uint256 amount
+    ) private {
+        require(
+            !isPaymentProcessed(UID, from),
+            "PaymentRelay: Payment already processed"
+        );
 
         _payments[getPaymentKey(UID, from)] = Payment(token, amount);
     }
@@ -88,7 +112,10 @@ contract PaymentRelay is AccessControl, IERC777Recipient {
         bytes calldata userData,
         bytes calldata operatorData
     ) external override onlyRole(TOKEN_ROLE) {
-        require(amount > 0, "PaymentRelay: Payment amount should be strictly positive");
+        require(
+            amount > 0,
+            "PaymentRelay: Payment amount should be strictly positive"
+        );
 
         address tokenAddress = msg.sender;
         bytes32 UID = bytes32(BytesLib.slice(operatorData, 0, 32));

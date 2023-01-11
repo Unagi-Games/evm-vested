@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC1820Registry
 import "solidity-bytes-utils/contracts/BytesLib.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "./ERC777Proxy.sol";
 
 /**
  * @title ChampMarketplace
@@ -114,6 +115,16 @@ contract ChampMarketplace is
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(FEE_MANAGER_ROLE, _msgSender());
         _setupRole(OPTION_ROLE, _msgSender());
+    }
+
+    /**
+     * @dev Approves ERC777Proxy with underlying ERC20
+     */
+    function approveERC777Proxy() external returns (bool) {
+        return
+            IERC20Upgradeable(
+                ERC777Proxy(address(_CHAMP_TOKEN_CONTRACT)).underlying()
+            ).approve(address(_CHAMP_TOKEN_CONTRACT), type(uint256).max);
     }
 
     /**

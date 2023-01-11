@@ -5,26 +5,18 @@
 import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
-export interface TestPaymentRelay_V0Contract
-  extends Truffle.Contract<TestPaymentRelay_V0Instance> {
-  "new"(
-    meta?: Truffle.TransactionDetails
-  ): Promise<TestPaymentRelay_V0Instance>;
+export interface IERC777ProxyContract
+  extends Truffle.Contract<IERC777ProxyInstance> {
+  "new"(meta?: Truffle.TransactionDetails): Promise<IERC777ProxyInstance>;
 }
 
 type AllEvents = never;
 
-export interface TestPaymentRelay_V0Instance extends Truffle.ContractInstance {
-  getPayment(
-    arg0: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<{ 0: string; 1: BN }>;
+export interface IERC777ProxyInstance extends Truffle.ContractInstance {
+  underlying(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   methods: {
-    getPayment(
-      arg0: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<{ 0: string; 1: BN }>;
+    underlying(txDetails?: Truffle.TransactionDetails): Promise<string>;
   };
 
   getPastEvents(event: string): Promise<EventData[]>;

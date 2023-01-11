@@ -159,6 +159,18 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
   _NFCHAMP_CONTRACT(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
+   * Approves ERC777Proxy with underlying ERC20
+   */
+  approveERC777Proxy: {
+    (txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+  };
+
+  /**
    * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
    * @param from the address to check for permission to interact
    * @param tokenId the ID of the NFT to check for interaction permission
@@ -576,6 +588,18 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<string>;
 
     _NFCHAMP_CONTRACT(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    /**
+     * Approves ERC777Proxy with underlying ERC20
+     */
+    approveERC777Proxy: {
+      (txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+    };
 
     /**
      * Returns true if the given address is allowed to interact with the specified NFT. If no option is set on the sale, it means that anyone can interact with the NFT.
