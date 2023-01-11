@@ -16,7 +16,7 @@ contract("Marketplace", (accounts) => {
         await Token.new(accounts[0])
       ).address,
       (
-        await NFT.new()
+        await NFT.new(0)
       ).address
     );
   });
@@ -102,7 +102,7 @@ contract("Marketplace", (accounts) => {
     let nft: number;
 
     beforeEach(async function () {
-      nftContract = await NFT.new();
+      nftContract = await NFT.new(0);
       tokenContract = await Token.new(accounts[0]);
       marketContract = await NewChampMarketplace(
         tokenContract.address,

@@ -14,7 +14,6 @@ import { Address, Network } from "../types";
 const ChildChampToken = artifacts.require("ChildChampToken");
 const ChildMgcToken = artifacts.require("ChildMgcToken");
 const UltimateChampionsNFT = artifacts.require("UltimateChampionsNFT");
-const ChampMarketplace = artifacts.require("ChampMarketplace");
 
 const CHILD_CHAIN_MANAGER = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa";
 
@@ -63,7 +62,7 @@ module.exports =
     await childMgcTokenContract.renounceRole(PAUSER_ROLE, rootAccount);
     await childMgcTokenContract.renounceRole(MINT_ROLE, rootAccount);
 
-    await deployer.deploy(UltimateChampionsNFT);
+    await deployer.deploy(UltimateChampionsNFT, 0);
     const ultimateChampionsNFTContract = await UltimateChampionsNFT.deployed();
     console.log("Setup roles for UltimateChampionsNFT");
 

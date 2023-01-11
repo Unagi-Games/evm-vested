@@ -8,6 +8,7 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 export interface UltimateChampionsNFTContract
   extends Truffle.Contract<UltimateChampionsNFTInstance> {
   "new"(
+    initialId: number | BN | string,
     meta?: Truffle.TransactionDetails
   ): Promise<UltimateChampionsNFTInstance>;
 }

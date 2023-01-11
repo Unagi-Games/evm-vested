@@ -25,7 +25,7 @@ contract("DistributionManager", (accounts) => {
   before(async function () {
     champContract = await ChildChamp.new(accounts[0]);
     mgcContract = await ChildMgc.new(accounts[0]);
-    nfChamp = await UltimateChampionsNFT.new();
+    nfChamp = await UltimateChampionsNFT.new(0);
     distributionContract = await DistributionManager.new(
       champContract.address,
       mgcContract.address,

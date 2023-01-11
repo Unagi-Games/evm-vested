@@ -31,7 +31,11 @@ contract UltimateChampionsNFT is
     /**
      * @dev Create NFCHAMP contract.
      */
-    constructor() ERC721("Non Fungible Ultimate Champions", "NFCHAMP") {
+    constructor(uint256 initialId)
+        ERC721("Non Fungible Ultimate Champions", "NFCHAMP")
+    {
+        _tokenIds._value = initialId;
+
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINT_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);

@@ -20,7 +20,7 @@ contract("Marketplace", (accounts) => {
     let marketContract: ChampMarketplaceInstance;
 
     before(async () => {
-      nftContract = await NFT.new();
+      nftContract = await NFT.new(0);
       tokenContract = await Token.new(accounts[0]);
       marketContract = await NewChampMarketplace(
         tokenContract.address,
@@ -624,7 +624,7 @@ contract("Marketplace", (accounts) => {
     let marketContract: ChampMarketplaceInstance;
 
     before(async () => {
-      nftContract = await NFT.new();
+      nftContract = await NFT.new(0);
       tokenContract = await Token.new(accounts[0]);
       marketContract = await NewChampMarketplace(
         tokenContract.address,

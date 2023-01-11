@@ -983,6 +983,9 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
       ): Promise<number>;
     };
 
+    /**
+     * See _acceptSale(uint64,uint256,address)
+     */
     "acceptSale(uint64,uint256)": {
       (
         tokenId: number | BN | string,
@@ -1007,7 +1010,7 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Allow to accept a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleCreated} event. Requirements: - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID. - NFCHAMP ID should not be on sale.
+     * See _acceptSale(uint64,uint256,address)
      */
     "acceptSale(uint64,uint256,address)": {
       (
