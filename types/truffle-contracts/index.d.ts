@@ -43,6 +43,7 @@ import { IERC777RecipientContract } from "./IERC777Recipient";
 import { IERC777RecipientUpgradeableContract } from "./IERC777RecipientUpgradeable";
 import { IERC777SenderContract } from "./IERC777Sender";
 import { IERC777UpgradeableContract } from "./IERC777Upgradeable";
+import { IMintableContract } from "./IMintable";
 import { InitializableContract } from "./Initializable";
 import { IPaymentRelay_V0Contract } from "./IPaymentRelay_V0";
 import { LockableContract } from "./Lockable";
@@ -121,6 +122,7 @@ declare global {
       ): IERC777RecipientUpgradeableContract;
       require(name: "IERC777Sender"): IERC777SenderContract;
       require(name: "IERC777Upgradeable"): IERC777UpgradeableContract;
+      require(name: "IMintable"): IMintableContract;
       require(name: "Initializable"): InitializableContract;
       require(name: "IPaymentRelay_V0"): IPaymentRelay_V0Contract;
       require(name: "Lockable"): LockableContract;
@@ -265,6 +267,7 @@ export {
   IERC777UpgradeableContract,
   IERC777UpgradeableInstance,
 } from "./IERC777Upgradeable";
+export { IMintableContract, IMintableInstance } from "./IMintable";
 export { InitializableContract, InitializableInstance } from "./Initializable";
 export {
   IPaymentRelay_V0Contract,

@@ -2,11 +2,14 @@
 // Unagi Contracts v1.0.0 (DistributionManager.sol)
 pragma solidity 0.8.12;
 
-import "@openzeppelin/contracts/token/ERC777/ERC777.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "./ChildMgcToken.sol";
+
+interface IMintable {
+    function mint(address to, uint256 amount) external;
+}
 
 /**
  * @title DistributionManager
@@ -17,8 +20,8 @@ contract DistributionManager is AccessControl, Pausable {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
 
-    IERC777 public immutable _CHAMP_TOKEN_CONTRACT;
-    ChildMgcToken public immutable _MGC_TOKEN_CONTRACT;
+    IERC20 public immutable _CHAMP_TOKEN_CONTRACT;
+    IMintable public immutable _MGC_TOKEN_CONTRACT;
     IERC721 public immutable _NFCHAMP_CONTRACT;
 
     // (UID => used) mapping of UID
@@ -29,8 +32,8 @@ contract DistributionManager is AccessControl, Pausable {
         address mgcTokenAddress,
         address nfChampAddress
     ) {
-        _CHAMP_TOKEN_CONTRACT = IERC777(champTokenAddress);
-        _MGC_TOKEN_CONTRACT = ChildMgcToken(mgcTokenAddress);
+        _CHAMP_TOKEN_CONTRACT = IERC20(champTokenAddress);
+        _MGC_TOKEN_CONTRACT = IMintable(mgcTokenAddress);
         _NFCHAMP_CONTRACT = IERC721(nfChampAddress);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -86,13 +89,7 @@ contract DistributionManager is AccessControl, Pausable {
         _reserveUID(UID);
 
         if (champAmount > 0) {
-            _CHAMP_TOKEN_CONTRACT.operatorSend(
-                _msgSender(),
-                to,
-                champAmount,
-                "",
-                ""
-            );
+            _CHAMP_TOKEN_CONTRACT.transferFrom(_msgSender(), to, champAmount);
         }
 
         if (mgcAmount > 0) {
