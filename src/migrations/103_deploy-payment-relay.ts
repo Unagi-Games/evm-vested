@@ -6,7 +6,6 @@ const ChildChamp = artifacts.require("ChildChampToken");
 const ChildMgc = artifacts.require("ChildMgcToken");
 const PaymentRelay = artifacts.require("PaymentRelay");
 
-const paymentRelay_V0 = "";
 const receiver = "";
 
 module.exports =
@@ -19,7 +18,7 @@ module.exports =
 
     const rootAccount = accounts[0];
 
-    await deployer.deploy(PaymentRelay, paymentRelay_V0);
+    await deployer.deploy(PaymentRelay);
 
     const paymentRelayContract = await PaymentRelay.deployed();
     const champContract = await ChildChamp.deployed();

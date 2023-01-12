@@ -7,10 +7,7 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 
 export interface PaymentRelayContract
   extends Truffle.Contract<PaymentRelayInstance> {
-  "new"(
-    paymentRelayV0: string,
-    meta?: Truffle.TransactionDetails
-  ): Promise<PaymentRelayInstance>;
+  "new"(meta?: Truffle.TransactionDetails): Promise<PaymentRelayInstance>;
 }
 
 export interface PaymentSent {
@@ -71,8 +68,6 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
   RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  _PAYMENT_RELAY_V0(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
    * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
@@ -177,6 +172,27 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
+  /**
+   * Approves ERC777Proxy with underlying ERC20
+   */
+  approveERC777Proxy: {
+    (token: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      token: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      token: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      token: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
   getPaymentKey(
     UID: string,
     from: string,
@@ -240,8 +256,6 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    _PAYMENT_RELAY_V0(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
      * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
@@ -345,6 +359,27 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       interfaceId: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
+
+    /**
+     * Approves ERC777Proxy with underlying ERC20
+     */
+    approveERC777Proxy: {
+      (token: string, txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(
+        token: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        token: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        token: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     getPaymentKey(
       UID: string,

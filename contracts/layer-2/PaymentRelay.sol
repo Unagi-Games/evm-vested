@@ -4,10 +4,11 @@ pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
-import "./IPaymentRelay_V0.sol";
+import "./ERC777Proxy.sol";
 
 /**
  * @title PaymentRelay
@@ -23,8 +24,6 @@ contract PaymentRelay is AccessControl, IERC777Recipient {
     bytes32 private constant _TOKENS_RECIPIENT_INTERFACE_HASH =
         keccak256("ERC777TokensRecipient");
 
-    IPaymentRelay_V0 public immutable _PAYMENT_RELAY_V0;
-
     struct Payment {
         address token;
         uint256 amount;
@@ -33,18 +32,29 @@ contract PaymentRelay is AccessControl, IERC777Recipient {
     // (keccak256 UID => payment) mapping of payments
     mapping(bytes32 => Payment) private _payments;
 
-    constructor(address paymentRelayV0) {
+    constructor() {
         _ERC1820_REGISTRY.setInterfaceImplementer(
             address(this),
             _TOKENS_RECIPIENT_INTERFACE_HASH,
             address(this)
         );
 
-        _PAYMENT_RELAY_V0 = IPaymentRelay_V0(paymentRelayV0);
-
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(TOKEN_ROLE, _msgSender());
         _setupRole(RECEIVER_ROLE, _msgSender());
+    }
+
+    /**
+     * @dev Approves ERC777Proxy with underlying ERC20
+     */
+    function approveERC777Proxy(address token) external returns (bool) {
+        _checkRole(TOKEN_ROLE, token);
+
+        return
+            IERC20(ERC777Proxy(token).underlying()).approve(
+                token,
+                type(uint256).max
+            );
     }
 
     function getPaymentKey(bytes32 UID, address from)
@@ -78,15 +88,6 @@ contract PaymentRelay is AccessControl, IERC777Recipient {
         view
         returns (Payment memory)
     {
-        // Start backward compatibility
-        address token;
-        uint256 amount;
-        (token, amount) = _PAYMENT_RELAY_V0.getPayment(UID);
-        if (amount > 0) {
-            return Payment(token, amount);
-        }
-        // End backward compatibility
-
         return _payments[getPaymentKey(UID, from)];
     }
 
