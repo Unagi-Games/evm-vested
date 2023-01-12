@@ -1,0 +1,264 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0xb9F9220b0434875262610e5066824f0C3aed75f9",
+    "txHash": "0x980b449ca5080b2ff40e7b0f339f5259f2363b5694ef7fd479a555169ac974f0"
+  },
+  "proxies": [
+    {
+      "address": "0x950d86d86EE4c0aAEeEB12BD5FEbaD2b02026e4a",
+      "txHash": "0xdebe28661a238216421d86630dde3e36e18251c2fbfd5ddbae732894170c8f9e",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "fbebfef852939ffc38818bd1737e0add6354005ce5c88f416aff56e51a994f5a": {
+      "address": "0x096aa14bD76F32c274e94Ae368DAE8Aa03Fb2AD9",
+      "txHash": "0x8a3fe8d120702b319c97f4a9a8b68df51cc15f75f2d8fd0f84fe6e571e170727",
+      "layout": {
+        "solcVersion": "0.8.12",
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_uint8",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "contract": "ERC165Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)179_storage)",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
+          },
+          {
+            "contract": "AccessControlEnumerableUpgradeable",
+            "label": "_roleMembers",
+            "type": "t_mapping(t_bytes32,t_struct(AddressSet)3591_storage)",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:22"
+          },
+          {
+            "contract": "AccessControlEnumerableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:76"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_CHAMP_TOKEN_CONTRACT",
+            "type": "t_contract(IERC777Upgradeable)1441",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:71"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_NFCHAMP_CONTRACT",
+            "type": "t_contract(IERC721Upgradeable)1258",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:72"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_sales",
+            "type": "t_mapping(t_uint64,t_uint256)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:84"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_options",
+            "type": "t_mapping(t_uint64,t_struct(Option)12034_storage)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:86"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_rateLimits",
+            "type": "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)12044_storage))",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:88"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_optionLock",
+            "type": "t_mapping(t_address,t_struct(OptionLock)12039_storage)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:90"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_marketplacePercentFees",
+            "type": "t_uint256",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:93"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_marketplaceFeesReceiver",
+            "type": "t_address",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:95"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:724"
+          }
+        ],
+        "types": {
+          "t_contract(IERC777Upgradeable)1441": {
+            "label": "contract IERC777Upgradeable"
+          },
+          "t_contract(IERC721Upgradeable)1258": {
+            "label": "contract IERC721Upgradeable"
+          },
+          "t_mapping(t_uint64,t_uint256)": {
+            "label": "mapping(uint64 => uint256)"
+          },
+          "t_uint64": {
+            "label": "uint64"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint64,t_struct(Option)12034_storage)": {
+            "label": "mapping(uint64 => struct ChampMarketplace.Option)"
+          },
+          "t_struct(Option)12034_storage": {
+            "label": "struct ChampMarketplace.Option",
+            "members": [
+              {
+                "label": "buyer",
+                "type": "t_address"
+              },
+              {
+                "label": "until",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)12044_storage))": {
+            "label": "mapping(uint64 => mapping(address => struct ChampMarketplace.RateLimit))"
+          },
+          "t_mapping(t_address,t_struct(RateLimit)12044_storage)": {
+            "label": "mapping(address => struct ChampMarketplace.RateLimit)"
+          },
+          "t_struct(RateLimit)12044_storage": {
+            "label": "struct ChampMarketplace.RateLimit",
+            "members": [
+              {
+                "label": "renew",
+                "type": "t_uint8"
+              },
+              {
+                "label": "until",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_address,t_struct(OptionLock)12039_storage)": {
+            "label": "mapping(address => struct ChampMarketplace.OptionLock)"
+          },
+          "t_struct(OptionLock)12039_storage": {
+            "label": "struct ChampMarketplace.OptionLock",
+            "members": [
+              {
+                "label": "tokenId",
+                "type": "t_uint64"
+              },
+              {
+                "label": "until",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)3591_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSetUpgradeable.AddressSet)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(AddressSet)3591_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3276_storage"
+              }
+            ]
+          },
+          "t_struct(Set)3276_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)179_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)179_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    }
+  }
+}
