@@ -1,6 +1,5 @@
 import {
   DEFAULT_ADMIN_ROLE,
-  FEE_MANAGER_ROLE,
   MINT_ROLE,
   PAUSER_ROLE,
 } from "../roles";

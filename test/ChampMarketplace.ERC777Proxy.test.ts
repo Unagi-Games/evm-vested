@@ -1,6 +1,7 @@
 import {
   ChampMarketplaceInstance,
-  ERC20Instance, ERC777ProxyInstance,
+  ERC20Instance,
+  ERC777ProxyInstance,
   UltimateChampionsNFTInstance,
 } from "../types/truffle-contracts";
 import { NewChampMarketplace } from "./ChampMarketplace.service";
@@ -22,7 +23,9 @@ contract("Marketplace & ERC777Proxy", (accounts) => {
   let marketContract: ChampMarketplaceInstance;
 
   before(async () => {
-    erc20 = await ERC20.new("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    erc20 = await ERC20.new(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
     erc777Proxy = await ERC777Proxy.new(erc20.address);
     nftContract = await NFT.new(0);
     marketContract = await NewChampMarketplace(
@@ -32,14 +35,15 @@ contract("Marketplace & ERC777Proxy", (accounts) => {
     await marketContract.approveERC777Proxy();
 
     // Set operator as... an operator
-    await erc20.approve(erc777Proxy.address, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", { from: buyer });
+    await erc20.approve(
+      erc777Proxy.address,
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      { from: buyer }
+    );
     await erc777Proxy.authorizeOperator(operator, { from: buyer });
 
     // Let's give our buyer some UNA token
-    await erc20.transfer(
-      buyer,
-      SALE_PRICE * 100
-    );
+    await erc20.transfer(buyer, SALE_PRICE * 100);
   });
 
   beforeEach(async () => {
@@ -55,12 +59,8 @@ contract("Marketplace & ERC777Proxy", (accounts) => {
   });
 
   it("E2E Allow to exchange NFT & ERC20 with ERC777 methods", async function () {
-    const initialSellerBalance = (
-      await erc20.balanceOf(seller)
-    ).toNumber();
-    const initialBuyerBalance = (
-      await erc20.balanceOf(buyer)
-    ).toNumber();
+    const initialSellerBalance = (await erc20.balanceOf(seller)).toNumber();
+    const initialBuyerBalance = (await erc20.balanceOf(buyer)).toNumber();
 
     // Check initial state
     expect(await nftContract.ownerOf(nft)).to.equals(seller);
@@ -83,12 +83,8 @@ contract("Marketplace & ERC777Proxy", (accounts) => {
     const saleAcceptedEvents = await marketContract.getPastEvents(
       "SaleAccepted"
     );
-    expect(saleAcceptedEvents, "SaleAccepted events count").to.have.length(
-      1
-    );
-    expect(saleAcceptedEvents[0].returnValues.tokenId).to.equals(
-      String(nft)
-    );
+    expect(saleAcceptedEvents, "SaleAccepted events count").to.have.length(1);
+    expect(saleAcceptedEvents[0].returnValues.tokenId).to.equals(String(nft));
 
     // Check final state
     expect(await nftContract.ownerOf(nft)).to.equals(buyer);

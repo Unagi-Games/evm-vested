@@ -84,7 +84,9 @@ contract("Marketplace", (accounts) => {
           await marketContract.setOption(buyer, nft, { from: seller });
           assert.fail("setOption did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes("Only an authorized operator is allowed");
+          expect(e.message).to.includes(
+            "Only an authorized operator is allowed"
+          );
         }
 
         expect(await marketContract.hasOption(seller, nft)).to.be.false;
@@ -164,7 +166,7 @@ contract("Marketplace", (accounts) => {
         expect((await marketContract.getSale(nft)).toNumber()).to.equals(1);
       });
 
-      it('Prevents to have multiple option at the same time', async () => {
+      it("Prevents to have multiple option at the same time", async () => {
         const { receipt: mintReceipt } = await nftContract.safeMint(
           seller,
           "NFT_2"
@@ -193,7 +195,9 @@ contract("Marketplace", (accounts) => {
           await marketContract.setOption(buyer, nft2, { from: buyer });
           assert.fail("setOption did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes("Cannot set an option on multiple sales at the same time");
+          expect(e.message).to.includes(
+            "Cannot set an option on multiple sales at the same time"
+          );
         }
 
         expect(await marketContract.hasOption(buyer, nft2)).to.be.false;
@@ -222,7 +226,7 @@ contract("Marketplace", (accounts) => {
         expect(await marketContract.hasOption(buyer, nft)).to.be.false;
       });
 
-      it('Clean rate limitation when sale is accepted', async () => {
+      it("Clean rate limitation when sale is accepted", async () => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
@@ -254,7 +258,7 @@ contract("Marketplace", (accounts) => {
         expect(await marketContract.hasOption(buyer, nft)).to.be.true;
       });
 
-      it('Emits OptionSet when an option is set', async () => {
+      it("Emits OptionSet when an option is set", async () => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
@@ -265,12 +269,13 @@ contract("Marketplace", (accounts) => {
           await marketContract.OPTION_ROLE(),
           buyer
         );
-        const transaction = await marketContract.setOption(buyer, nft, { from: buyer });
+        const transaction = await marketContract.setOption(buyer, nft, {
+          from: buyer,
+        });
         const { 1: until } = await marketContract.getOption(nft);
 
         expect(transaction.logs[0]).to.have.property("event", "OptionSet");
-        const event = transaction
-          .logs[0] as Truffle.TransactionLog<OptionSet>;
+        const event = transaction.logs[0] as Truffle.TransactionLog<OptionSet>;
         expect(event.args).to.have.property("tokenId");
         expect(event.args.tokenId.toNumber()).to.equals(1);
         expect(event.args).to.have.property("buyer");
@@ -279,7 +284,7 @@ contract("Marketplace", (accounts) => {
         expect(event.args.until.toString()).to.equals(until.toString());
       });
 
-      it('Emits OptionSet when an option is unset', async () => {
+      it("Emits OptionSet when an option is unset", async () => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
@@ -312,7 +317,7 @@ contract("Marketplace", (accounts) => {
         expect(event.returnValues.until).to.equals("0");
       });
 
-      it('Clean option after 3 minutes', async () => {
+      it("Clean option after 3 minutes", async () => {
         const snapshotId = (await TimeMachine.takeSnapshot()).result;
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
@@ -326,7 +331,7 @@ contract("Marketplace", (accounts) => {
         );
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        await TimeMachine.advanceTimeAndBlock((60 * 3) - 1);
+        await TimeMachine.advanceTimeAndBlock(60 * 3 - 1);
         expect(await marketContract.hasOption(buyer, nft)).to.be.true;
         await TimeMachine.advanceTimeAndBlock(2);
         expect(await marketContract.hasOption(buyer, nft)).to.be.false;
@@ -334,7 +339,7 @@ contract("Marketplace", (accounts) => {
         await TimeMachine.revertToSnapshot(snapshotId);
       });
 
-      it('Clean rateLimit after 30 minutes', async () => {
+      it("Clean rateLimit after 30 minutes", async () => {
         const snapshotId = (await TimeMachine.takeSnapshot()).result;
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
@@ -349,7 +354,7 @@ contract("Marketplace", (accounts) => {
         await marketContract.setOption(buyer, nft, { from: buyer });
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        await TimeMachine.advanceTimeAndBlock((60 * 30 * 2) - 1);
+        await TimeMachine.advanceTimeAndBlock(60 * 30 * 2 - 1);
 
         try {
           await marketContract.setOption(buyer, nft, { from: buyer });
@@ -366,7 +371,7 @@ contract("Marketplace", (accounts) => {
 
         await TimeMachine.revertToSnapshot(snapshotId);
       });
-    })
+    });
   });
 
   describe("as an operator", () => {
@@ -413,7 +418,7 @@ contract("Marketplace", (accounts) => {
       await tokenContract.authorizeOperator(operator, { from: buyer });
     });
 
-    it('Set an option', async () => {
+    it("Set an option", async () => {
       await nftContract.approve(marketContract.address, nft, {
         from: seller,
       });

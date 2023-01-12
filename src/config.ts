@@ -6,9 +6,12 @@ export const L1_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER: Address = "";
 export const L1_UNAGI_MAINTENANCE_MULTISIG: Address = "";
 export const L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER: Address = "";
 export const L2_UNAGI_MAINTENANCE_MULTISIG: Address = "";
+export const BINANCE_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER: Address = "";
+export const BINANCE_UNAGI_MAINTENANCE_MULTISIG: Address = "";
 
 // Unagi minter
 export const L2_UNAGI_MINTER_BCI: Address = "";
+export const BINANCE_UNAGI_MINTER_BCI: Address = "";
 
 const GAME_LAUNCH = moment();
 const TGE = moment();

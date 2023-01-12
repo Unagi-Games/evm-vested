@@ -180,8 +180,14 @@ contract("Marketplace", (accounts) => {
         );
 
         // Accept the sale
-        await tokenContract.approve(marketContract.address, SALE_PRICE, { from: buyer });
-        await marketContract.methods['acceptSale(uint64,uint256)'](nft, SALE_PRICE, { from: buyer });
+        await tokenContract.approve(marketContract.address, SALE_PRICE, {
+          from: buyer,
+        });
+        await marketContract.methods["acceptSale(uint64,uint256)"](
+          nft,
+          SALE_PRICE,
+          { from: buyer }
+        );
         const saleAcceptedEvents = await marketContract.getPastEvents(
           "SaleAccepted"
         );
@@ -224,8 +230,15 @@ contract("Marketplace", (accounts) => {
         });
 
         // Accept the sale
-        await tokenContract.approve(marketContract.address, SALE_PRICE, { from: buyer });
-        await marketContract.methods['acceptSale(uint64,uint256,address)'](nft, SALE_PRICE, receiver, { from: buyer });
+        await tokenContract.approve(marketContract.address, SALE_PRICE, {
+          from: buyer,
+        });
+        await marketContract.methods["acceptSale(uint64,uint256,address)"](
+          nft,
+          SALE_PRICE,
+          receiver,
+          { from: buyer }
+        );
 
         // Check final state
         expect(await nftContract.ownerOf(nft)).to.equals(receiver);
@@ -347,14 +360,10 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
 
-        const { receipt: updateSaleReceipt } = await marketContract.updateSaleFrom(
-          seller,
-          nft,
-          NEW_SALE_PRICE,
-          {
+        const { receipt: updateSaleReceipt } =
+          await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, {
             from: seller,
-          }
-        );
+          });
         const updateSaleEvent = updateSaleReceipt.logs.find(
           ({ event }) => event === "SaleUpdated"
         );
@@ -413,7 +422,7 @@ contract("Marketplace", (accounts) => {
     });
 
     describe("Sale accept", () => {
-      describe('ERC777', () => {
+      describe("ERC777", () => {
         it("Should require offer to be greater than sale price", async () => {
           const SALE_PRICE = 100;
           await nftContract.approve(marketContract.address, nft, {
@@ -438,7 +447,7 @@ contract("Marketplace", (accounts) => {
         });
       });
 
-      describe('ERC20', () => {
+      describe("ERC20", () => {
         it("Should require offer to be greater than sale price", async () => {
           const SALE_PRICE = 100;
           await nftContract.approve(marketContract.address, nft, {
@@ -448,13 +457,19 @@ contract("Marketplace", (accounts) => {
             from: seller,
           });
           try {
-            await tokenContract.approve(marketContract.address, SALE_PRICE - 1, { from: buyer });
-            await marketContract.methods['acceptSale(uint64,uint256)'](nft, SALE_PRICE, { from: buyer });
+            await tokenContract.approve(
+              marketContract.address,
+              SALE_PRICE - 1,
+              { from: buyer }
+            );
+            await marketContract.methods["acceptSale(uint64,uint256)"](
+              nft,
+              SALE_PRICE,
+              { from: buyer }
+            );
             assert.fail("Accept the sale did not throw.");
           } catch (e: any) {
-            expect(e.message).to.includes(
-              "Allowance is lower than sale price"
-            );
+            expect(e.message).to.includes("Allowance is lower than sale price");
           }
         });
       });
@@ -730,12 +745,10 @@ contract("Marketplace", (accounts) => {
       await marketContract.createSaleFrom(seller, nft, INITIAL_SALE_PRICE, {
         from: operator,
       });
-      const { receipt: updateSaleReceipt } = await marketContract.updateSaleFrom(
-        seller,
-        nft,
-        NEW_SALE_PRICE,
-        { from: operator }
-      );
+      const { receipt: updateSaleReceipt } =
+        await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, {
+          from: operator,
+        });
       const saleUpdatedEvent = updateSaleReceipt.logs.find(
         ({ event }) => event === "SaleUpdated"
       );

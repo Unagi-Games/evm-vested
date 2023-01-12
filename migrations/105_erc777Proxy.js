@@ -1,1 +1,0 @@
-module.exports = require("../src/migrations/105_erc777Proxy")(web3);

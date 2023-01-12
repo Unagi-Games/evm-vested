@@ -37,7 +37,7 @@ module.exports =
       DEFAULT_ADMIN_ROLE,
       L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
-    await ultimateChampionsNFTContract.grantRole(
+    await distributionManagerContract.grantRole(
       PAUSER_ROLE,
       L2_UNAGI_MAINTENANCE_MULTISIG
     );
@@ -49,7 +49,7 @@ module.exports =
       DEFAULT_ADMIN_ROLE,
       rootAccount
     );
-    await ultimateChampionsNFTContract.renounceRole(PAUSER_ROLE, rootAccount);
+    await distributionManagerContract.renounceRole(PAUSER_ROLE, rootAccount);
     await distributionManagerContract.renounceRole(
       DISTRIBUTOR_ROLE,
       rootAccount

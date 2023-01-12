@@ -10,6 +10,8 @@ export const BENEFICIARY_MANAGER_ROLE =
   "0xc59ec23d1c349d9976a1aba1c27c681cc250eafcb2aaf5c7c3be1d0e6827bfb1";
 export const FEE_MANAGER_ROLE =
   "0x6c0757dc3e6b28b2580c03fd9e96c274acf4f99d91fbec9b418fa1d70604ff1c";
+export const OPTION_ROLE =
+  "0xfd0eee74c7609b4290ae42cfa22435eabf285017ea12017ed27c2e820eae6a77";
 export const DISTRIBUTOR_ROLE =
   "0xfbd454f36a7e1a388bd6fc3ab10d434aa4578f811acbbcf33afb1c697486313c";
 export const RECEIVER_ROLE =
