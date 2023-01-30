@@ -1,8 +1,4 @@
-import {
-  DEFAULT_ADMIN_ROLE,
-  MINT_ROLE,
-  PAUSER_ROLE,
-} from "../roles";
+import { DEFAULT_ADMIN_ROLE, MINT_ROLE, PAUSER_ROLE } from "../roles";
 import {
   L2_UNAGI_MAINTENANCE_MULTISIG,
   L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER,
@@ -38,10 +34,7 @@ module.exports =
       PAUSER_ROLE,
       L2_UNAGI_MAINTENANCE_MULTISIG
     );
-    await childChampTokenContract.renounceRole(
-      DEFAULT_ADMIN_ROLE,
-      rootAccount
-    );
+    await childChampTokenContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
     await childChampTokenContract.renounceRole(PAUSER_ROLE, rootAccount);
 
     await deployer.deploy(ChildMgcToken, CHILD_CHAIN_MANAGER);

@@ -1,5 +1,5 @@
 import { DEFAULT_ADMIN_ROLE, RECEIVER_ROLE, TOKEN_ROLE } from "../roles";
-import { L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER, } from "../config";
+import { L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER } from "../config";
 import { Address, Network } from "../types";
 
 const ChildChamp = artifacts.require("ChildChampToken");
@@ -28,28 +28,10 @@ module.exports =
       DEFAULT_ADMIN_ROLE,
       L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
-    await paymentRelayContract.grantRole(
-      RECEIVER_ROLE,
-      receiver
-    );
-    await paymentRelayContract.grantRole(
-      TOKEN_ROLE,
-      champContract.address
-    );
-    await paymentRelayContract.grantRole(
-      TOKEN_ROLE,
-      mgcContract.address
-    );
-    await paymentRelayContract.renounceRole(
-      DEFAULT_ADMIN_ROLE,
-      rootAccount
-    );
-    await paymentRelayContract.renounceRole(
-      TOKEN_ROLE,
-      rootAccount
-    );
-    await paymentRelayContract.renounceRole(
-      RECEIVER_ROLE,
-      rootAccount
-    );
+    await paymentRelayContract.grantRole(RECEIVER_ROLE, receiver);
+    await paymentRelayContract.grantRole(TOKEN_ROLE, champContract.address);
+    await paymentRelayContract.grantRole(TOKEN_ROLE, mgcContract.address);
+    await paymentRelayContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
+    await paymentRelayContract.renounceRole(TOKEN_ROLE, rootAccount);
+    await paymentRelayContract.renounceRole(RECEIVER_ROLE, rootAccount);
   };
