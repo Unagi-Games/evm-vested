@@ -50,105 +50,6 @@ contract("Marketplace", (accounts) => {
       nft = transferEvent.args.tokenId.toNumber();
     });
 
-    describe("E2E ERC777", () => {
-      it("Should allow users to exchange NFT", async () => {
-        const SALE_PRICE = 100;
-        const initialSellerBalance = (
-          await tokenContract.balanceOf(seller)
-        ).toNumber();
-        const initialBuyerBalance = (
-          await tokenContract.balanceOf(buyer)
-        ).toNumber();
-
-        // Check initial state
-        expect(await nftContract.ownerOf(nft)).to.equals(seller);
-
-        // Create the sale
-        await nftContract.approve(marketContract.address, nft, {
-          from: seller,
-        });
-        const { receipt: createSaleReceipt } =
-          await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
-            from: seller,
-          });
-        const createSaleEvent = createSaleReceipt.logs.find(
-          ({ event }) => event === "SaleCreated"
-        );
-        expect(createSaleEvent.args.seller).to.equals(seller);
-        expect(createSaleEvent.args.tokenId.toNumber()).to.equals(nft);
-        expect(createSaleEvent.args.tokenWeiPrice.toNumber()).to.equals(
-          SALE_PRICE
-        );
-
-        // Accept the sale
-        await tokenContract.send(
-          marketContract.address,
-          SALE_PRICE,
-          web3.utils.padLeft(web3.utils.toHex(nft), 16),
-          { from: buyer }
-        );
-        const saleAcceptedEvents = await marketContract.getPastEvents(
-          "SaleAccepted"
-        );
-        expect(saleAcceptedEvents, "SaleAccepted events count").to.have.length(
-          1
-        );
-        expect(saleAcceptedEvents[0].returnValues.tokenId).to.equals(
-          String(nft)
-        );
-
-        // Check final state
-        expect(await nftContract.ownerOf(nft)).to.equals(buyer);
-        expect(await nftContract.getApproved(nft)).to.equals(
-          "0x0000000000000000000000000000000000000000"
-        );
-        expect((await tokenContract.balanceOf(seller)).toNumber()).to.equals(
-          initialSellerBalance + SALE_PRICE
-        );
-        expect((await tokenContract.balanceOf(buyer)).toNumber()).to.equals(
-          initialBuyerBalance - SALE_PRICE
-        );
-      });
-
-      it("Should allow to buy a NFT for someone else", async () => {
-        const receiver = accounts[5];
-        const SALE_PRICE = 100;
-        const initialSellerBalance = (
-          await tokenContract.balanceOf(seller)
-        ).toNumber();
-        const initialBuyerBalance = (
-          await tokenContract.balanceOf(buyer)
-        ).toNumber();
-
-        // Create the sale
-        await nftContract.approve(marketContract.address, nft, {
-          from: seller,
-        });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
-          from: seller,
-        });
-
-        // Accept the sale
-        await tokenContract.send(
-          marketContract.address,
-          SALE_PRICE,
-          `${web3.utils.padLeft(web3.utils.toHex(nft), 16)}${receiver.substr(
-            2
-          )}`,
-          { from: buyer }
-        );
-
-        // Check final state
-        expect(await nftContract.ownerOf(nft)).to.equals(receiver);
-        expect((await tokenContract.balanceOf(seller)).toNumber()).to.equals(
-          initialSellerBalance + SALE_PRICE
-        );
-        expect((await tokenContract.balanceOf(buyer)).toNumber()).to.equals(
-          initialBuyerBalance - SALE_PRICE
-        );
-      });
-    });
-
     describe("E2E ERC20", () => {
       it("Should allow users to exchange NFT", async () => {
         const SALE_PRICE = 100;
@@ -422,31 +323,6 @@ contract("Marketplace", (accounts) => {
     });
 
     describe("Sale accept", () => {
-      describe("ERC777", () => {
-        it("Should require offer to be greater than sale price", async () => {
-          const SALE_PRICE = 100;
-          await nftContract.approve(marketContract.address, nft, {
-            from: seller,
-          });
-          await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
-            from: seller,
-          });
-          try {
-            await tokenContract.send(
-              marketContract.address,
-              SALE_PRICE - 1,
-              web3.utils.padLeft(web3.utils.toHex(nft), 16),
-              { from: buyer }
-            );
-            assert.fail("Accept the sale did not throw.");
-          } catch (e: any) {
-            expect(e.message).to.includes(
-              "You must match the sale price to accept the sale"
-            );
-          }
-        });
-      });
-
       describe("ERC20", () => {
         it("Should require offer to be greater than sale price", async () => {
           const SALE_PRICE = 100;

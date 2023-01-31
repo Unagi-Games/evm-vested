@@ -1,14 +1,14 @@
 import TimeMachine from "ganache-time-traveler";
 import {
   ChampMarketplaceInstance,
-  ChildChampTokenInstance,
+  TestERC20Instance,
   UltimateChampionsNFTInstance,
 } from "../types/truffle-contracts";
 import { OptionSet } from "../types/truffle-contracts/ChampMarketplace";
 import { NewChampMarketplace } from "./ChampMarketplace.service";
 
 const NFT = artifacts.require("UltimateChampionsNFT");
-const Token = artifacts.require("ChildChampToken");
+const Token = artifacts.require("TestERC20");
 
 contract("Marketplace", (accounts) => {
   describe("as a user", () => {
@@ -17,25 +17,17 @@ contract("Marketplace", (accounts) => {
     const buyer = accounts[2];
     let nft: number;
     let nftContract: UltimateChampionsNFTInstance;
-    let tokenContract: ChildChampTokenInstance;
+    let tokenContract: TestERC20Instance;
     let marketContract: ChampMarketplaceInstance;
 
     beforeEach(async () => {
       nftContract = await NFT.new(0);
-      tokenContract = await Token.new(accounts[0]);
+      tokenContract = await Token.new(1_000_000, {
+        from: buyer,
+      });
       marketContract = await NewChampMarketplace(
         tokenContract.address,
         nftContract.address
-      );
-
-      // Let's give our buyer some UNA token
-      await tokenContract.grantRole(
-        await tokenContract.DEPOSITOR_ROLE(),
-        rootUser
-      );
-      await tokenContract.deposit(
-        buyer,
-        "0x00000000000000000000000000000000000000000000000000000000000f424075696e74323536"
       );
 
       // Let's give our seller a NFT
@@ -106,12 +98,8 @@ contract("Marketplace", (accounts) => {
         await marketContract.setOption(seller, nft, { from: seller });
 
         try {
-          await tokenContract.send(
-            marketContract.address,
-            1,
-            web3.utils.padLeft(web3.utils.toHex(nft), 16),
-            { from: buyer }
-          );
+          await tokenContract.approve(marketContract.address, 1);
+          await marketContract.methods["acceptSale(uint64,uint256)"](nft, 1);
           assert.fail("send did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("An option exists on this sale");
@@ -216,12 +204,8 @@ contract("Marketplace", (accounts) => {
         );
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        await tokenContract.send(
-          marketContract.address,
-          1,
-          web3.utils.padLeft(web3.utils.toHex(nft), 16),
-          { from: buyer }
-        );
+        await tokenContract.approve(marketContract.address, 1);
+        await marketContract.methods["acceptSale(uint64,uint256)"](nft, 1);
 
         expect(await marketContract.hasOption(buyer, nft)).to.be.false;
       });
@@ -240,12 +224,8 @@ contract("Marketplace", (accounts) => {
         await marketContract.setOption(buyer, nft, { from: buyer });
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        await tokenContract.send(
-          marketContract.address,
-          1,
-          web3.utils.padLeft(web3.utils.toHex(nft), 16),
-          { from: buyer }
-        );
+        await tokenContract.approve(marketContract.address, 1);
+        await marketContract.methods["acceptSale(uint64,uint256)"](nft, 1);
 
         await nftContract.approve(marketContract.address, nft, {
           from: buyer,
@@ -297,12 +277,10 @@ contract("Marketplace", (accounts) => {
         );
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        const transaction = await tokenContract.send(
-          marketContract.address,
-          1,
-          web3.utils.padLeft(web3.utils.toHex(nft), 16),
-          { from: buyer }
-        );
+        await tokenContract.approve(marketContract.address, 1);
+        const transaction = await marketContract.methods[
+          "acceptSale(uint64,uint256)"
+        ](nft, 1);
 
         const [event] = await marketContract.getPastEvents("OptionSet", {
           fromBlock: transaction.receipt.blockNumber,
@@ -380,25 +358,17 @@ contract("Marketplace", (accounts) => {
     const buyer = accounts[2];
     let nft: number;
     let nftContract: UltimateChampionsNFTInstance;
-    let tokenContract: ChildChampTokenInstance;
+    let tokenContract: TestERC20Instance;
     let marketContract: ChampMarketplaceInstance;
 
     beforeEach(async () => {
       nftContract = await NFT.new(0);
-      tokenContract = await Token.new(accounts[0]);
+      tokenContract = await Token.new(1_000_000, {
+        from: buyer,
+      });
       marketContract = await NewChampMarketplace(
         tokenContract.address,
         nftContract.address
-      );
-
-      // Let's give our buyer some UNA token
-      await tokenContract.grantRole(
-        await tokenContract.DEPOSITOR_ROLE(),
-        operator
-      );
-      await tokenContract.deposit(
-        buyer,
-        "0x00000000000000000000000000000000000000000000000000000000000f424075696e74323536"
       );
 
       // Let's give our seller a NFT
@@ -413,9 +383,6 @@ contract("Marketplace", (accounts) => {
 
       // operator is the operator of seller NFT
       await nftContract.setApprovalForAll(operator, true, { from: seller });
-
-      // operator is the operator of buyer token
-      await tokenContract.authorizeOperator(operator, { from: buyer });
     });
 
     it("Set an option", async () => {
