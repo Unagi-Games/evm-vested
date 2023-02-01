@@ -1,20 +1,20 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0xA1DD0abb366e09951941880C6acC89f49B89926f",
-    "txHash": "0x1b9df182668dcc684534073255604ee55b532735ae45ee7839ebd52eb48cefe9"
+    "address": "0x4C243D2eBe83aF7C57E28F17038c2545Aa3E4492",
+    "txHash": "0xef884d52e96e1635ad7eb9362880cb50b0ad6aa7476a8b19b89fa09de1186bdc"
   },
   "proxies": [
     {
-      "address": "0x5B52ce4A93625a94e411bF0262206d78E6d459fb",
-      "txHash": "0xfc98536874d4881c50bbf697a832a59dfed845ad2390217a270d32a3e3f2b0ce",
+      "address": "0xD6867c853ab52B220e2EF60422a16227a242223c",
+      "txHash": "0xd42920c31543f17358ea05eefd9807daf2692573ba6cd380e19a23a609433ae0",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "fbebfef852939ffc38818bd1737e0add6354005ce5c88f416aff56e51a994f5a": {
-      "address": "0xc15498E43796bBeDeBeaFDcB37a6aEAbD1878394",
-      "txHash": "0xc95d9ebf37c5b8cb2bb50020c584aa59d16b86a0c34bf88255165a421f09532a",
+    "c751b7a2983a3210e2e18c61bab6c7e71e4d9a245266e781f34a0911abdab904": {
+      "address": "0x2359bA46b4da73Ed479823542B751F9972920A40",
+      "txHash": "0x4a7a1c35bed41b9d18e680a99b456b559adad4b0bf6af5f63a9916d3653c4b1b",
       "layout": {
         "solcVersion": "0.8.12",
         "storage": [
@@ -58,7 +58,7 @@
           {
             "contract": "AccessControlEnumerableUpgradeable",
             "label": "_roleMembers",
-            "type": "t_mapping(t_bytes32,t_struct(AddressSet)3591_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(AddressSet)3408_storage)",
             "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:22"
           },
           {
@@ -70,61 +70,61 @@
           {
             "contract": "ChampMarketplace",
             "label": "_CHAMP_TOKEN_CONTRACT",
-            "type": "t_contract(IERC777Upgradeable)1441",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:71"
+            "type": "t_contract(IERC20Upgradeable)825",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:63"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_NFCHAMP_CONTRACT",
             "type": "t_contract(IERC721Upgradeable)1258",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:72"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:64"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_sales",
             "type": "t_mapping(t_uint64,t_uint256)",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:84"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:77"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_options",
-            "type": "t_mapping(t_uint64,t_struct(Option)12034_storage)",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:86"
+            "type": "t_mapping(t_uint64,t_struct(Option)11846_storage)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:79"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_rateLimits",
-            "type": "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)12044_storage))",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:88"
+            "type": "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)11856_storage))",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:81"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_optionLock",
-            "type": "t_mapping(t_address,t_struct(OptionLock)12039_storage)",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:90"
+            "type": "t_mapping(t_address,t_struct(OptionLock)11851_storage)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:83"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_marketplacePercentFees",
             "type": "t_uint256",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:93"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:86"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_marketplaceFeesReceiver",
             "type": "t_address",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:95"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:88"
           },
           {
             "contract": "ChampMarketplace",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:724"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:598"
           }
         ],
         "types": {
-          "t_contract(IERC777Upgradeable)1441": {
-            "label": "contract IERC777Upgradeable"
+          "t_contract(IERC20Upgradeable)825": {
+            "label": "contract IERC20Upgradeable"
           },
           "t_contract(IERC721Upgradeable)1258": {
             "label": "contract IERC721Upgradeable"
@@ -138,10 +138,10 @@
           "t_uint256": {
             "label": "uint256"
           },
-          "t_mapping(t_uint64,t_struct(Option)12034_storage)": {
+          "t_mapping(t_uint64,t_struct(Option)11846_storage)": {
             "label": "mapping(uint64 => struct ChampMarketplace.Option)"
           },
-          "t_struct(Option)12034_storage": {
+          "t_struct(Option)11846_storage": {
             "label": "struct ChampMarketplace.Option",
             "members": [
               {
@@ -157,13 +157,13 @@
           "t_address": {
             "label": "address"
           },
-          "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)12044_storage))": {
+          "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)11856_storage))": {
             "label": "mapping(uint64 => mapping(address => struct ChampMarketplace.RateLimit))"
           },
-          "t_mapping(t_address,t_struct(RateLimit)12044_storage)": {
+          "t_mapping(t_address,t_struct(RateLimit)11856_storage)": {
             "label": "mapping(address => struct ChampMarketplace.RateLimit)"
           },
-          "t_struct(RateLimit)12044_storage": {
+          "t_struct(RateLimit)11856_storage": {
             "label": "struct ChampMarketplace.RateLimit",
             "members": [
               {
@@ -179,10 +179,10 @@
           "t_uint8": {
             "label": "uint8"
           },
-          "t_mapping(t_address,t_struct(OptionLock)12039_storage)": {
+          "t_mapping(t_address,t_struct(OptionLock)11851_storage)": {
             "label": "mapping(address => struct ChampMarketplace.OptionLock)"
           },
-          "t_struct(OptionLock)12039_storage": {
+          "t_struct(OptionLock)11851_storage": {
             "label": "struct ChampMarketplace.OptionLock",
             "members": [
               {
@@ -198,22 +198,22 @@
           "t_array(t_uint256)50_storage": {
             "label": "uint256[50]"
           },
-          "t_mapping(t_bytes32,t_struct(AddressSet)3591_storage)": {
+          "t_mapping(t_bytes32,t_struct(AddressSet)3408_storage)": {
             "label": "mapping(bytes32 => struct EnumerableSetUpgradeable.AddressSet)"
           },
           "t_bytes32": {
             "label": "bytes32"
           },
-          "t_struct(AddressSet)3591_storage": {
+          "t_struct(AddressSet)3408_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)3276_storage"
+                "type": "t_struct(Set)3093_storage"
               }
             ]
           },
-          "t_struct(Set)3276_storage": {
+          "t_struct(Set)3093_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
