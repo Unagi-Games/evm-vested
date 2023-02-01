@@ -172,27 +172,6 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
-  /**
-   * Approves ERC777Proxy with underlying ERC20
-   */
-  approveERC777Proxy: {
-    (token: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      token: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
-    sendTransaction(
-      token: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      token: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
   getPaymentKey(
     UID: string,
     from: string,
@@ -211,41 +190,33 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: string; 1: BN }>;
 
-  tokensReceived: {
+  execPayment: {
     (
-      arg0: string,
-      from: string,
-      arg2: string,
+      tokenAddress: string,
       amount: number | BN | string,
-      userData: string,
-      operatorData: string,
+      UID: string,
+      forwardTo: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      arg0: string,
-      from: string,
-      arg2: string,
+      tokenAddress: string,
       amount: number | BN | string,
-      userData: string,
-      operatorData: string,
+      UID: string,
+      forwardTo: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      arg0: string,
-      from: string,
-      arg2: string,
+      tokenAddress: string,
       amount: number | BN | string,
-      userData: string,
-      operatorData: string,
+      UID: string,
+      forwardTo: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      arg0: string,
-      from: string,
-      arg2: string,
+      tokenAddress: string,
       amount: number | BN | string,
-      userData: string,
-      operatorData: string,
+      UID: string,
+      forwardTo: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -360,27 +331,6 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
 
-    /**
-     * Approves ERC777Proxy with underlying ERC20
-     */
-    approveERC777Proxy: {
-      (token: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(
-        token: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<boolean>;
-      sendTransaction(
-        token: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        token: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
     getPaymentKey(
       UID: string,
       from: string,
@@ -399,41 +349,33 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: string; 1: BN }>;
 
-    tokensReceived: {
+    execPayment: {
       (
-        arg0: string,
-        from: string,
-        arg2: string,
+        tokenAddress: string,
         amount: number | BN | string,
-        userData: string,
-        operatorData: string,
+        UID: string,
+        forwardTo: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        arg0: string,
-        from: string,
-        arg2: string,
+        tokenAddress: string,
         amount: number | BN | string,
-        userData: string,
-        operatorData: string,
+        UID: string,
+        forwardTo: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        arg0: string,
-        from: string,
-        arg2: string,
+        tokenAddress: string,
         amount: number | BN | string,
-        userData: string,
-        operatorData: string,
+        UID: string,
+        forwardTo: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        arg0: string,
-        from: string,
-        arg2: string,
+        tokenAddress: string,
         amount: number | BN | string,
-        userData: string,
-        operatorData: string,
+        UID: string,
+        forwardTo: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

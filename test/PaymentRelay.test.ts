@@ -1,13 +1,13 @@
 import {
-  ChildChampTokenInstance,
   PaymentRelayInstance,
+  TestERC20Instance,
 } from "../types/truffle-contracts";
 
-const ChildChamp = artifacts.require("ChildChampToken");
+const Token = artifacts.require("TestERC20");
 const PaymentRelay = artifacts.require("PaymentRelay");
 
 contract("PaymentRelay", (accounts) => {
-  let champContract: ChildChampTokenInstance;
+  let champContract: TestERC20Instance;
   let paymentRelayContract: PaymentRelayInstance;
 
   const sender = accounts[1];
@@ -16,7 +16,7 @@ contract("PaymentRelay", (accounts) => {
   const initialChampBalance = web3.utils.toWei("1000", "ether");
 
   before(async function () {
-    champContract = await ChildChamp.new(accounts[0]);
+    champContract = await Token.new(initialChampBalance, { from: sender });
     paymentRelayContract = await PaymentRelay.new();
     await paymentRelayContract.grantRole(
       await paymentRelayContract.TOKEN_ROLE(),
@@ -26,25 +26,14 @@ contract("PaymentRelay", (accounts) => {
       await paymentRelayContract.RECEIVER_ROLE(),
       receiver
     );
-
-    await champContract.deposit(
-      sender,
-      web3.eth.abi.encodeParameter("uint256", initialChampBalance)
-    );
   });
 
   describe("As any user", function () {
     it("I cannot interact with PaymentRelay directly", async function () {
       try {
-        await paymentRelayContract.tokensReceived(
-          sender,
-          sender,
-          receiver,
-          "100",
-          "0x0",
-          "0x0",
-          { from: sender }
-        );
+        await paymentRelayContract.execPayment(sender, "100", "0x0", receiver, {
+          from: sender,
+        });
         assert.fail("tokensReceived() did not throw.");
       } catch (e: any) {
         expect(e.message).to.includes("missing role");
@@ -58,13 +47,12 @@ contract("PaymentRelay", (accounts) => {
       const amount = "1000";
 
       before(async function () {
-        const operatorData = `${PAYMENT_UID}${receiver.substring(2)}`;
-        await champContract.operatorSend(
-          sender,
-          paymentRelayContract.address,
+        await champContract.approve(paymentRelayContract.address, amount);
+        await paymentRelayContract.execPayment(
+          champContract.address,
           amount,
-          "0x0",
-          operatorData,
+          PAYMENT_UID,
+          receiver,
           { from: sender }
         );
       });
@@ -82,15 +70,13 @@ contract("PaymentRelay", (accounts) => {
       });
 
       it("Should block payment duplication", async function () {
-        const operatorData = `${PAYMENT_UID}${receiver.substring(2)}`;
-
         try {
-          await champContract.operatorSend(
-            sender,
-            paymentRelayContract.address,
+          await champContract.approve(paymentRelayContract.address, amount);
+          await paymentRelayContract.execPayment(
+            champContract.address,
             amount,
-            "0x0",
-            operatorData,
+            PAYMENT_UID,
+            receiver,
             { from: sender }
           );
           assert.fail("operatorSend() did not throw.");
@@ -101,15 +87,14 @@ contract("PaymentRelay", (accounts) => {
 
       it("Should block payment to unauthorized receiver", async function () {
         const ANY_UID = web3.utils.keccak256("ANY_UID");
-        const operatorData = `${ANY_UID}${anyUser.substring(2)}`;
 
         try {
-          await champContract.operatorSend(
-            sender,
-            paymentRelayContract.address,
+          await champContract.approve(paymentRelayContract.address, amount);
+          await paymentRelayContract.execPayment(
+            champContract.address,
             amount,
-            "0x0",
-            operatorData,
+            ANY_UID,
+            anyUser,
             { from: sender }
           );
           assert.fail("operatorSend() did not throw.");

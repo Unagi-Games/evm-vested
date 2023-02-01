@@ -300,18 +300,6 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Approves ERC777Proxy with underlying ERC20
-   */
-  approveERC777Proxy: {
-    (txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
-    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
-  };
-
-  /**
    * Compute the current share for a given price. Remainder is given to the seller. Return a tuple of wei: - First element is CHAMP wei for the seller. - Second element is CHAMP wei fee.
    */
   computeSaleShares(
@@ -532,48 +520,6 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
-  /**
-   * Called by an {IERC777} CHAMP token contract whenever tokens are being sent to the ChampMarketplace contract. This function is used to buy a NFCHAMP listed on the ChampMarketplace contract. To buy a NFCHAMP, a CHAMP holder must send CHAMP wei price (or above) to the ChampMarketplace contract with some extra data: - MANDATORY: Bytes 0 to 7 (8 bytes, uint64) corresponds to the NFCHAMP ID to buy - OPTIONAL: Bytes 8 to 27 (20 bytes, address) can be provided to customize the wallet that will receive the NFCHAMP if the sale is executed. Once a NFT is sold, a fee will be applied on the CHAMP payment and forwarded to the marketplace fees receiver. Emits a {SaleAccepted} event. Requirements: - Received tokens must be CHAMP. - NFCHAMP ID must be on sale. - nftReceiver can interact with the sale. - Received tokens amount must be greater than sale price.
-   */
-  tokensReceived: {
-    (
-      arg0: string,
-      from: string,
-      to: string,
-      amount: number | BN | string,
-      userData: string,
-      arg5: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      arg0: string,
-      from: string,
-      to: string,
-      amount: number | BN | string,
-      userData: string,
-      arg5: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      arg0: string,
-      from: string,
-      to: string,
-      amount: number | BN | string,
-      userData: string,
-      arg5: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      arg0: string,
-      from: string,
-      to: string,
-      amount: number | BN | string,
-      userData: string,
-      arg5: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
   methods: {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -728,18 +674,6 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
         nfChampAddress: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
-    };
-
-    /**
-     * Approves ERC777Proxy with underlying ERC20
-     */
-    approveERC777Proxy: {
-      (txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
-      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
     };
 
     /**
@@ -962,48 +896,6 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
-
-    /**
-     * Called by an {IERC777} CHAMP token contract whenever tokens are being sent to the ChampMarketplace contract. This function is used to buy a NFCHAMP listed on the ChampMarketplace contract. To buy a NFCHAMP, a CHAMP holder must send CHAMP wei price (or above) to the ChampMarketplace contract with some extra data: - MANDATORY: Bytes 0 to 7 (8 bytes, uint64) corresponds to the NFCHAMP ID to buy - OPTIONAL: Bytes 8 to 27 (20 bytes, address) can be provided to customize the wallet that will receive the NFCHAMP if the sale is executed. Once a NFT is sold, a fee will be applied on the CHAMP payment and forwarded to the marketplace fees receiver. Emits a {SaleAccepted} event. Requirements: - Received tokens must be CHAMP. - NFCHAMP ID must be on sale. - nftReceiver can interact with the sale. - Received tokens amount must be greater than sale price.
-     */
-    tokensReceived: {
-      (
-        arg0: string,
-        from: string,
-        to: string,
-        amount: number | BN | string,
-        userData: string,
-        arg5: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        arg0: string,
-        from: string,
-        to: string,
-        amount: number | BN | string,
-        userData: string,
-        arg5: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        arg0: string,
-        from: string,
-        to: string,
-        amount: number | BN | string,
-        userData: string,
-        arg5: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        arg0: string,
-        from: string,
-        to: string,
-        amount: number | BN | string,
-        userData: string,
-        arg5: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
 
     /**
      * See _acceptSale(uint64,uint256,address)
