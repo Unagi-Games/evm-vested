@@ -235,17 +235,17 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
 
+        await tokenContract.approve(marketContract.address, NEW_SALE_PRICE, { from: buyer });
         try {
-          await tokenContract.send(
-            marketContract.address,
+          await marketContract.methods['acceptSale(uint64,uint256)'](
+            nft,
             INITIAL_SALE_PRICE,
-            web3.utils.padLeft(web3.utils.toHex(nft), 16),
             { from: buyer }
           );
           assert.fail("Accept the sale did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes(
-            "You must match the sale price to accept the sale"
+            "Sale price does not match"
           );
         }
       });
@@ -422,11 +422,11 @@ contract("Marketplace", (accounts) => {
         });
         await marketContract.destroySaleFrom(seller, nft, { from: seller });
 
+        await tokenContract.approve(marketContract.address, SALE_PRICE, { from: buyer });
         try {
-          await tokenContract.send(
-            marketContract.address,
+          await marketContract.methods["acceptSale(uint64,uint256)"](
+            nft,
             SALE_PRICE,
-            web3.utils.padLeft(web3.utils.toHex(nft), 16),
             { from: buyer }
           );
           assert.fail("Accept the sale did not throw.");
@@ -528,15 +528,16 @@ contract("Marketplace", (accounts) => {
         operator
       );
       await tokenContract.deposit(
+        operator,
+        "0x00000000000000000000000000000000000000000000000000000000000f424075696e74323536"
+      );
+      await tokenContract.deposit(
         buyer,
         "0x00000000000000000000000000000000000000000000000000000000000f424075696e74323536"
       );
 
       // operator is the operator of seller NFT
       await nftContract.setApprovalForAll(operator, true, { from: seller });
-
-      // operator is the operator of buyer token
-      await tokenContract.authorizeOperator(operator, { from: buyer });
     });
 
     beforeEach(async () => {
@@ -579,12 +580,11 @@ contract("Marketplace", (accounts) => {
         );
 
         // Accept the sale
-        await tokenContract.operatorSend(
-          buyer,
-          marketContract.address,
+        await tokenContract.approve(marketContract.address, SALE_PRICE, { from: operator });
+        await marketContract.methods["acceptSale(uint64,uint256,address)"](
+          nft,
           SALE_PRICE,
-          web3.utils.padLeft(web3.utils.toHex(nft), 16),
-          "0x0",
+          buyer,
           { from: operator }
         );
         const saleAcceptedEvents = await marketContract.getPastEvents(
@@ -633,18 +633,18 @@ contract("Marketplace", (accounts) => {
         NEW_SALE_PRICE
       );
 
+      await tokenContract.approve(marketContract.address, NEW_SALE_PRICE, { from: buyer });
       // Try to buy at initial price should throw
       try {
-        await tokenContract.send(
-          marketContract.address,
+        await marketContract.methods["acceptSale(uint64,uint256)"](
+          nft,
           INITIAL_SALE_PRICE,
-          web3.utils.padLeft(web3.utils.toHex(nft), 16),
           { from: buyer }
         );
         assert.fail("Accept the sale did not throw.");
       } catch (e: any) {
         expect(e.message).to.includes(
-          "You must match the sale price to accept the sale"
+          "Sale price does not match"
         );
       }
     });

@@ -31,7 +31,7 @@ contract("DistributionManager", (accounts) => {
       mgcContract.address,
       nfChamp.address
     );
-    await champContract.authorizeOperator(distributionContract.address);
+    await champContract.approve(distributionContract.address, '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
     await mgcContract.grantRole(
       await mgcContract.MINT_ROLE(),
       distributionContract.address

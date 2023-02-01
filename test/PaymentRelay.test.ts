@@ -47,7 +47,7 @@ contract("PaymentRelay", (accounts) => {
       const amount = "1000";
 
       before(async function () {
-        await champContract.approve(paymentRelayContract.address, amount);
+        await champContract.approve(paymentRelayContract.address, amount, { from: sender });
         await paymentRelayContract.execPayment(
           champContract.address,
           amount,
@@ -71,7 +71,7 @@ contract("PaymentRelay", (accounts) => {
 
       it("Should block payment duplication", async function () {
         try {
-          await champContract.approve(paymentRelayContract.address, amount);
+          await champContract.approve(paymentRelayContract.address, amount, { from: sender });
           await paymentRelayContract.execPayment(
             champContract.address,
             amount,
@@ -89,7 +89,7 @@ contract("PaymentRelay", (accounts) => {
         const ANY_UID = web3.utils.keccak256("ANY_UID");
 
         try {
-          await champContract.approve(paymentRelayContract.address, amount);
+          await champContract.approve(paymentRelayContract.address, amount, { from: sender });
           await paymentRelayContract.execPayment(
             champContract.address,
             amount,

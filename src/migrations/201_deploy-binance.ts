@@ -21,7 +21,6 @@ import {
   BINANCE_UNAGI_MINTER_BCI,
 } from "../config";
 
-const ERC777Proxy = artifacts.require("ERC777Proxy");
 const UltimateChampionsNFT = artifacts.require("UltimateChampionsNFT");
 const ChampMarketplace = artifacts.require("ChampMarketplace");
 const DistributionManager = artifacts.require("DistributionManager");
@@ -62,12 +61,6 @@ module.exports =
     await ultimateChampionsNFT.renounceRole(MINT_ROLE, rootAccount);
 
     //////////////////////////////////////////////////////////////
-    // Deploy ERC777Proxy for ERC777 compatibility
-    //////////////////////////////////////////////////////////////
-    await deployer.deploy(ERC777Proxy, CHAMP_TOKEN_BINANCE);
-    const erc777Proxy = await ERC777Proxy.deployed();
-
-    //////////////////////////////////////////////////////////////
     // Deploy marketplace
     //////////////////////////////////////////////////////////////
     await validateImplementation(ChampMarketplace as any, {
@@ -75,10 +68,9 @@ module.exports =
     });
     const champMarketplace = (await deployProxy(
       ChampMarketplace as any,
-      [erc777Proxy.address, ultimateChampionsNFT.address],
+      [CHAMP_TOKEN_BINANCE, ultimateChampionsNFT.address],
       { deployer: deployer as any }
     )) as ChampMarketplaceInstance;
-    await champMarketplace.approveERC777Proxy();
     await champMarketplace.setMarketplaceFeesReceiver(
       "0xa6A47E2Ad1dC0680308B16731285a8F1476473C8"
     );
@@ -137,8 +129,7 @@ module.exports =
       BINANCE_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
     await paymentRelay.grantRole(RECEIVER_ROLE, PAYMENT_RECEIVER);
-    await paymentRelay.grantRole(TOKEN_ROLE, erc777Proxy.address);
-    await paymentRelay.approveERC777Proxy(erc777Proxy.address);
+    await paymentRelay.grantRole(TOKEN_ROLE, CHAMP_TOKEN_BINANCE);
     await paymentRelay.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
     await paymentRelay.renounceRole(TOKEN_ROLE, rootAccount);
     await paymentRelay.renounceRole(RECEIVER_ROLE, rootAccount);

@@ -60,30 +60,6 @@ contract("Marketplace", (accounts) => {
         expect(await marketContract.hasOption(buyer, nft)).to.be.false;
       });
 
-      it("Prevents user to set an option for someone else", async () => {
-        await nftContract.approve(marketContract.address, nft, {
-          from: seller,
-        });
-        await marketContract.createSaleFrom(seller, nft, 1, {
-          from: seller,
-        });
-        await marketContract.grantRole(
-          await marketContract.OPTION_ROLE(),
-          seller
-        );
-
-        try {
-          await marketContract.setOption(buyer, nft, { from: seller });
-          assert.fail("setOption did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes(
-            "Only an authorized operator is allowed"
-          );
-        }
-
-        expect(await marketContract.hasOption(seller, nft)).to.be.false;
-      });
-
       it("Prevents an other buyer to accept a sale", async () => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
@@ -204,8 +180,8 @@ contract("Marketplace", (accounts) => {
         );
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        await tokenContract.approve(marketContract.address, 1);
-        await marketContract.methods["acceptSale(uint64,uint256)"](nft, 1);
+        await tokenContract.approve(marketContract.address, 1, { from: buyer });
+        await marketContract.methods["acceptSale(uint64,uint256)"](nft, 1, { from: buyer });
 
         expect(await marketContract.hasOption(buyer, nft)).to.be.false;
       });
@@ -224,8 +200,8 @@ contract("Marketplace", (accounts) => {
         await marketContract.setOption(buyer, nft, { from: buyer });
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        await tokenContract.approve(marketContract.address, 1);
-        await marketContract.methods["acceptSale(uint64,uint256)"](nft, 1);
+        await tokenContract.approve(marketContract.address, 1, { from: buyer });
+        await marketContract.methods["acceptSale(uint64,uint256)"](nft, 1, { from: buyer });
 
         await nftContract.approve(marketContract.address, nft, {
           from: buyer,
@@ -277,10 +253,10 @@ contract("Marketplace", (accounts) => {
         );
         await marketContract.setOption(buyer, nft, { from: buyer });
 
-        await tokenContract.approve(marketContract.address, 1);
+        await tokenContract.approve(marketContract.address, 1, { from: buyer });
         const transaction = await marketContract.methods[
           "acceptSale(uint64,uint256)"
-        ](nft, 1);
+        ](nft, 1, { from: buyer });
 
         const [event] = await marketContract.getPastEvents("OptionSet", {
           fromBlock: transaction.receipt.blockNumber,

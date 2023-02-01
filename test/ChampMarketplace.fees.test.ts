@@ -157,12 +157,12 @@ contract("Marketplace", (accounts) => {
           });
 
           // Accept the sale
-          await tokenContract.send(
+          await tokenContract.approve(
             marketContract.address,
             price,
-            web3.utils.padLeft(web3.utils.toHex(nft), 16),
             { from: buyer }
           );
+          await marketContract.methods["acceptSale(uint64,uint256)"](nft, price, { from: buyer });
 
           // Check final state
           expect(
