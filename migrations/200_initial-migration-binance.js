@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/200_initial-migration-binance")(web3);

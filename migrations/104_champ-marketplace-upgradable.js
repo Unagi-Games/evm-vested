@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/104_champ-marketplace-upgradable")(web3);

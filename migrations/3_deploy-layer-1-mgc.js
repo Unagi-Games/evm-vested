@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/3_deploy-layer-1-mgc")(web3);

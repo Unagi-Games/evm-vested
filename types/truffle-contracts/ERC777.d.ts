@@ -371,7 +371,7 @@ export interface ERC777Instance extends Truffle.ContractInstance {
   ): Promise<BN>;
 
   /**
-   * See {IERC20-approve}. Note that accounts cannot have allowance issued by their operators.
+   * See {IERC20-approve}. NOTE: If `value` is the maximum `uint256`, the allowance is not updated on `transferFrom`. This is semantically equivalent to an infinite approval. Note that accounts cannot have allowance issued by their operators.
    */
   approve: {
     (
@@ -397,7 +397,7 @@ export interface ERC777Instance extends Truffle.ContractInstance {
   };
 
   /**
-   * See {IERC20-transferFrom}. Note that operator and allowance concepts are orthogonal: operators cannot call `transferFrom` (unless they have allowance), and accounts with allowance cannot call `operatorSend` (unless they are operators). Emits {Sent}, {IERC20-Transfer} and {IERC20-Approval} events.
+   * See {IERC20-transferFrom}. NOTE: Does not update the allowance if the current allowance is the maximum `uint256`. Note that operator and allowance concepts are orthogonal: operators cannot call `transferFrom` (unless they have allowance), and accounts with allowance cannot call `operatorSend` (unless they are operators). Emits {Sent}, {IERC20-Transfer} and {IERC20-Approval} events.
    */
   transferFrom: {
     (
@@ -680,7 +680,7 @@ export interface ERC777Instance extends Truffle.ContractInstance {
     ): Promise<BN>;
 
     /**
-     * See {IERC20-approve}. Note that accounts cannot have allowance issued by their operators.
+     * See {IERC20-approve}. NOTE: If `value` is the maximum `uint256`, the allowance is not updated on `transferFrom`. This is semantically equivalent to an infinite approval. Note that accounts cannot have allowance issued by their operators.
      */
     approve: {
       (
@@ -706,7 +706,7 @@ export interface ERC777Instance extends Truffle.ContractInstance {
     };
 
     /**
-     * See {IERC20-transferFrom}. Note that operator and allowance concepts are orthogonal: operators cannot call `transferFrom` (unless they have allowance), and accounts with allowance cannot call `operatorSend` (unless they are operators). Emits {Sent}, {IERC20-Transfer} and {IERC20-Approval} events.
+     * See {IERC20-transferFrom}. NOTE: Does not update the allowance if the current allowance is the maximum `uint256`. Note that operator and allowance concepts are orthogonal: operators cannot call `transferFrom` (unless they have allowance), and accounts with allowance cannot call `operatorSend` (unless they are operators). Emits {Sent}, {IERC20-Transfer} and {IERC20-Approval} events.
      */
     transferFrom: {
       (

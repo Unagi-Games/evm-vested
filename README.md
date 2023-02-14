@@ -71,18 +71,11 @@ Run the following command to migrate the contracts.
 # Migrate on your local evm emulator
 make migrate-dev
 
-# Migrate on BSC Testnet
-make migrate-testnet-bsc
+# Migrate on Ethereum testnet (Goerli)
+make migrate-testnet-goerli
 
-# Migrate on BSC
-make migrate-bsc
-```
-
-## Deployment
-
-Run the following command to migrate the contracts to the EVM provider
-```bash
-make migrate-bsc
+# Migrate on Ethereum
+make migrate-ethereum
 ```
 
 ## Troubleshooting

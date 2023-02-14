@@ -71,22 +71,22 @@ export interface IAccessControlInstance extends Truffle.ContractInstance {
    */
   grantRole: {
     (
-      role: string,
+      romle: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      role: string,
+      romle: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      role: string,
+      romle: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      role: string,
+      romle: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
@@ -167,22 +167,22 @@ export interface IAccessControlInstance extends Truffle.ContractInstance {
      */
     grantRole: {
       (
-        role: string,
+        romle: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        role: string,
+        romle: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        role: string,
+        romle: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        role: string,
+        romle: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;

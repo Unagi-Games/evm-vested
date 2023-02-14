@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/103_deploy-payment-relay")(web3);

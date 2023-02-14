@@ -14,13 +14,21 @@ test: ## Run truffle tests
 migrate-dev: ## Migrate Solidity SmartContracts to development EVM emulator
 	@docker-compose run --rm --no-deps evm-contracts npm run migrate:dev
 
-.PHONY: migrate-testnet-bsc
-migrate-testnet-bsc: ## Migrate Solidity SmartContracts to Testnet BSC
-	@docker-compose run --rm --no-deps evm-contracts npm run migrate:testnet-bsc
+.PHONY: migrate-testnet-polygon
+migrate-testnet-polygon: ## Migrate Solidity SmartContracts to Testnet Polygon
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:testnet-polygon
 
-.PHONY: migrate-bsc
-migrate-bsc: ## Migrate Solidity SmartContracts to BSC
-	@docker-compose run --rm --no-deps evm-contracts npm run migrate:bsc
+.PHONY: migrate-l2
+migrate-l2: ## Migrate Solidity SmartContracts to L2 Polygon
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:layer-2
+
+.PHONY: migrate-testnet-goerli
+migrate-testnet-goerli: ## Migrate Solidity SmartContracts to Testnet Ethereum Goerli
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:testnet-goerli
+
+.PHONY: migrate-l1
+migrate-l1: ## Migrate Solidity SmartContracts to L1 Ethereum
+	@docker-compose run --rm --no-deps evm-contracts npm run migrate:layer-1
 
 .PHONY: format
 format: ## Format typescript code with prettier
@@ -33,7 +41,7 @@ clean: ## Clean dependencies and build
 	@docker-compose run --rm --no-deps evm-contracts rm -rf types/*
 
 .PHONY: evm-emulator
-evm-emulator: ## Start EVM Emulator forked from Binance Smart Chain
+evm-emulator: ## Start EVM Emulator forked from Polygon Smart Chain
 	@docker-compose up evm-emulator
 
 .PHONY: help
