@@ -222,10 +222,6 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
 
         delete _sales[tokenId];
 
-        if (getReservedOffer(tokenId) != address(0)) {
-            _unsetReservedOffer(tokenId);
-        }
-
         emit SaleDestroyed(tokenId, nftOwner);
     }
 
