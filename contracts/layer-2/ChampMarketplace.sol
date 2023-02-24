@@ -32,6 +32,11 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
  * The fees is editable by FEE_MANAGER_ROLE.
  * The fee receiver is editable by FEE_MANAGER_ROLE.
  *
+ *
+ * A NFT owner also has the option to set, or unset a reserved offer on their existing NFT
+ * sales through `setReservedOffer`. This ensures only a single CHAMP holder,
+ * approved by the NFT owner, can accept the sale.
+ *
  * For off-chain payments, an option can be set on a sale.
  * Options are restricted to only one per sale at any time.
  * Options are rate limited per sale.
@@ -322,7 +327,11 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * @param tokenId the ID of the NFT to check for a reserved offer
      * @return true if the given address has a reserved offer on the sale, or false if no reservation is set or if the reserve is held by a different address
      */
-    function hasReservedOffer(address from, uint64 tokenId) public view returns (bool) {
+    function hasReservedOffer(address from, uint64 tokenId)
+        public
+        view
+        returns (bool)
+    {
         return _reservedOffers[tokenId] == from;
     }
 
@@ -482,7 +491,10 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
             "ChampMarketplace: An option exists on this sale"
         );
         address nftOwner = _NFCHAMP_CONTRACT.ownerOf(tokenId);
-        require(from != nftOwner, "ChampMarketplace: Can not reserve sale for token owner.");
+        require(
+            from != nftOwner,
+            "ChampMarketplace: Can not reserve sale for token owner."
+        );
         require(
             nftOwner == msg.sender ||
                 _NFCHAMP_CONTRACT.isApprovedForAll(nftOwner, msg.sender),
@@ -492,7 +504,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         _reservedOffers[tokenId] = from;
 
         emit ReservedOfferSet(tokenId, from);
-    } 
+    }
 
     /**
      * Returns true if the given address is allowed to accept the sale of the given NFT.
@@ -507,7 +519,9 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         view
         returns (bool)
     {
-        return _reservedOffers[tokenId] == address(0) ||  _reservedOffers[tokenId] == from;
+        return
+            _reservedOffers[tokenId] == address(0) ||
+            _reservedOffers[tokenId] == from;
     }
 
     /**
@@ -570,7 +584,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * @dev Unset a reserved offer for a given NFT.
      *
      * Emits a {ReservedOfferSet} event.
-     * 
+     *
      * Requirements:
      *
      * - Reserved offer must exist for the given tokenId.
@@ -672,7 +686,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         if (hasOption(nftReceiver, tokenId)) {
             _unsetOption(nftReceiver, tokenId);
         }
-        if (getReservedOffer(tokenId) != address(0)) {
+        if (hasReservedOffer(nftReceiver, tokenId)) {
             _unsetReservedOffer(tokenId);
         }
 
