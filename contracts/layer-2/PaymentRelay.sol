@@ -58,10 +58,10 @@ contract PaymentRelay is AccessControl {
     function getPayment(bytes32 UID, address from)
         external
         view
-        returns (address, uint256)
+        returns (address, uint256, bool)
     {
         Payment memory payment = _getPayment(UID, from);
-        return (payment.token, payment.amount);
+        return (payment.token, payment.amount, payment.exec);
     }
 
     function _getPayment(bytes32 UID, address from)
