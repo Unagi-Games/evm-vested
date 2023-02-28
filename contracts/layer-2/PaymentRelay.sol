@@ -18,10 +18,15 @@ contract PaymentRelay is AccessControl {
     bytes32 public constant TOKEN_ROLE = keccak256("TOKEN_ROLE");
     bytes32 public constant RECEIVER_ROLE = keccak256("RECEIVER_ROLE");
 
+    bytes32 public constant RESERVED_STATE = keccak256("RESERVED");
+    bytes32 public constant EXECUTED_STATE = keccak256("EXECUTED");
+    bytes32 public constant REFUNDED_STATE = keccak256("REFUNDED");
+
+
     struct Payment {
         address token;
         uint256 amount;
-        bool exec;
+        bytes32 state;
     }
 
     // (keccak256 UID => payment) mapping of payments
@@ -83,9 +88,14 @@ contract PaymentRelay is AccessControl {
             "PaymentRelay: Payment already processed or reserved"
         );
 
-        _payments[getPaymentKey(UID, from)] = Payment(token, amount, false);
+        _payments[getPaymentKey(UID, from)] = Payment(token, amount, RESERVED_STATE);
+
+        IERC20 tokenContract = IERC20(_payments[getPaymentKey(UID, from)].token);
+        tokenContract.safeTransferFrom(msg.sender, address(this), _payments[getPaymentKey(UID, from)].amount);
     }
 
+    // Places msg.sender funds under escrow
+    // Can only be called by wallet owner
     function reservePayment(
         address tokenAddress,
         uint256 amount,
@@ -102,6 +112,11 @@ contract PaymentRelay is AccessControl {
         emit PaymentReserved(UID, msg.sender, tokenAddress, amount);
     }
 
+    // Can only be called by opeartor
+    function refundPayment() external {}
+
+    // Forwards msg.sender escrow funds to @forwardTo
+    // Can be called by operator and wallet owner
     function execPayment(
         bytes32 UID,
         address forwardTo
@@ -114,7 +129,7 @@ contract PaymentRelay is AccessControl {
 
         Payment storage payment = _payments[getPaymentKey(UID, msg.sender)];
         IERC20 tokenContract = IERC20(payment.token);
-        tokenContract.safeTransferFrom(msg.sender, forwardTo, payment.amount);
+        tokenContract.safeTransferFrom(address(this), forwardTo, payment.amount);
 
         payment.exec = true;
 
