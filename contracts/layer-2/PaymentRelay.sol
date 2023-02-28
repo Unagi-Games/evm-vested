@@ -9,19 +9,32 @@ import "solidity-bytes-utils/contracts/BytesLib.sol";
 
 /**
  * @title PaymentRelay
- * @dev Allow to sent payment with offchain triggers only once.
+ * @dev Allows to sent payment with offchain triggers through a two-stage payment flow. This is intended
+ * to allow flow for payment refunds.
+ *
+ * The payment flow is as follows:
+ * 1 - Funds owner calls `reservePayment`, placing his funds in escrow and creating a new payment reservation;
+ * 2 - Funds owner, or authorized operator, calls `execPayment` to forward the funds to an approved recipient;
+ * 3 - In case the payment's offchain transaction fails, an authorized operator calls `refundPayment` to trigger
+ * an escrow refund to the payment's originator
+ *
+ * For calling `execPayment` or `refundPayment`, the caller must have EXECUTION_ROLE, or REFUND_ROLE, respectively.
+ * `refundPayment` can only be called by and authorized operator besides the fund's owner.
+ *
  * @custom:security-contact security@unagi.ch
  */
 contract PaymentRelay is AccessControl {
     using SafeERC20 for IERC20;
 
+    bytes32 public constant EXECUTION_ROLE = keccak256("EXECUTION_ROLE");
+    bytes32 public constant REFUND_ROLE = keccak256("REFUND_ROLE");
     bytes32 public constant TOKEN_ROLE = keccak256("TOKEN_ROLE");
     bytes32 public constant RECEIVER_ROLE = keccak256("RECEIVER_ROLE");
 
-    bytes32 public constant RESERVED_STATE = keccak256("RESERVED");
-    bytes32 public constant EXECUTED_STATE = keccak256("EXECUTED");
-    bytes32 public constant REFUNDED_STATE = keccak256("REFUNDED");
-
+    // Possible states for an existing payment
+    bytes32 public constant PAYMENT_RESERVED = keccak256("PAYMENT_RESERVED");
+    bytes32 public constant PAYMENT_EXECUTED = keccak256("PAYMENT_EXECUTED");
+    bytes32 public constant PAYMENT_REFUNDED = keccak256("PAYMENT_REFUNDED");
 
     struct Payment {
         address token;
@@ -46,9 +59,13 @@ contract PaymentRelay is AccessControl {
         return keccak256(abi.encodePacked(UID, from));
     }
 
-    function isPaymentReserved(bytes32 UID, address from) public view returns (bool) {
+    function isPaymentReserved(bytes32 UID, address from)
+        public
+        view
+        returns (bool)
+    {
         Payment memory payment = _getPayment(UID, from);
-        return payment.amount > 0 && !payment.exec;
+        return payment.state == PAYMENT_RESERVED;
     }
 
     function isPaymentProcessed(bytes32 UID, address from)
@@ -57,16 +74,20 @@ contract PaymentRelay is AccessControl {
         returns (bool)
     {
         Payment memory payment = _getPayment(UID, from);
-        return payment.exec;
+        return payment.state == PAYMENT_EXECUTED;
     }
 
     function getPayment(bytes32 UID, address from)
         external
         view
-        returns (address, uint256, bool)
+        returns (
+            address,
+            uint256,
+            bytes32
+        )
     {
         Payment memory payment = _getPayment(UID, from);
-        return (payment.token, payment.amount, payment.exec);
+        return (payment.token, payment.amount, payment.state);
     }
 
     function _getPayment(bytes32 UID, address from)
@@ -77,6 +98,16 @@ contract PaymentRelay is AccessControl {
         return _payments[getPaymentKey(UID, from)];
     }
 
+    /**
+     * @dev Function transfers `amount` of `token` from `from` to account the contract account.
+     * A new Payment instance holding payment details is assigned to `UID`.
+     *
+     * Payment is placed in PAYMENT_RESERVED state.
+     *
+     * Requirements:
+     * - `from` must not have a reserved payment for `UID`
+     * - `from` must not have a processed payment for `UID`
+     */
     function _reservePayment(
         bytes32 UID,
         address from,
@@ -84,18 +115,30 @@ contract PaymentRelay is AccessControl {
         uint256 amount
     ) private {
         require(
-            !isPaymentReserved(UID, from) || !isPaymentProcessed(UID, from), 
+            !isPaymentReserved(UID, from) && !isPaymentProcessed(UID, from),
             "PaymentRelay: Payment already processed or reserved"
         );
 
-        _payments[getPaymentKey(UID, from)] = Payment(token, amount, RESERVED_STATE);
+        IERC20 tokenContract = IERC20(token);
+        tokenContract.safeTransferFrom(from, address(this), amount);
 
-        IERC20 tokenContract = IERC20(_payments[getPaymentKey(UID, from)].token);
-        tokenContract.safeTransferFrom(msg.sender, address(this), _payments[getPaymentKey(UID, from)].amount);
+        _payments[getPaymentKey(UID, from)] = Payment(
+            token,
+            amount,
+            PAYMENT_RESERVED
+        );
     }
 
-    // Places msg.sender funds under escrow
-    // Can only be called by wallet owner
+    /**
+     * Places the function caller's funds under escrow, creating a payment reservation
+     * that can be later executed.
+     *
+     * @dev See _reservePayment()
+     *
+     * Requirements:
+     * - `tokenAddress` must be approved token
+     * - `amount` must be greater than 0
+     */
     function reservePayment(
         address tokenAddress,
         uint256 amount,
@@ -112,30 +155,96 @@ contract PaymentRelay is AccessControl {
         emit PaymentReserved(UID, msg.sender, tokenAddress, amount);
     }
 
-    // Can only be called by opeartor
-    function refundPayment() external {}
+    /**
+     * Refunds an existing payment reservation. This operation can only be executed by
+     * an authorized operator. The payment owner can not refund their
+     * own payment reservation.
+     *
+     * @dev Function refunds a payment to `from`. Payment details are identified by `UID`
+     * and retrieved from storage.
+     *
+     * The payment is placed in PAYMENT_EXECUTED state.
+     *
+     * The function caller must have REFUND_ROLE and not be `from`.
+     *
+     * Requirements:
+     * - Payment to be refunded is currently reserved
+     * - Function caller is not refund recipient
+     * - Function caller has REFUND_ROLE
+     */
+    function refundPayment(address from, bytes32 UID) external {
+        require(
+            isPaymentReserved(UID, from),
+            "PaymentRelay: Payment reserve not found"
+        );
+        require(
+            msg.sender != from && hasRole(REFUND_ROLE, msg.sender),
+            "PaymentRelay: Caller does not have permission to refund payment"
+        );
 
-    // Forwards msg.sender escrow funds to @forwardTo
-    // Can be called by operator and wallet owner
+        Payment storage payment = _payments[getPaymentKey(UID, from)];
+        IERC20 tokenContract = IERC20(payment.token);
+        tokenContract.safeTransferFrom(address(this), from, payment.amount);
+
+        payment.state = PAYMENT_REFUNDED;
+
+        emit PaymentRefunded(UID, from, payment.token, payment.amount);
+    }
+
+    /**
+     * Forwards an existing payment reservation to an authorized recipient account.
+     *
+     * @dev Function executes an existing payment reservation on behalf of `from`.
+     * Payment details identified by `UID` are retrieved from storage and funds in escrow
+     * matching the reservation amount are forwarded to `forwardTo`.
+     *
+     * Payment is placed in PAYMENT_EXECUTED state.
+     *
+     * The function caller be either `from`, or have must have EXECUTION_ROLE.
+     *
+     * Requirements:
+     * - Payment to be executed is currently reserved
+     * - Function caller is the funds' owner, or has EXECUTION_ROLE
+     */
     function execPayment(
+        address from,
         bytes32 UID,
         address forwardTo
     ) external {
         require(
-            isPaymentReserved(UID, msg.sender),
-            "PaymentRelay: Payment reserve for message sender not found"
+            isPaymentReserved(UID, from),
+            "PaymentRelay: Payment reserve not found"
+        );
+        require(
+            msg.sender == from || hasRole(EXECUTION_ROLE, msg.sender),
+            "PaymentRelay: Caller does not have permission to execute payment"
         );
         _checkRole(RECEIVER_ROLE, forwardTo);
 
-        Payment storage payment = _payments[getPaymentKey(UID, msg.sender)];
+        Payment storage payment = _payments[getPaymentKey(UID, from)];
         IERC20 tokenContract = IERC20(payment.token);
-        tokenContract.safeTransferFrom(address(this), forwardTo, payment.amount);
+        tokenContract.safeTransferFrom(
+            address(this),
+            forwardTo,
+            payment.amount
+        );
 
-        payment.exec = true;
+        payment.state = PAYMENT_EXECUTED;
 
-        emit PaymentSent(UID, msg.sender, payment.token, payment.amount);
+        emit PaymentSent(UID, from, payment.token, payment.amount);
     }
 
-    event PaymentReserved(bytes32 UID, address from, address token, uint256 amount);
+    event PaymentReserved(
+        bytes32 UID,
+        address from,
+        address token,
+        uint256 amount
+    );
     event PaymentSent(bytes32 UID, address from, address token, uint256 amount);
+    event PaymentRefunded(
+        bytes32 UID,
+        address from,
+        address token,
+        uint256 amount
+    );
 }
