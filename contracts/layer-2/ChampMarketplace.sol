@@ -17,12 +17,17 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
  *
  * A NFT holder can create, update or delete a sale for one of his NFTs.
  * To create a sale, the NFT holder must give his approval for the ChampMarketplace
- * on the NFT he wants to sell. Then, the NFT holder must call the function
- * `createSaleFrom`. To remove the sale, the NFT holder must call the function
+ * on the NFT he wants to sell. Alternativly, a reserved sale can also be created, meaning
+ * only a specific CHAMP holder, approved by the NFT owner, can accept the sale. Then, the NFT holder
+ * must call the function `createSaleFrom`. To remove the sale, the NFT holder must call the function
  * `destroySaleFrom`.
  *
- * A CHAMP holder can accept a sale. To accept a sale, the CHAMP holder must
- * approve CHAMP tokens to the ChampMarketplace address and call the function `acceptSale`.
+ * A NFT holder can also update their existing sales through the `updateSaleFrom` function.
+ * This function allows the NFT holder to update a given sale's price and reserved offer.
+ *
+ * A CHAMP holder can accept a sale if the sale is either public, or has a reserved offer
+ * set for CHAMP holder. To accept a sale, the CHAMP holder must approve CHAMP tokens to
+ * the ChampMarketplace address and call the function `acceptSale`.
  *
  * Once a NFT is sold, a fee (readable through `marketplacePercentFees()`)
  * will be applied on the CHAMP payment and forwarded to the marketplace
@@ -31,7 +36,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
  *
  * The fees is editable by FEE_MANAGER_ROLE.
  * The fee receiver is editable by FEE_MANAGER_ROLE.
- *
  *
  * A NFT owner also has the option to set, or unset a reserved offer on their existing NFT
  * sales through `setReservedOffer`. This ensures only a single CHAMP holder,
@@ -64,7 +68,6 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
 
     bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
     bytes32 public constant OPTION_ROLE = keccak256("OPTION_ROLE");
-    bytes32 public constant RESERVE_ROLE = keccak256("RESERVE_ROLE");
 
     IERC20Upgradeable public _CHAMP_TOKEN_CONTRACT;
     IERC721Upgradeable public _NFCHAMP_CONTRACT;
@@ -78,7 +81,6 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     uint256 internal constant _RATE_LIMIT_TIME = 30 minutes;
     uint256 internal constant _RATE_LIMIT_MAX_RENEW = 2;
     uint256 internal constant _OPTION_TIME = 3 minutes;
-    uint256 internal constant _RESERVE_TIME_ = 3 days;
 
     // (nft ID => prices as CHAMP wei) mapping of sales
     mapping(uint64 => uint256) private _sales;
@@ -111,7 +113,6 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(FEE_MANAGER_ROLE, _msgSender());
         _setupRole(OPTION_ROLE, _msgSender());
-        _setupRole(RESERVE_ROLE, _msgSender());
     }
 
     /**
@@ -131,50 +132,31 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     }
 
     /**
-     * @dev Allow to create a sale for a given NFCHAMP ID at a given CHAMP wei price.
-     *
-     * Emits a {SaleCreated} event.
-     *
-     * Requirements:
-     *
-     * - tokenWeiPrice should be strictly positive.
-     * - from must be the NFCHAMP owner.
-     * - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner.
-     * - ChampMarketplace contract should be approved for the given NFCHAMP ID.
-     * - NFCHAMP ID should not be on sale.
+     * @dev See _createSaleFrom(address,uint64,uint256,address)
      */
     function createSaleFrom(
         address from,
         uint64 tokenId,
         uint256 tokenWeiPrice
     ) external {
+        _createSaleFrom(from, tokenId, tokenWeiPrice, address(0));
+    }
+
+    /**
+     * @dev See _createSaleFrom(address,uint64,uint256,address)
+     */
+    function createSaleFrom(
+        address from,
+        uint64 tokenId,
+        uint256 tokenWeiPrice,
+        address reserve
+    ) external {
         require(
-            tokenWeiPrice > 0,
-            "ChampMarketplace: Price should be strictly positive"
+            reserve != address(0),
+            "ChampMarketplace: Cant not create reserved sale for 0 address"
         );
 
-        address nftOwner = _NFCHAMP_CONTRACT.ownerOf(tokenId);
-        require(
-            nftOwner == from,
-            "ChampMarketplace: Create sale of token that is not own"
-        );
-        require(
-            nftOwner == msg.sender ||
-                _NFCHAMP_CONTRACT.isApprovedForAll(nftOwner, msg.sender),
-            "ChampMarketplace: Only the token owner or its operator are allowed to create a sale."
-        );
-        require(
-            _NFCHAMP_CONTRACT.getApproved(tokenId) == address(this),
-            "ChampMarketplace: Contract should be approved by the token owner."
-        );
-        require(
-            !hasSale(tokenId),
-            "ChampMarketplace: Sale already exists. Destroy the previous sale first."
-        );
-
-        _sales[tokenId] = tokenWeiPrice;
-
-        emit SaleCreated(tokenId, tokenWeiPrice, nftOwner);
+        _createSaleFrom(from, tokenId, tokenWeiPrice, reserve);
     }
 
     /**
@@ -227,6 +209,10 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
 
         delete _sales[tokenId];
 
+        if (_reservedOffers[tokenId] != address(0)) {
+            delete _reservedOffers[tokenId];
+        }
+
         emit SaleDestroyed(tokenId, nftOwner);
     }
 
@@ -240,6 +226,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * - NFCHAMP ID should be on sale.
      * - from can interact with the sale.
      * - tokenWeiPrice should be strictly positive.
+     * - reserve address must be different than from.
      * - from must be the NFCHAMP owner.
      * - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner.
      * - ChampMarketplace contract should be approved for the given NFCHAMP ID.
@@ -247,7 +234,8 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     function updateSaleFrom(
         address from,
         uint64 tokenId,
-        uint256 tokenWeiPrice
+        uint256 tokenWeiPrice,
+        address reserve
     ) external {
         require(hasSale(tokenId), "ChampMarketplace: Sale does not exists");
         require(
@@ -268,10 +256,15 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
             tokenWeiPrice > 0,
             "ChampMarketplace: Price should be strictly positive"
         );
+        require(
+            nftOwner != reserve,
+            "ChampMarketplace: Can not reserve sale for token owner."
+        );
 
         _sales[tokenId] = tokenWeiPrice;
+        _reservedOffers[tokenId] = reserve;
 
-        emit SaleUpdated(tokenId, tokenWeiPrice, nftOwner);
+        emit SaleUpdated(tokenId, tokenWeiPrice, nftOwner, reserve);
     }
 
     /**
@@ -284,22 +277,16 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     }
 
     /**
-     * @dev Returns the address for which the sale of the given NFT is reserved.
-     * If there's no reserved offer for the given NFT, the function returns the 0 address.
+     * @dev Returns the CHAMP wei price to buy a given NFCHAMP ID and the address for which
+     * the sale is reserved. If the returned address is the 0 address, that means the sale is public.
+     *
+     * If the sale does not exists, the function returns a wei price of 0.
      */
-    function getReservedOffer(uint64 tokenId) public view returns (address) {
-        return _reservedOffers[tokenId];
-    }
-
-    /**
-     * @dev Returns the CHAMP wei price to buy a given NFCHAMP ID.
-     * If the sale does not exists, the function returns 0.
-     */
-    function getSale(uint64 tokenId) public view returns (uint256) {
+    function getSale(uint64 tokenId) public view returns (uint256, address) {
         if (_NFCHAMP_CONTRACT.getApproved(tokenId) != address(this)) {
-            return 0;
+            return (0, address(0));
         }
-        return _sales[tokenId];
+        return (_sales[tokenId], _reservedOffers[tokenId]);
     }
 
     /**
@@ -339,7 +326,8 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * @dev Returns true if a tokenID is on sale.
      */
     function hasSale(uint64 tokenId) public view returns (bool) {
-        return getSale(tokenId) > 0;
+        (uint256 salePrice, ) = getSale(tokenId);
+        return salePrice > 0;
     }
 
     /**
@@ -470,51 +458,14 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     }
 
     /**
-     * @dev Set a reserved offer on a sale.
-     *
-     * Emits a {ReservedOfferSet} event.
-     *
-     * Requirements:
-     *
-     * - NFCHAMP ID must be on sale.
-     * - from can interact with the sale.
-     * - from can not be NFCHAMP owner.
-     * - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner.
-     */
-    function setReservedOffer(address from, uint64 tokenId)
-        public
-        onlyRole(RESERVE_ROLE)
-    {
-        require(hasSale(tokenId), "ChampMarketplace: Sale does not exists");
-        require(
-            canInteract(from, tokenId),
-            "ChampMarketplace: An option exists on this sale"
-        );
-        address nftOwner = _NFCHAMP_CONTRACT.ownerOf(tokenId);
-        require(
-            from != nftOwner,
-            "ChampMarketplace: Can not reserve sale for token owner."
-        );
-        require(
-            nftOwner == msg.sender ||
-                _NFCHAMP_CONTRACT.isApprovedForAll(nftOwner, msg.sender),
-            "ChampMarketplace: Only the token owner or its operator are allowed to set a reservation on a sale."
-        );
-
-        _reservedOffers[tokenId] = from;
-
-        emit ReservedOfferSet(tokenId, from);
-    }
-
-    /**
-     * Returns true if the given address is allowed to accept the sale of the given NFT.
+     * Returns true if the given address is allowed to accept a sale of the given NFT.
      * If no reservation is set on the sale, it means that anyone can buy the NFT.
      *
      * @param from the address to test for the permission to buy the NFT,
      * @param tokenId the ID of the NFT to check for buy permission
      * @return true if the given address is allowed to buy the NFT, or false if a reservation is set on the sale and held by a different address
      */
-    function canAcceptSale(address from, uint64 tokenId)
+    function isReservationOpenFor(address from, uint64 tokenId)
         public
         view
         returns (bool)
@@ -581,23 +532,63 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     }
 
     /**
-     * @dev Unset a reserved offer for a given NFT.
+     * @dev Allow to create a reserved sale for a given NFCHAMP ID at a given CHAMP wei price.
      *
-     * Emits a {ReservedOfferSet} event.
+     * Only the `reserve` address is allowed to accept the new sale offer. If `reserve` is the 0 address
+     * that means the sale is public and anyone can accept the sale offer.
+     *
+     * Emits a {SaleCreated} event.
      *
      * Requirements:
      *
-     * - Reserved offer must exist for the given tokenId.
+     * - tokenWeiPrice should be strictly positive.
+     * - reserve address must not be the same as NFCHAMP owner.
+     * - from must be the NFCHAMP owner.
+     * - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner.
+     * - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+     * - NFCHAMP ID should not be on sale.
      */
-    function _unsetReservedOffer(uint64 tokenId) private {
+    function _createSaleFrom(
+        address from,
+        uint64 tokenId,
+        uint256 tokenWeiPrice,
+        address reserve
+    ) private {
         require(
-            getReservedOffer(tokenId) != address(0),
-            "ChampMarketplace: No reserved offer set."
+            tokenWeiPrice > 0,
+            "ChampMarketplace: Price should be strictly positive"
         );
 
-        delete _reservedOffers[tokenId];
+        address nftOwner = _NFCHAMP_CONTRACT.ownerOf(tokenId);
+        require(
+            nftOwner != reserve,
+            "ChampMarketplace: Can not reserve sale for token owner."
+        );
+        require(
+            nftOwner == from,
+            "ChampMarketplace: Create sale of token that is not own"
+        );
+        require(
+            nftOwner == msg.sender ||
+                _NFCHAMP_CONTRACT.isApprovedForAll(nftOwner, msg.sender),
+            "ChampMarketplace: Only the token owner or its operator are allowed to create a sale."
+        );
+        require(
+            _NFCHAMP_CONTRACT.getApproved(tokenId) == address(this),
+            "ChampMarketplace: Contract should be approved by the token owner."
+        );
+        require(
+            !hasSale(tokenId),
+            "ChampMarketplace: Sale already exists. Destroy the previous sale first."
+        );
 
-        emit ReservedOfferSet(tokenId, address(0));
+        _sales[tokenId] = tokenWeiPrice;
+
+        if (reserve != address(0)) {
+            _reservedOffers[tokenId] = reserve;
+        }
+
+        emit SaleCreated(tokenId, tokenWeiPrice, nftOwner, reserve);
     }
 
     /**
@@ -624,7 +615,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         uint256 salePrice_,
         address nftReceiver
     ) private {
-        uint256 salePrice = getSale(tokenId);
+        (uint256 salePrice, ) = getSale(tokenId);
 
         //
         // 1.
@@ -640,7 +631,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
             "ChampMarketplace: An option exists on this sale"
         );
         require(
-            canAcceptSale(nftReceiver, tokenId),
+            isReservationOpenFor(nftReceiver, tokenId),
             "ChampMarketplace: A reservation exists for this sale"
         );
         require(
@@ -686,8 +677,8 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         if (hasOption(nftReceiver, tokenId)) {
             _unsetOption(nftReceiver, tokenId);
         }
-        if (hasReservedOffer(nftReceiver, tokenId)) {
-            _unsetReservedOffer(tokenId);
+        if (_reservedOffers[tokenId] != address(0)) {
+            delete _reservedOffers[tokenId];
         }
 
         emit SaleAccepted(tokenId, salePrice, seller, nftReceiver);
@@ -697,9 +688,19 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
 
     event MarketplaceFeesReceiverUpdated(address feesReceiver);
 
-    event SaleCreated(uint64 tokenId, uint256 tokenWeiPrice, address seller);
+    event SaleCreated(
+        uint64 tokenId,
+        uint256 tokenWeiPrice,
+        address seller,
+        address reserve
+    );
 
-    event SaleUpdated(uint64 tokenId, uint256 tokenWeiPrice, address seller);
+    event SaleUpdated(
+        uint64 tokenId,
+        uint256 tokenWeiPrice,
+        address seller,
+        address reserve
+    );
 
     event SaleAccepted(
         uint64 tokenId,
@@ -711,8 +712,6 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     event SaleDestroyed(uint64 tokenId, address seller);
 
     event OptionSet(uint64 tokenId, address buyer, uint256 until);
-
-    event ReservedOfferSet(uint64 tokenId, address buyer);
 
     uint256[50] __gap;
 }
