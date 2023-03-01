@@ -37,10 +37,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
  * The fees is editable by FEE_MANAGER_ROLE.
  * The fee receiver is editable by FEE_MANAGER_ROLE.
  *
- * A NFT owner also has the option to set, or unset a reserved offer on their existing NFT
- * sales through `setReservedOffer`. This ensures only a single CHAMP holder,
- * approved by the NFT owner, can accept the sale.
- *
  * For off-chain payments, an option can be set on a sale.
  * Options are restricted to only one per sale at any time.
  * Options are rate limited per sale.
