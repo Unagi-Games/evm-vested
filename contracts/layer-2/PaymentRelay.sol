@@ -26,8 +26,7 @@ import "solidity-bytes-utils/contracts/BytesLib.sol";
 contract PaymentRelay is AccessControl {
     using SafeERC20 for IERC20;
 
-    bytes32 public constant EXECUTION_ROLE = keccak256("EXECUTION_ROLE");
-    bytes32 public constant REFUND_ROLE = keccak256("REFUND_ROLE");
+    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant TOKEN_ROLE = keccak256("TOKEN_ROLE");
     bytes32 public constant RECEIVER_ROLE = keccak256("RECEIVER_ROLE");
 
@@ -74,7 +73,9 @@ contract PaymentRelay is AccessControl {
         returns (bool)
     {
         Payment memory payment = _getPayment(UID, from);
-        return payment.state == PAYMENT_EXECUTED;
+        return
+            payment.state == PAYMENT_EXECUTED ||
+            payment.state == PAYMENT_REFUNDED;
     }
 
     function getPayment(bytes32 UID, address from)
@@ -119,14 +120,14 @@ contract PaymentRelay is AccessControl {
             "PaymentRelay: Payment already processed or reserved"
         );
 
-        IERC20 tokenContract = IERC20(token);
-        tokenContract.safeTransferFrom(from, address(this), amount);
-
         _payments[getPaymentKey(UID, from)] = Payment(
             token,
             amount,
             PAYMENT_RESERVED
         );
+
+        IERC20 tokenContract = IERC20(token);
+        tokenContract.safeTransferFrom(from, address(this), amount);
     }
 
     /**
@@ -178,15 +179,16 @@ contract PaymentRelay is AccessControl {
             "PaymentRelay: Payment reserve not found"
         );
         require(
-            msg.sender != from && hasRole(REFUND_ROLE, msg.sender),
+            msg.sender != from && hasRole(OPERATOR_ROLE, msg.sender),
             "PaymentRelay: Caller does not have permission to refund payment"
         );
 
         Payment storage payment = _payments[getPaymentKey(UID, from)];
-        IERC20 tokenContract = IERC20(payment.token);
-        tokenContract.safeTransferFrom(address(this), from, payment.amount);
 
         payment.state = PAYMENT_REFUNDED;
+
+        IERC20 tokenContract = IERC20(payment.token);
+        tokenContract.safeTransferFrom(address(this), from, payment.amount);
 
         emit PaymentRefunded(UID, from, payment.token, payment.amount);
     }
@@ -216,20 +218,21 @@ contract PaymentRelay is AccessControl {
             "PaymentRelay: Payment reserve not found"
         );
         require(
-            msg.sender == from || hasRole(EXECUTION_ROLE, msg.sender),
+            msg.sender == from || hasRole(OPERATOR_ROLE, msg.sender),
             "PaymentRelay: Caller does not have permission to execute payment"
         );
         _checkRole(RECEIVER_ROLE, forwardTo);
 
         Payment storage payment = _payments[getPaymentKey(UID, from)];
+
+        payment.state = PAYMENT_EXECUTED;
+
         IERC20 tokenContract = IERC20(payment.token);
         tokenContract.safeTransferFrom(
             address(this),
             forwardTo,
             payment.amount
         );
-
-        payment.state = PAYMENT_EXECUTED;
 
         emit PaymentSent(UID, from, payment.token, payment.amount);
     }
