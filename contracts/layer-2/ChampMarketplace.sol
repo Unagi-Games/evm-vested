@@ -17,16 +17,17 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
  *
  * A NFT holder can create, update or delete a sale for one of his NFTs.
  * To create a sale, the NFT holder must give his approval for the ChampMarketplace
- * on the NFT he wants to sell. Alternativly, a reserved sale can also be created, meaning
- * only a specific CHAMP holder, approved by the NFT owner, can accept the sale. Then, the NFT holder
- * must call the function `createSaleFrom`. To remove the sale, the NFT holder must call the function
- * `destroySaleFrom`.
+ * on the NFT he wants to sell. Then, the NFT holder must call the function `createSaleFrom`.
+ * A reserved sale can also be created, meaning only a specific CHAMP holder, approved by
+ * the NFT owner, can accept the sale. To remove the sale, the NFT holder must call the
+ * function `destroySaleFrom`.
  *
  * A NFT holder can also update their existing sales through the `updateSaleFrom` function.
  * This function allows the NFT holder to update a given sale's price and reserved offer.
  *
  * A CHAMP holder can accept a sale if the sale is either public, or has a reserved offer
- * set for CHAMP holder. To accept a sale, the CHAMP holder must approve CHAMP tokens to
+ * set for CHAMP holder. The function `isReservationOpenFor` can be used to verify if a given CHAMP holder
+ * can accept a specifc sale. To accept a sale, the CHAMP holder must approve CHAMP tokens to
  * the ChampMarketplace address and call the function `acceptSale`.
  *
  * Once a NFT is sold, a fee (readable through `marketplacePercentFees()`)
@@ -304,7 +305,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
 
     /**
      * Returns true if the given address has a reserved offer on a sale of the specified NFT.
-     * If the sale has is not reserved for a specific buyer, it means that anyone can purchase the NFT.
+     * If the sale is not reserved for a specific buyer, it means that anyone can purchase the NFT.
      *
      * @param from the address to check for a reservation
      * @param tokenId the ID of the NFT to check for a reserved offer
@@ -603,7 +604,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * - NFCHAMP ID must be on sale.
      * - salePrice must match sale price.
      * - nftReceiver can interact with the sale.
-     * - nftReceiver can accept the sale.
+     * - sale reservation is open for nftReceiver.
      * - ChampMarketplace allowance must be greater than sale price.
      */
     function _acceptSale(
@@ -673,7 +674,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         if (hasOption(nftReceiver, tokenId)) {
             _unsetOption(nftReceiver, tokenId);
         }
-        if (_reservedOffers[tokenId] != address(0)) {
+        if (hasReservedOffer(nftReceiver, tokenId)) {
             delete _reservedOffers[tokenId];
         }
 
