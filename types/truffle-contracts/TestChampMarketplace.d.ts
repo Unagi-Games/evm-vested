@@ -104,9 +104,11 @@ export interface SaleCreated {
     tokenId: BN;
     tokenWeiPrice: BN;
     seller: string;
+    reserve: string;
     0: BN;
     1: BN;
     2: string;
+    3: string;
   };
 }
 
@@ -126,9 +128,11 @@ export interface SaleUpdated {
     tokenId: BN;
     tokenWeiPrice: BN;
     seller: string;
+    reserve: string;
     0: BN;
     1: BN;
     2: string;
+    3: string;
   };
 }
 
@@ -176,36 +180,6 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     weiPrice: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: BN; 1: BN }>;
-
-  /**
-   * Allow to create a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleCreated} event. Requirements: - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID. - NFCHAMP ID should not be on sale.
-   */
-  createSaleFrom: {
-    (
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      from: string,
-      tokenId: number | BN | string,
-      tokenWeiPrice: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
 
   /**
    * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
@@ -266,12 +240,12 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
   ): Promise<BN>;
 
   /**
-   * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
+   * Returns the CHAMP wei price to buy a given NFCHAMP ID and the address for which the sale is reserved. If the returned address is the 0 address, that means the sale is public. If the sale does not exists, the function returns a wei price of 0.
    */
   getSale(
     tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
+  ): Promise<{ 0: BN; 1: string }>;
 
   /**
    * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.
@@ -305,6 +279,17 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
    * @param tokenId the ID of the NFT to check for an option
    */
   hasOption(
+    from: string,
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
+  /**
+   * Returns true if the given address has a reserved offer on a sale of the specified NFT. If the sale is not reserved for a specific buyer, it means that anyone can purchase the NFT.
+   * @param from the address to check for a reservation
+   * @param tokenId the ID of the NFT to check for a reserved offer
+   */
+  hasReservedOffer(
     from: string,
     tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
@@ -349,6 +334,17 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
+
+  /**
+   * Returns true if the given address is allowed to accept a sale of the given NFT. If no reservation is set on the sale, it means that anyone can buy the NFT.
+   * @param from the address to test for the permission to buy the NFT,
+   * @param tokenId the ID of the NFT to check for buy permission
+   */
+  isReservationOpenFor(
+    from: string,
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
 
   /**
    * Getter for the marketplace fees receiver address.
@@ -493,31 +489,35 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
-   * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+   * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - reserve address must be different than from. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
    */
   updateSaleFrom: {
     (
       from: string,
       tokenId: number | BN | string,
       tokenWeiPrice: number | BN | string,
+      reserve: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
       from: string,
       tokenId: number | BN | string,
       tokenWeiPrice: number | BN | string,
+      reserve: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
       from: string,
       tokenId: number | BN | string,
       tokenWeiPrice: number | BN | string,
+      reserve: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
       from: string,
       tokenId: number | BN | string,
       tokenWeiPrice: number | BN | string,
+      reserve: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -553,36 +553,6 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
       weiPrice: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: BN; 1: BN }>;
-
-    /**
-     * Allow to create a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleCreated} event. Requirements: - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID. - NFCHAMP ID should not be on sale.
-     */
-    createSaleFrom: {
-      (
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        from: string,
-        tokenId: number | BN | string,
-        tokenWeiPrice: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
 
     /**
      * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
@@ -643,12 +613,12 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<BN>;
 
     /**
-     * Returns the CHAMP wei price to buy a given NFCHAMP ID. If the sale does not exists, the function returns 0.
+     * Returns the CHAMP wei price to buy a given NFCHAMP ID and the address for which the sale is reserved. If the returned address is the 0 address, that means the sale is public. If the sale does not exists, the function returns a wei price of 0.
      */
     getSale(
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
+    ): Promise<{ 0: BN; 1: string }>;
 
     /**
      * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.
@@ -682,6 +652,17 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
      * @param tokenId the ID of the NFT to check for an option
      */
     hasOption(
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
+    /**
+     * Returns true if the given address has a reserved offer on a sale of the specified NFT. If the sale is not reserved for a specific buyer, it means that anyone can purchase the NFT.
+     * @param from the address to check for a reservation
+     * @param tokenId the ID of the NFT to check for a reserved offer
+     */
+    hasReservedOffer(
       from: string,
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
@@ -726,6 +707,17 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
+
+    /**
+     * Returns true if the given address is allowed to accept a sale of the given NFT. If no reservation is set on the sale, it means that anyone can buy the NFT.
+     * @param from the address to test for the permission to buy the NFT,
+     * @param tokenId the ID of the NFT to check for buy permission
+     */
+    isReservationOpenFor(
+      from: string,
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
 
     /**
      * Getter for the marketplace fees receiver address.
@@ -870,31 +862,35 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
-     * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
+     * Allow to update a sale for a given NFCHAMP ID at a given CHAMP wei price. Emits a {SaleUpdated} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - tokenWeiPrice should be strictly positive. - reserve address must be different than from. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
      */
     updateSaleFrom: {
       (
         from: string,
         tokenId: number | BN | string,
         tokenWeiPrice: number | BN | string,
+        reserve: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
         from: string,
         tokenId: number | BN | string,
         tokenWeiPrice: number | BN | string,
+        reserve: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
         from: string,
         tokenId: number | BN | string,
         tokenWeiPrice: number | BN | string,
+        reserve: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
         from: string,
         tokenId: number | BN | string,
         tokenWeiPrice: number | BN | string,
+        reserve: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
@@ -951,6 +947,70 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
         tokenId: number | BN | string,
         salePrice: number | BN | string,
         nftReceiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * See _createSaleFrom(address,uint64,uint256,address)
+     */
+    "createSaleFrom(address,uint64,uint256)": {
+      (
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * See _createSaleFrom(address,uint64,uint256,address)
+     */
+    "createSaleFrom(address,uint64,uint256,address)": {
+      (
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        reserve: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        reserve: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        reserve: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        from: string,
+        tokenId: number | BN | string,
+        tokenWeiPrice: number | BN | string,
+        reserve: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
