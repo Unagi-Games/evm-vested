@@ -3,14 +3,15 @@ import {
   ChildChampTokenInstance,
   UltimateChampionsNFTInstance,
 } from "../types/truffle-contracts";
-import { SaleAccepted } from "../types/truffle-contracts/ChampMarketplace";
 import { NewChampMarketplace } from "./ChampMarketplace.service";
 
 const NFT = artifacts.require("UltimateChampionsNFT");
 const Token = artifacts.require("ChildChampToken");
 
+const ZeroAddress = "0x0000000000000000000000000000000000000000";
+
 contract("Marketplace", (accounts) => {
-  describe("as a user", () => {
+  describe.only("as a user", () => {
     const rootUser = accounts[0];
     const seller = accounts[1];
     const buyer = accounts[2];
@@ -68,7 +69,7 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
         const { receipt: createSaleReceipt } =
-          await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
             from: seller,
           });
         const createSaleEvent = createSaleReceipt.logs.find(
@@ -126,7 +127,7 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
           from: seller,
         });
 
@@ -155,7 +156,7 @@ contract("Marketplace", (accounts) => {
     describe("Sale creation", () => {
       it("Should require market to be approve by nft owner", async () => {
         try {
-          await marketContract.createSaleFrom(seller, nft, 1, { from: seller });
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, { from: seller });
           assert.fail("createSaleFrom() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes(
@@ -170,7 +171,7 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
         try {
-          await marketContract.createSaleFrom(notOwner, nft, 1, {
+          await marketContract['createSaleFrom(address,uint64,uint256)'](notOwner, nft, 1, {
             from: notOwner,
           });
           assert.fail("createSaleFrom() did not throw.");
@@ -185,7 +186,7 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
         try {
-          await marketContract.createSaleFrom(seller, nft, 1, {
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
             from: notOwner,
           });
           assert.fail("createSaleFrom() did not throw.");
@@ -201,7 +202,7 @@ contract("Marketplace", (accounts) => {
           from: seller,
         });
         try {
-          await marketContract.createSaleFrom(seller, nft, -1, {
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, -1, {
             from: seller,
           });
           assert.fail("createSaleFrom() did not throw.");
@@ -210,11 +211,32 @@ contract("Marketplace", (accounts) => {
         }
 
         try {
-          await marketContract.createSaleFrom(seller, nft, 0, { from: seller });
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 0, { from: seller });
           assert.fail("createSaleFrom() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("Price should be strictly positive");
         }
+      });
+
+      it("Should allow to set a reserved offer on the sale", async () => {
+        await nftContract.approve(marketContract.address, nft, {
+          from: seller,
+        });
+        const { receipt: createSaleReceipt } =
+          await marketContract['createSaleFrom(address,uint64,uint256,address)'](seller, nft, 100, buyer, {
+            from: seller,
+          });
+        
+        const createSaleEvent = createSaleReceipt.logs.find(
+          ({ event }) => event === "SaleCreated"
+        );
+        expect(createSaleEvent.args.reserved).to.equals(buyer);
+
+        const hasReservedOffer = await marketContract.hasReservedOffer(buyer, nft);
+        const { 1: reservedOffer } = await marketContract.getSale(nft);
+
+        expect(hasReservedOffer).to.be.true;
+        expect(reservedOffer).to.be.equal(buyer);
       });
     });
 
@@ -222,47 +244,61 @@ contract("Marketplace", (accounts) => {
       it("Should edit sale", async () => {
         const INITIAL_SALE_PRICE = 1;
         const NEW_SALE_PRICE = 100;
+        const reservedAddress = accounts[5];
 
         // Create the sale
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, INITIAL_SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, INITIAL_SALE_PRICE, {
           from: seller,
         });
 
-        await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, {
+        await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, reservedAddress, {
           from: seller,
         });
 
-        await tokenContract.approve(marketContract.address, NEW_SALE_PRICE, { from: buyer });
+        await tokenContract.approve(marketContract.address, NEW_SALE_PRICE, {
+          from: buyer,
+        });
+
         try {
-          await marketContract.methods['acceptSale(uint64,uint256)'](
+          await marketContract.methods["acceptSale(uint64,uint256)"](
             nft,
             INITIAL_SALE_PRICE,
             { from: buyer }
           );
           assert.fail("Accept the sale did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes(
-            "Sale price does not match"
+          expect(e.message).to.includes("Sale price does not match");
+        }
+
+        try {
+          await marketContract.methods["acceptSale(uint64,uint256)"](
+            nft,
+            NEW_SALE_PRICE,
+            { from: buyer }
           );
+          assert.fail("Accept the sale did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("A reservation exists for this sale");
         }
       });
 
       it("Should emit SaleUpdated event", async () => {
         const NEW_SALE_PRICE = 100;
+        const reservedAddress = accounts[5];
 
         // Create the sale
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, 1, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
           from: seller,
         });
 
         const { receipt: updateSaleReceipt } =
-          await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, {
+          await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, reservedAddress, {
             from: seller,
           });
         const updateSaleEvent = updateSaleReceipt.logs.find(
@@ -272,7 +308,8 @@ contract("Marketplace", (accounts) => {
         expect(updateSaleEvent.args.tokenId.toNumber()).to.equals(nft);
         expect(updateSaleEvent.args.tokenWeiPrice.toNumber()).to.equals(
           NEW_SALE_PRICE
-        );
+          );
+        expect(updateSaleEvent.args.reserved).to.equals(reservedAddress);
       });
 
       it("Should require user to be the nft owner", async () => {
@@ -280,13 +317,13 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, 1, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
           from: seller,
         });
 
         const notOwner = accounts[5];
         try {
-          await marketContract.updateSaleFrom(notOwner, nft, 2, {
+          await marketContract.updateSaleFrom(notOwner, nft, 2, ZeroAddress, {
             from: notOwner,
           });
           assert.fail("updateSaleFrom() did not throw.");
@@ -300,12 +337,12 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, 1, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
           from: seller,
         });
 
         try {
-          await marketContract.updateSaleFrom(seller, nft, -1, {
+          await marketContract.updateSaleFrom(seller, nft, -1, ZeroAddress, {
             from: seller,
           });
           assert.fail("updateSaleFrom() did not throw.");
@@ -314,7 +351,7 @@ contract("Marketplace", (accounts) => {
         }
 
         try {
-          await marketContract.updateSaleFrom(seller, nft, 0, { from: seller });
+          await marketContract.updateSaleFrom(seller, nft, 0, ZeroAddress, { from: seller });
           assert.fail("createSaleFrom() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("Price should be strictly positive");
@@ -329,7 +366,7 @@ contract("Marketplace", (accounts) => {
           await nftContract.approve(marketContract.address, nft, {
             from: seller,
           });
-          await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
             from: seller,
           });
           try {
@@ -348,6 +385,39 @@ contract("Marketplace", (accounts) => {
             expect(e.message).to.includes("Allowance is lower than sale price");
           }
         });
+
+        it("Should require the sale to have an open reservation for buyer", async () => {
+          const SALE_PRICE = 100;
+          const reservedAddress = accounts[5];
+          await nftContract.approve(marketContract.address, nft, {
+            from: seller,
+          });
+          await marketContract['createSaleFrom(address,uint64,uint256,address)'](seller, nft, SALE_PRICE, reservedAddress, {
+            from: seller,
+          });
+
+          const isReservationOpenForBuyer = await marketContract.isReservationOpenFor(buyer, nft);
+          const isReservationOpenForReservedAddr = await marketContract.isReservationOpenFor(reservedAddress, nft);
+
+          expect(isReservationOpenForBuyer).to.be.false;
+          expect(isReservationOpenForReservedAddr).to.be.true;
+
+          try {
+            await tokenContract.approve(
+              marketContract.address,
+              SALE_PRICE,
+              { from: buyer }
+            );
+            await marketContract.methods["acceptSale(uint64,uint256)"](
+              nft,
+              SALE_PRICE,
+              { from: buyer }
+            );
+            assert.fail("Accept the sale did not throw.");
+          } catch (e: any) {
+            expect(e.message).to.includes("A reservation exists for this sale");
+          }
+        });
       });
     });
 
@@ -357,7 +427,7 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
           from: seller,
         });
         const { receipt: destroySaleReceipt } =
@@ -374,7 +444,7 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
           from: seller,
         });
 
@@ -396,7 +466,7 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
           from: seller,
         });
 
@@ -417,12 +487,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
           from: seller,
         });
         await marketContract.destroySaleFrom(seller, nft, { from: seller });
 
-        await tokenContract.approve(marketContract.address, SALE_PRICE, { from: buyer });
+        await tokenContract.approve(marketContract.address, SALE_PRICE, {
+          from: buyer,
+        });
         try {
           await marketContract.methods["acceptSale(uint64,uint256)"](
             nft,
@@ -437,29 +509,31 @@ contract("Marketplace", (accounts) => {
     });
 
     describe("Sale getter", () => {
-      it("Should return sale for on sale NFT", async () => {
+      it("Should return sale price and reservation for on sale NFT", async () => {
         const SALE_PRICE = 100;
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256,address)'](seller, nft, SALE_PRICE, buyer, {
           from: seller,
         });
 
-        expect((await marketContract.getSale(nft)).toNumber()).to.equals(
+        const { 0: salePrice, 1: reservation }= await marketContract.getSale(nft);
+        expect(salePrice.toNumber()).to.equals(
           SALE_PRICE
         );
+        expect(reservation).to.equals(buyer);
       });
 
       it("Should returns 0 for NFT not on sale", async () => {
-        expect((await marketContract.getSale(nft)).toNumber()).to.equals(0);
+        expect((await marketContract.getSale(nft))[0].toNumber()).to.equals(0);
       });
 
       it("Should returns 0 for NFT on sale but not approved", async () => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, "1", {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, "1", {
           from: seller,
         });
         await nftContract.approve(
@@ -468,7 +542,7 @@ contract("Marketplace", (accounts) => {
           { from: seller }
         );
 
-        expect((await marketContract.getSale(nft)).toNumber()).to.equals(0);
+        expect((await marketContract.getSale(nft))[0].toNumber()).to.equals(0);
       });
 
       it("Should return true for on sale NFT", async () => {
@@ -476,7 +550,7 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
           from: seller,
         });
 
@@ -491,7 +565,7 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract.createSaleFrom(seller, nft, "1", {
+        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, "1", {
           from: seller,
         });
         await nftContract.approve(
@@ -567,7 +641,7 @@ contract("Marketplace", (accounts) => {
           from: operator,
         });
         const { receipt: createSaleReceipt } =
-          await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
             from: operator,
           });
         const createSaleEvent = createSaleReceipt.logs.find(
@@ -580,7 +654,9 @@ contract("Marketplace", (accounts) => {
         );
 
         // Accept the sale
-        await tokenContract.approve(marketContract.address, SALE_PRICE, { from: operator });
+        await tokenContract.approve(marketContract.address, SALE_PRICE, {
+          from: operator,
+        });
         await marketContract.methods["acceptSale(uint64,uint256,address)"](
           nft,
           SALE_PRICE,
@@ -614,15 +690,16 @@ contract("Marketplace", (accounts) => {
     it("Update sale", async () => {
       const INITIAL_SALE_PRICE = 1;
       const NEW_SALE_PRICE = 100;
+      const reservedAddress = accounts[5];
 
       await nftContract.approve(marketContract.address, nft, {
         from: operator,
       });
-      await marketContract.createSaleFrom(seller, nft, INITIAL_SALE_PRICE, {
+      await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, INITIAL_SALE_PRICE, {
         from: operator,
       });
       const { receipt: updateSaleReceipt } =
-        await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, {
+        await marketContract.updateSaleFrom(seller, nft, NEW_SALE_PRICE, reservedAddress, {
           from: operator,
         });
       const saleUpdatedEvent = updateSaleReceipt.logs.find(
@@ -632,8 +709,14 @@ contract("Marketplace", (accounts) => {
       expect(saleUpdatedEvent.args.tokenWeiPrice.toNumber()).to.equals(
         NEW_SALE_PRICE
       );
+      expect(saleUpdatedEvent.args.reserved).to.equals(
+        reservedAddress
+      );
 
-      await tokenContract.approve(marketContract.address, NEW_SALE_PRICE, { from: buyer });
+      await tokenContract.approve(marketContract.address, NEW_SALE_PRICE, {
+        from: buyer,
+      });
+
       // Try to buy at initial price should throw
       try {
         await marketContract.methods["acceptSale(uint64,uint256)"](
@@ -643,9 +726,18 @@ contract("Marketplace", (accounts) => {
         );
         assert.fail("Accept the sale did not throw.");
       } catch (e: any) {
-        expect(e.message).to.includes(
-          "Sale price does not match"
+        expect(e.message).to.includes("Sale price does not match");
+      }
+      // Try to buy with account other than `reservedAddress` should throw
+      try {
+        await marketContract.methods["acceptSale(uint64,uint256)"](
+          nft,
+          NEW_SALE_PRICE,
+          { from: buyer }
         );
+        assert.fail("Accept the sale did not throw.");
+      } catch (e: any) {
+        expect(e.message).to.includes("A reservation exists for this sale");
       }
     });
 
@@ -655,7 +747,7 @@ contract("Marketplace", (accounts) => {
       await nftContract.approve(marketContract.address, nft, {
         from: operator,
       });
-      await marketContract.createSaleFrom(seller, nft, SALE_PRICE, {
+      await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, SALE_PRICE, {
         from: operator,
       });
       const { receipt: destroySaleReceipt } =
