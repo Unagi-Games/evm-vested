@@ -65,22 +65,22 @@ export interface IAccessControlEnumerableInstance
    */
   grantRole: {
     (
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      romle: string,
+      role: string,
       account: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
@@ -178,22 +178,22 @@ export interface IAccessControlEnumerableInstance
      */
     grantRole: {
       (
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        romle: string,
+        role: string,
         account: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;

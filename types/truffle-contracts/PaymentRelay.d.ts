@@ -10,6 +10,34 @@ export interface PaymentRelayContract
   "new"(meta?: Truffle.TransactionDetails): Promise<PaymentRelayInstance>;
 }
 
+export interface PaymentRefunded {
+  name: "PaymentRefunded";
+  args: {
+    UID: string;
+    from: string;
+    token: string;
+    amount: BN;
+    0: string;
+    1: string;
+    2: string;
+    3: BN;
+  };
+}
+
+export interface PaymentReserved {
+  name: "PaymentReserved";
+  args: {
+    UID: string;
+    from: string;
+    token: string;
+    amount: BN;
+    0: string;
+    1: string;
+    2: string;
+    3: BN;
+  };
+}
+
 export interface PaymentSent {
   name: "PaymentSent";
   args: {
@@ -60,10 +88,24 @@ export interface RoleRevoked {
   };
 }
 
-type AllEvents = PaymentSent | RoleAdminChanged | RoleGranted | RoleRevoked;
+type AllEvents =
+  | PaymentRefunded
+  | PaymentReserved
+  | PaymentSent
+  | RoleAdminChanged
+  | RoleGranted
+  | RoleRevoked;
 
 export interface PaymentRelayInstance extends Truffle.ContractInstance {
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  PAYMENT_EXECUTED(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  PAYMENT_REFUNDED(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  PAYMENT_RESERVED(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -178,6 +220,12 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<string>;
 
+  isPaymentReserved(
+    UID: string,
+    from: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
   isPaymentProcessed(
     UID: string,
     from: string,
@@ -188,33 +236,91 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     UID: string,
     from: string,
     txDetails?: Truffle.TransactionDetails
-  ): Promise<{ 0: string; 1: BN }>;
+  ): Promise<{ 0: string; 1: BN; 2: string }>;
 
-  execPayment: {
+  /**
+   * See _reservePayment() Requirements: - `tokenAddress` must be approved token - `amount` must be greater than 0
+   * Places the function caller's funds under escrow, creating a payment reservation that can be later executed.
+   */
+  reservePayment: {
     (
       tokenAddress: string,
       amount: number | BN | string,
       UID: string,
-      forwardTo: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
       tokenAddress: string,
       amount: number | BN | string,
       UID: string,
-      forwardTo: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
       tokenAddress: string,
       amount: number | BN | string,
       UID: string,
-      forwardTo: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
       tokenAddress: string,
       amount: number | BN | string,
+      UID: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Function refunds a payment to `from`. Payment details are identified by `UID` and retrieved from storage. The payment is placed in PAYMENT_EXECUTED state. The function caller must have REFUND_ROLE and not be `from`. Requirements: - Payment to be refunded is currently reserved - Function caller is not refund recipient - Function caller has REFUND_ROLE
+   * Refunds an existing payment reservation. This operation can only be executed by an authorized operator. The payment owner can not refund their own payment reservation.
+   */
+  refundPayment: {
+    (
+      from: string,
+      UID: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      from: string,
+      UID: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      from: string,
+      UID: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      from: string,
+      UID: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Function executes an existing payment reservation on behalf of `from`. Payment details identified by `UID` are retrieved from storage and funds in escrow matching the reservation amount are forwarded to `forwardTo`. Payment is placed in PAYMENT_EXECUTED state. The function caller be either `from`, or have must have EXECUTION_ROLE. Requirements: - Payment to be executed is currently reserved - Function caller is the funds' owner, or has EXECUTION_ROLE
+   * Forwards an existing payment reservation to an authorized recipient account.
+   */
+  execPayment: {
+    (
+      from: string,
+      UID: string,
+      forwardTo: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      from: string,
+      UID: string,
+      forwardTo: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      from: string,
+      UID: string,
+      forwardTo: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      from: string,
       UID: string,
       forwardTo: string,
       txDetails?: Truffle.TransactionDetails
@@ -223,6 +329,14 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
 
   methods: {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    PAYMENT_EXECUTED(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    PAYMENT_REFUNDED(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    PAYMENT_RESERVED(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -337,6 +451,12 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
 
+    isPaymentReserved(
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
     isPaymentProcessed(
       UID: string,
       from: string,
@@ -347,33 +467,91 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
       UID: string,
       from: string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<{ 0: string; 1: BN }>;
+    ): Promise<{ 0: string; 1: BN; 2: string }>;
 
-    execPayment: {
+    /**
+     * See _reservePayment() Requirements: - `tokenAddress` must be approved token - `amount` must be greater than 0
+     * Places the function caller's funds under escrow, creating a payment reservation that can be later executed.
+     */
+    reservePayment: {
       (
         tokenAddress: string,
         amount: number | BN | string,
         UID: string,
-        forwardTo: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
         tokenAddress: string,
         amount: number | BN | string,
         UID: string,
-        forwardTo: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
         tokenAddress: string,
         amount: number | BN | string,
         UID: string,
-        forwardTo: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
         tokenAddress: string,
         amount: number | BN | string,
+        UID: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Function refunds a payment to `from`. Payment details are identified by `UID` and retrieved from storage. The payment is placed in PAYMENT_EXECUTED state. The function caller must have REFUND_ROLE and not be `from`. Requirements: - Payment to be refunded is currently reserved - Function caller is not refund recipient - Function caller has REFUND_ROLE
+     * Refunds an existing payment reservation. This operation can only be executed by an authorized operator. The payment owner can not refund their own payment reservation.
+     */
+    refundPayment: {
+      (
+        from: string,
+        UID: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        from: string,
+        UID: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        from: string,
+        UID: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        from: string,
+        UID: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Function executes an existing payment reservation on behalf of `from`. Payment details identified by `UID` are retrieved from storage and funds in escrow matching the reservation amount are forwarded to `forwardTo`. Payment is placed in PAYMENT_EXECUTED state. The function caller be either `from`, or have must have EXECUTION_ROLE. Requirements: - Payment to be executed is currently reserved - Function caller is the funds' owner, or has EXECUTION_ROLE
+     * Forwards an existing payment reservation to an authorized recipient account.
+     */
+    execPayment: {
+      (
+        from: string,
+        UID: string,
+        forwardTo: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        from: string,
+        UID: string,
+        forwardTo: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        from: string,
+        UID: string,
+        forwardTo: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        from: string,
         UID: string,
         forwardTo: string,
         txDetails?: Truffle.TransactionDetails

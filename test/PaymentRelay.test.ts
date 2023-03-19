@@ -10,6 +10,7 @@ contract("PaymentRelay", (accounts) => {
   let champContract: TestERC20Instance;
   let paymentRelayContract: PaymentRelayInstance;
 
+  const operator = accounts[0];
   const sender = accounts[1];
   const receiver = accounts[2];
   const anyUser = accounts[5];
@@ -26,93 +27,242 @@ contract("PaymentRelay", (accounts) => {
       await paymentRelayContract.RECEIVER_ROLE(),
       receiver
     );
+    await paymentRelayContract.grantRole(
+      await paymentRelayContract.OPERATOR_ROLE(),
+      operator
+    );
   });
 
   describe("As any user", function () {
-    it("I cannot interact with PaymentRelay directly", async function () {
-      try {
-        await paymentRelayContract.execPayment(sender, "100", "0x0", receiver, {
+    const PAYMENT_UID = web3.utils.keccak256("PAYMENT_UID");
+    const PAYMENT_UID_2 = web3.utils.keccak256("PAYMENT_UID_2");
+    const ANY_UID = web3.utils.keccak256("ANY_UID");
+    const amount = "500";
+
+    describe("When payment is reserved", function () {
+      before(async function () {
+        await champContract.approve(paymentRelayContract.address, amount, {
           from: sender,
         });
-        assert.fail("tokensReceived() did not throw.");
-      } catch (e: any) {
-        expect(e.message).to.includes("missing role");
-      }
-    });
-  });
-
-  describe("As any user", function () {
-    describe("When token are sent", function () {
-      const PAYMENT_UID = web3.utils.keccak256("PAYMENT_UID");
-      const amount = "1000";
-
-      before(async function () {
-        await champContract.approve(paymentRelayContract.address, amount, { from: sender });
-        await paymentRelayContract.execPayment(
+        await paymentRelayContract.reservePayment(
           champContract.address,
           amount,
           PAYMENT_UID,
-          receiver,
           { from: sender }
         );
+      });
+
+      it("Should mark payment as reserved", async function () {
+        expect(
+          await paymentRelayContract.isPaymentReserved(PAYMENT_UID, sender)
+        ).to.be.true;
+
+        const { 2: paymentState } = await paymentRelayContract.getPayment(
+          PAYMENT_UID,
+          sender
+        );
+        expect(paymentState).to.be.equal(
+          await paymentRelayContract.PAYMENT_RESERVED()
+        );
+      });
+
+      it("Should transfer reserved amount to escrow", async function () {
+        expect(
+          (
+            await champContract.balanceOf(paymentRelayContract.address)
+          ).toString()
+        ).to.equals(amount);
+        expect((await champContract.balanceOf(sender)).toString()).to.equals(
+          amount
+        );
+      });
+
+      it("Should block duplicate payment reservation", async function () {
+        expect(
+          await paymentRelayContract.isPaymentReserved(PAYMENT_UID, sender)
+        ).to.be.true;
+
+        try {
+          await paymentRelayContract.reservePayment(
+            champContract.address,
+            amount,
+            PAYMENT_UID,
+            { from: sender }
+          );
+          assert.fail("execPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes(
+            "Payment already processed or reserved"
+          );
+        }
+      });
+
+      it("Should block payment execution to unauthorized receiver", async function () {
+        try {
+          await paymentRelayContract.execPayment(sender, PAYMENT_UID, anyUser, {
+            from: sender,
+          });
+          assert.fail("execPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("missing role");
+        }
+      });
+
+      it("Should block execution of payments that were not previously reserved", async function () {
+        try {
+          await paymentRelayContract.execPayment(sender, ANY_UID, receiver, {
+            from: sender,
+          });
+          assert.fail("execPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment reserve not found");
+        }
+      });
+
+      it("Should block refund of payments that were not previously reserved", async function () {
+        try {
+          await paymentRelayContract.refundPayment(sender, ANY_UID, {
+            from: operator,
+          });
+          assert.fail("refundPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment reserve not found");
+        }
+      });
+
+      it("Should only allow reservation owner, or contract operator to execute payment", async function () {
+        try {
+          await paymentRelayContract.execPayment(
+            sender,
+            PAYMENT_UID,
+            receiver,
+            { from: anyUser }
+          );
+          assert.fail("execPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes(
+            "Caller does not have permission to execute payment"
+          );
+        }
+      });
+
+      it("Should only allow contract operator to refund payment", async function () {
+        try {
+          await paymentRelayContract.refundPayment(sender, PAYMENT_UID, {
+            from: anyUser,
+          });
+          assert.fail("refundPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes(
+            "Caller does not have permission to refund payment"
+          );
+        }
+
+        try {
+          await paymentRelayContract.refundPayment(sender, PAYMENT_UID, {
+            from: sender,
+          });
+          assert.fail("refundPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes(
+            "Caller does not have permission to refund payment"
+          );
+        }
+      });
+    });
+
+    describe("When payment is executed", function () {
+      before(async function () {
+        await paymentRelayContract.execPayment(sender, PAYMENT_UID, receiver, {
+          from: operator,
+        });
       });
 
       it("Should sent tokens", async function () {
         expect((await champContract.balanceOf(receiver)).toString()).to.equals(
           amount
         );
+        expect(
+          (
+            await champContract.balanceOf(paymentRelayContract.address)
+          ).toString()
+        ).to.equals("0");
+        // Since `amount` is half the sender's initial balance, we should expect the sender's balance to be equal to `amount` after payment execution
+        expect((await champContract.balanceOf(sender)).toString()).to.equals(
+          amount
+        );
       });
 
-      it("Should mark payment as sent", async function () {
+      it("Should mark payment as executed", async function () {
         expect(
           await paymentRelayContract.isPaymentProcessed(PAYMENT_UID, sender)
         ).to.be.true;
-      });
 
-      it("Should block payment duplication", async function () {
-        try {
-          await champContract.approve(paymentRelayContract.address, amount, { from: sender });
-          await paymentRelayContract.execPayment(
-            champContract.address,
-            amount,
-            PAYMENT_UID,
-            receiver,
-            { from: sender }
-          );
-          assert.fail("operatorSend() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("already processed");
-        }
-      });
-
-      it("Should block payment to unauthorized receiver", async function () {
-        const ANY_UID = web3.utils.keccak256("ANY_UID");
-
-        try {
-          await champContract.approve(paymentRelayContract.address, amount, { from: sender });
-          await paymentRelayContract.execPayment(
-            champContract.address,
-            amount,
-            ANY_UID,
-            anyUser,
-            { from: sender }
-          );
-          assert.fail("operatorSend() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("missing role");
-        }
+        const { 2: paymentState } = await paymentRelayContract.getPayment(
+          PAYMENT_UID,
+          sender
+        );
+        expect(paymentState).to.be.equal(
+          await paymentRelayContract.PAYMENT_EXECUTED()
+        );
       });
 
       it("Should keep free other UID", async function () {
-        const ANY_UID = web3.utils.keccak256("ANY_UID");
+        expect(await paymentRelayContract.isPaymentReserved(ANY_UID, sender)).to
+          .be.false;
         expect(await paymentRelayContract.isPaymentProcessed(ANY_UID, sender))
           .to.be.false;
       });
 
       it("Should prevent UID collision between users", async function () {
         expect(
+          await paymentRelayContract.isPaymentReserved(PAYMENT_UID, anyUser)
+        ).to.be.false;
+        expect(
           await paymentRelayContract.isPaymentProcessed(PAYMENT_UID, anyUser)
         ).to.be.false;
+      });
+    });
+
+    describe("When payment is refunded", function () {
+      before(async function () {
+        await champContract.approve(paymentRelayContract.address, amount, {
+          from: sender,
+        });
+        await paymentRelayContract.reservePayment(
+          champContract.address,
+          amount,
+          PAYMENT_UID_2,
+          { from: sender }
+        );
+        await paymentRelayContract.refundPayment(sender, PAYMENT_UID_2, {
+          from: operator,
+        });
+      });
+
+      it("Should mark payment as refunded", async function () {
+        expect(
+          await paymentRelayContract.isPaymentProcessed(PAYMENT_UID_2, sender)
+        ).to.be.true;
+
+        const { 2: paymentState } = await paymentRelayContract.getPayment(
+          PAYMENT_UID_2,
+          sender
+        );
+        expect(paymentState).to.be.equal(
+          await paymentRelayContract.PAYMENT_REFUNDED()
+        );
+      });
+
+      it("Should refund tokens back to the user", async function () {
+        expect((await champContract.balanceOf(sender)).toString()).to.equals(
+          amount
+        );
+        expect(
+          (
+            await champContract.balanceOf(paymentRelayContract.address)
+          ).toString()
+        ).to.equals("0");
       });
     });
   });

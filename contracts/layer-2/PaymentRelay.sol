@@ -100,7 +100,7 @@ contract PaymentRelay is AccessControl {
     }
 
     /**
-     * @dev Function transfers `amount` of `token` from `from` to account the contract account.
+     * @dev Function transfers `amount` of `token` from `from` the contract account.
      * A new Payment instance holding payment details is assigned to `UID`.
      *
      * Payment is placed in PAYMENT_RESERVED state.
@@ -166,12 +166,12 @@ contract PaymentRelay is AccessControl {
      *
      * The payment is placed in PAYMENT_EXECUTED state.
      *
-     * The function caller must have REFUND_ROLE and not be `from`.
+     * The function caller must have OPERATOR_ROLE and not be `from`.
      *
      * Requirements:
      * - Payment to be refunded is currently reserved
      * - Function caller is not refund recipient
-     * - Function caller has REFUND_ROLE
+     * - Function caller has OPERATOR_ROLE
      */
     function refundPayment(address from, bytes32 UID) external {
         require(
