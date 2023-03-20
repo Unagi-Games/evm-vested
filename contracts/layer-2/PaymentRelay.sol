@@ -188,7 +188,7 @@ contract PaymentRelay is AccessControl {
         payment.state = PAYMENT_REFUNDED;
 
         IERC20 tokenContract = IERC20(payment.token);
-        tokenContract.safeTransferFrom(address(this), from, payment.amount);
+        tokenContract.safeTransfer(from, payment.amount);
 
         emit PaymentRefunded(UID, from, payment.token, payment.amount);
     }
@@ -228,11 +228,7 @@ contract PaymentRelay is AccessControl {
         payment.state = PAYMENT_EXECUTED;
 
         IERC20 tokenContract = IERC20(payment.token);
-        tokenContract.safeTransferFrom(
-            address(this),
-            forwardTo,
-            payment.amount
-        );
+        tokenContract.safeTransfer(forwardTo, payment.amount);
 
         emit PaymentSent(UID, from, payment.token, payment.amount);
     }

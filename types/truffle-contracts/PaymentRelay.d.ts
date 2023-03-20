@@ -270,7 +270,7 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
   };
 
   /**
-   * Function refunds a payment to `from`. Payment details are identified by `UID` and retrieved from storage. The payment is placed in PAYMENT_EXECUTED state. The function caller must have REFUND_ROLE and not be `from`. Requirements: - Payment to be refunded is currently reserved - Function caller is not refund recipient - Function caller has REFUND_ROLE
+   * Function refunds a payment to `from`. Payment details are identified by `UID` and retrieved from storage. The payment is placed in PAYMENT_EXECUTED state. The function caller must have OPERATOR_ROLE and not be `from`. Requirements: - Payment to be refunded is currently reserved - Function caller is not refund recipient - Function caller has OPERATOR_ROLE
    * Refunds an existing payment reservation. This operation can only be executed by an authorized operator. The payment owner can not refund their own payment reservation.
    */
   refundPayment: {
@@ -501,7 +501,7 @@ export interface PaymentRelayInstance extends Truffle.ContractInstance {
     };
 
     /**
-     * Function refunds a payment to `from`. Payment details are identified by `UID` and retrieved from storage. The payment is placed in PAYMENT_EXECUTED state. The function caller must have REFUND_ROLE and not be `from`. Requirements: - Payment to be refunded is currently reserved - Function caller is not refund recipient - Function caller has REFUND_ROLE
+     * Function refunds a payment to `from`. Payment details are identified by `UID` and retrieved from storage. The payment is placed in PAYMENT_EXECUTED state. The function caller must have OPERATOR_ROLE and not be `from`. Requirements: - Payment to be refunded is currently reserved - Function caller is not refund recipient - Function caller has OPERATOR_ROLE
      * Refunds an existing payment reservation. This operation can only be executed by an authorized operator. The payment owner can not refund their own payment reservation.
      */
     refundPayment: {
