@@ -33,7 +33,7 @@ contract("PaymentRelay", (accounts) => {
     );
   });
 
-  describe.only("As any user", function () {
+  describe("As any user", function () {
     const PAYMENT_UID = web3.utils.keccak256("PAYMENT_UID");
     const PAYMENT_UID_2 = web3.utils.keccak256("PAYMENT_UID_2");
     const ANY_UID = web3.utils.keccak256("ANY_UID");
@@ -88,9 +88,7 @@ contract("PaymentRelay", (accounts) => {
           );
           assert.fail("execPayment() did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes(
-            "Payment already processed or reserved"
-          );
+          expect(e.message).to.includes("Payment already reserved");
         }
       });
 
@@ -112,7 +110,7 @@ contract("PaymentRelay", (accounts) => {
           });
           assert.fail("execPayment() did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes("Payment reserve not found");
+          expect(e.message).to.includes("Payment is not reserved");
         }
       });
 
@@ -123,7 +121,7 @@ contract("PaymentRelay", (accounts) => {
           });
           assert.fail("refundPayment() did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes("Payment reserve not found");
+          expect(e.message).to.includes("Payment is not reserved");
         }
       });
 
@@ -150,9 +148,7 @@ contract("PaymentRelay", (accounts) => {
           });
           assert.fail("refundPayment() did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes(
-            "Caller does not have permission to refund payment"
-          );
+          expect(e.message).to.includes("missing role");
         }
 
         try {
@@ -161,9 +157,7 @@ contract("PaymentRelay", (accounts) => {
           });
           assert.fail("refundPayment() did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes(
-            "Caller does not have permission to refund payment"
-          );
+          expect(e.message).to.includes("missing role");
         }
       });
     });
@@ -261,6 +255,92 @@ contract("PaymentRelay", (accounts) => {
             await champContract.balanceOf(paymentRelayContract.address)
           ).toString()
         ).to.equals("0");
+      });
+    });
+
+    describe("When payment is processed", function () {
+      before(async function () {
+        assert(
+          await paymentRelayContract.isPaymentProcessed(PAYMENT_UID, sender),
+          "Payment `PAYMENT_UID` is not processed"
+        );
+        assert(
+          await paymentRelayContract.isPaymentProcessed(PAYMENT_UID_2, sender),
+          "Payment `PAYMENT_UID_2` is not processed"
+        );
+      });
+
+      it("Should block reservation of the already processed payment", async function () {
+        try {
+          await paymentRelayContract.reservePayment(
+            champContract.address,
+            amount,
+            PAYMENT_UID,
+            { from: sender }
+          );
+          assert.fail("reservePayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment already processed");
+        }
+        try {
+          await paymentRelayContract.reservePayment(
+            champContract.address,
+            amount,
+            PAYMENT_UID,
+            { from: sender }
+          );
+          assert.fail("reservePayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment already processed");
+        }
+      });
+
+      it("Should block execution of the already processed payment", async function () {
+        try {
+          await paymentRelayContract.execPayment(
+            sender,
+            PAYMENT_UID,
+            receiver,
+            {
+              from: operator,
+            }
+          );
+          assert.fail("execPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment is not reserved");
+        }
+        try {
+          await paymentRelayContract.execPayment(
+            sender,
+            PAYMENT_UID_2,
+            receiver,
+            {
+              from: operator,
+            }
+          );
+          assert.fail("execPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment is not reserved");
+        }
+      });
+
+      it("Should block refund of the already processed payment", async function () {
+        try {
+          await paymentRelayContract.refundPayment(sender, PAYMENT_UID, {
+            from: operator,
+          });
+          assert.fail("refundPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment is not reserved");
+        }
+        try {
+          await paymentRelayContract.refundPayment(sender, PAYMENT_UID_2, {
+            from: operator,
+          });
+          assert.fail("refundPayment() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Payment is not reserved");
+        }
       });
     });
   });

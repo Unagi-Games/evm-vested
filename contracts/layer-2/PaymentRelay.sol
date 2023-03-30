@@ -18,8 +18,8 @@ import "solidity-bytes-utils/contracts/BytesLib.sol";
  * 3 - In case the payment's offchain transaction fails, an authorized operator calls `refundPayment` to trigger
  * an escrow refund to the payment's originator
  *
- * For calling `execPayment` or `refundPayment`, the caller must have EXECUTION_ROLE, or REFUND_ROLE, respectively.
- * `refundPayment` can only be called by and authorized operator besides the fund's owner.
+ * To call `execPayment` or `refundPayment`, the function caller must be granted OPERATOR_ROLE.
+ * `execPayment` can be called by both an authorized operator and the payment's owner.
  *
  * @custom:security-contact security@unagi.ch
  */
@@ -100,60 +100,49 @@ contract PaymentRelay is AccessControl {
     }
 
     /**
-     * @dev Function transfers `amount` of `token` from `from` the contract account.
-     * A new Payment instance holding payment details is assigned to `UID`.
+     * Places the function caller's funds under escrow, creating a payment reservation
+     * that can be later executed.
+     *
+     * @dev Function transfers `amount` of `token` from `msg.sender` to the contract's account.
+     * A new Payment instance holding the payment details is assigned to `UID`.
      *
      * Payment is placed in PAYMENT_RESERVED state.
      *
      * Requirements:
-     * - `from` must not have a reserved payment for `UID`
-     * - `from` must not have a processed payment for `UID`
+     * - `token` must be approved token address
+     * - `amount` must be greater than 0
+     * - `msg.sender` must not have a reserved payment for `UID`
+     * - `msg.sender` must not have a processed payment for `UID`
      */
-    function _reservePayment(
-        bytes32 UID,
-        address from,
+    function reservePayment(
         address token,
-        uint256 amount
-    ) private {
+        uint256 amount,
+        bytes32 UID
+    ) external {
+        _checkRole(TOKEN_ROLE, token);
         require(
-            !isPaymentReserved(UID, from) && !isPaymentProcessed(UID, from),
-            "PaymentRelay: Payment already processed or reserved"
+            amount > 0,
+            "PaymentRelay: Payment amount should be strictly positive"
+        );
+        require(
+            !isPaymentReserved(UID, msg.sender),
+            "PaymentRelay: Payment already reserved"
+        );
+        require(
+            !isPaymentProcessed(UID, msg.sender),
+            "PaymentRelay: Payment already processed"
         );
 
-        _payments[getPaymentKey(UID, from)] = Payment(
+        _payments[getPaymentKey(UID, msg.sender)] = Payment(
             token,
             amount,
             PAYMENT_RESERVED
         );
 
         IERC20 tokenContract = IERC20(token);
-        tokenContract.safeTransferFrom(from, address(this), amount);
-    }
+        tokenContract.safeTransferFrom(msg.sender, address(this), amount);
 
-    /**
-     * Places the function caller's funds under escrow, creating a payment reservation
-     * that can be later executed.
-     *
-     * @dev See _reservePayment()
-     *
-     * Requirements:
-     * - `tokenAddress` must be approved token
-     * - `amount` must be greater than 0
-     */
-    function reservePayment(
-        address tokenAddress,
-        uint256 amount,
-        bytes32 UID
-    ) external {
-        _checkRole(TOKEN_ROLE, tokenAddress);
-        require(
-            amount > 0,
-            "PaymentRelay: Payment amount should be strictly positive"
-        );
-
-        _reservePayment(UID, msg.sender, tokenAddress, amount);
-
-        emit PaymentReserved(UID, msg.sender, tokenAddress, amount);
+        emit PaymentReserved(UID, msg.sender, token, amount);
     }
 
     /**
@@ -164,23 +153,22 @@ contract PaymentRelay is AccessControl {
      * @dev Function refunds a payment to `from`. Payment details are identified by `UID`
      * and retrieved from storage.
      *
-     * The payment is placed in PAYMENT_EXECUTED state.
+     * The payment is placed in PAYMENT_REFUNDED state.
      *
      * The function caller must have OPERATOR_ROLE and not be `from`.
      *
      * Requirements:
+     * - Function caller has OPERATOR_ROLE
      * - Payment to be refunded is currently reserved
      * - Function caller is not refund recipient
-     * - Function caller has OPERATOR_ROLE
      */
-    function refundPayment(address from, bytes32 UID) external {
+    function refundPayment(address from, bytes32 UID)
+        external
+        onlyRole(OPERATOR_ROLE)
+    {
         require(
             isPaymentReserved(UID, from),
-            "PaymentRelay: Payment reserve not found"
-        );
-        require(
-            msg.sender != from && hasRole(OPERATOR_ROLE, msg.sender),
-            "PaymentRelay: Caller does not have permission to refund payment"
+            "PaymentRelay: Payment is not reserved"
         );
 
         Payment storage payment = _payments[getPaymentKey(UID, from)];
@@ -202,11 +190,11 @@ contract PaymentRelay is AccessControl {
      *
      * Payment is placed in PAYMENT_EXECUTED state.
      *
-     * The function caller be either `from`, or have must have EXECUTION_ROLE.
+     * The function caller be either `from`, or have must have OPERATOR_ROLE.
      *
      * Requirements:
      * - Payment to be executed is currently reserved
-     * - Function caller is the funds' owner, or has EXECUTION_ROLE
+     * - Function caller is the funds' owner, or has OPERATOR_ROLE
      */
     function execPayment(
         address from,
@@ -215,7 +203,7 @@ contract PaymentRelay is AccessControl {
     ) external {
         require(
             isPaymentReserved(UID, from),
-            "PaymentRelay: Payment reserve not found"
+            "PaymentRelay: Payment is not reserved"
         );
         require(
             msg.sender == from || hasRole(OPERATOR_ROLE, msg.sender),
