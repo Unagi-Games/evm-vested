@@ -674,7 +674,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         if (hasOption(nftReceiver, tokenId)) {
             _unsetOption(nftReceiver, tokenId);
         }
-        if (hasReservedOffer(nftReceiver, tokenId)) {
+        if (_reservedOffers[tokenId] != address(0)) {
             delete _reservedOffers[tokenId];
         }
 
