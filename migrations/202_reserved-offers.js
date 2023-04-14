@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/202_reserved-offers")(web3);

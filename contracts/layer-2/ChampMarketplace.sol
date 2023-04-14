@@ -83,8 +83,6 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     mapping(uint64 => uint256) private _sales;
     // (nft ID => Option) mapping of options
     mapping(uint64 => Option) private _options;
-    // (nft ID => address) mapping of reserved offers
-    mapping(uint64 => address) private _reservedOffers;
     // (nft ID => wallet => RateLimit) mapping of rate limit
     mapping(uint64 => mapping(address => RateLimit)) _rateLimits;
     // (wallet => Option) mapping of locks to prevent multiple options per wallet
@@ -94,6 +92,9 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     uint256 private _marketplacePercentFees;
     // Fees receiver address
     address private _marketplaceFeesReceiver;
+
+    // (nft ID => address) mapping of reserved offers
+    mapping(uint64 => address) private _reservedOffers;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
