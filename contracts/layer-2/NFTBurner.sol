@@ -39,9 +39,7 @@ contract NFTBurner is IERC721Receiver, AccessControl {
     mapping(bytes32 => Burn) private _burns;
 
     constructor(address nft) {
-        _checkRole(TOKEN_ROLE, nft);
         UltimateChampionsNFT = IERC721(nft);
-
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
