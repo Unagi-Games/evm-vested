@@ -123,16 +123,10 @@ contract NFTBurner is IERC721Receiver, AccessControl {
     ) external onlyRole(OPERATOR_ROLE) {
         require(
             tokenIds.length > 0,
-            "NFTBurner: burn must be reserved for at least 1 token"
+            "NFTBurner: Burn must be reserved for at least 1 token"
         );
-        require(
-            !isBurnReserved(UID),
-            "NFTBurner: Burn already reserved for given UID"
-        );
-        require(
-            !isBurnProcessed(UID),
-            "NFTBurner: Burn already processed for given UID"
-        );
+        require(!isBurnReserved(UID), "NFTBurner: Burn already reserved");
+        require(!isBurnProcessed(UID), "NFTBurner: Burn already processed");
 
         // Save new Burn instance to storage
         _burns[UID] = Burn(from, tokenIds, BURN_RESERVED);
@@ -144,7 +138,7 @@ contract NFTBurner is IERC721Receiver, AccessControl {
     }
 
     function executeBurn(bytes32 UID) external onlyRole(OPERATOR_ROLE) {
-        require(isBurnReserved(UID), "NFTBurner: Burn must be reserved first");
+        require(isBurnReserved(UID), "NFTBurner: Burn is not reserved");
 
         Burn storage burn = _burns[UID];
         burn.state = BURN_EXECUTED;
@@ -154,7 +148,7 @@ contract NFTBurner is IERC721Receiver, AccessControl {
     }
 
     function revertBurn(bytes32 UID) external onlyRole(OPERATOR_ROLE) {
-        require(isBurnReserved(UID), "NFTBurner: Burn must be reserved first");
+        require(isBurnReserved(UID), "NFTBurner: Burn is not reserved");
 
         Burn storage burn = _burns[UID];
         burn.state = BURN_REVERTED;

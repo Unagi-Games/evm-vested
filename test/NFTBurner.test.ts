@@ -119,14 +119,24 @@ contract("NFT Burner", (accounts) => {
     describe("When a token burn is reserved", () => {
       before(async () => {
         // Assert initial state
-        expect(await nftContract.ownerOf(nfts[0])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[1])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[2])).to.equals(holder);
+        assert(
+          (await nftContract.ownerOf(nfts[0])) === holder,
+          "NFT holder is not correct"
+        );
+        assert(
+          (await nftContract.ownerOf(nfts[1])) === holder,
+          "NFT holder is not correct"
+        );
+        assert(
+          (await nftContract.ownerOf(nfts[2])) === holder,
+          "NFT holder is not correct"
+        );
 
         await burnerContract.reserveBurn(BURN_UID, holder, nfts.slice(0, 3));
       });
 
-      it("Should set token burn state as reserved", async () => {
+      it("Should mark token burn as reserved", async () => {
+        expect(await burnerContract.isBurnReserved(BURN_UID)).to.be.true;
         const burn = await burnerContract.getBurn(BURN_UID);
         expect(burn["from"]).to.equals(holder);
         expect(burn["tokenIds"]).to.have.length(3);
@@ -136,9 +146,10 @@ contract("NFT Burner", (accounts) => {
       it("Should only accept token burn reservations for 1, or more tokens", async () => {
         try {
           await burnerContract.reserveBurn(BURN_UID_2, holder, []);
+          assert.fail("reserveBurn() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes(
-            "burn must be reserved for at least 1 token"
+            "Burn must be reserved for at least 1 token"
           );
         }
       });
@@ -155,9 +166,10 @@ contract("NFT Burner", (accounts) => {
         );
       });
 
-      it("Should block token reservations for the same UID", async () => {
+      it("Should block duplicate token burn reservations", async () => {
         try {
           await burnerContract.reserveBurn(BURN_UID, holder, nfts);
+          assert.fail("reserveBurn() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("already reserved");
         }
@@ -167,6 +179,7 @@ contract("NFT Burner", (accounts) => {
         expect(await nftContract.ownerOf(nfts[0])).to.not.equals(anyUser);
         try {
           await burnerContract.reserveBurn(BURN_UID_2, anyUser, nfts);
+          assert.fail("reserveBurn() did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes(
             "ERC721: transfer from incorrect owner"
@@ -180,36 +193,32 @@ contract("NFT Burner", (accounts) => {
 
       before(async () => {
         // Assert initial state
-        expect(await nftContract.ownerOf(nfts[0])).to.equals(
-          burnerContract.address
+        assert(
+          (await nftContract.ownerOf(nfts[0])) === burnerContract.address,
+          "NFT owner is not correct"
         );
-        expect(await nftContract.ownerOf(nfts[1])).to.equals(
-          burnerContract.address
+        assert(
+          (await nftContract.ownerOf(nfts[1])) === burnerContract.address,
+          "NFT owner is not correct"
         );
-        expect(await nftContract.ownerOf(nfts[2])).to.equals(
-          burnerContract.address
+        assert(
+          (await nftContract.ownerOf(nfts[2])) === burnerContract.address,
+          "NFT owner is not correct"
         );
 
         await burnerContract.executeBurn(BURN_UID);
       });
 
-      it("Should set token burn state as executed", async () => {
-        const burn = await burnerContract.getBurn(BURN_UID);
-        expect(burn["state"]).to.equals(await burnerContract.BURN_EXECUTED());
+      it("Should mark token burn as executed", async () => {
+        expect(await burnerContract.isBurnProcessed(BURN_UID)).to.be.true;
+        const { state } = await burnerContract.getBurn(BURN_UID);
+        expect(state).to.equals(await burnerContract.BURN_EXECUTED());
       });
 
       it("Should transfer the NFTs in escrow to DEAD address", async () => {
         expect(await nftContract.ownerOf(nfts[0])).to.equals(DEAD_ADDRESS);
         expect(await nftContract.ownerOf(nfts[1])).to.equals(DEAD_ADDRESS);
         expect(await nftContract.ownerOf(nfts[2])).to.equals(DEAD_ADDRESS);
-      });
-
-      it("Should block duplicate burn execution for the same UID", async () => {
-        try {
-          await burnerContract.executeBurn(BURN_UID);
-        } catch (e: any) {
-          expect(e.message).to.includes("Burn must be reserved");
-        }
       });
     });
 
@@ -225,9 +234,10 @@ contract("NFT Burner", (accounts) => {
         await burnerContract.revertBurn(BURN_UID_2);
       });
 
-      it("Should set token burn state as reverted", async () => {
-        const burn = await burnerContract.getBurn(BURN_UID_2);
-        expect(burn["state"]).to.equals(await burnerContract.BURN_REVERTED());
+      it("Should mark token burn as reverted", async () => {
+        expect(await burnerContract.isBurnProcessed(BURN_UID_2)).to.be.true;
+        const { state } = await burnerContract.getBurn(BURN_UID_2);
+        expect(state).to.equals(await burnerContract.BURN_REVERTED());
       });
 
       it("Should transfer the NFTs in escrow back to the original holder", async () => {
@@ -236,12 +246,63 @@ contract("NFT Burner", (accounts) => {
         expect(await nftContract.ownerOf(nfts[5])).to.equals(holder);
         expect(await nftContract.ownerOf(nfts[6])).to.equals(holder);
       });
+    });
 
-      it("Should block duplicate burn revert for the same UID", async () => {
+    describe("When a token burn is processed", () => {
+      before(async () => {
+        // Assert initial state
+        assert(
+          await burnerContract.isBurnProcessed(BURN_UID),
+          "Token burn `BURN_UID` is not processed"
+        );
+        assert(
+          await burnerContract.isBurnProcessed(BURN_UID_2),
+          "Token burn `BURN_UID` is not processed"
+        );
+      });
+
+      it("Should block reservation of the already processed token burn", async () => {
+        try {
+          await burnerContract.reserveBurn(BURN_UID, holder, nfts);
+          assert.fail("reserveBurn() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("already processed");
+        }
+        try {
+          await burnerContract.reserveBurn(BURN_UID, holder, nfts);
+          assert.fail("reserveBurn() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("already processed");
+        }
+      });
+
+      it("Should block execution of the already processed token burn", async () => {
+        try {
+          await burnerContract.executeBurn(BURN_UID);
+          assert.fail("executeBurn() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Burn is not reserved");
+        }
+        try {
+          await burnerContract.executeBurn(BURN_UID_2);
+          assert.fail("executeBurn() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Burn is not reserved");
+        }
+      });
+
+      it("Should block revert of the already processed token burn", async () => {
+        try {
+          await burnerContract.revertBurn(BURN_UID);
+          assert.fail("revertBurn() did not throw.");
+        } catch (e: any) {
+          expect(e.message).to.includes("Burn is not reserved");
+        }
         try {
           await burnerContract.revertBurn(BURN_UID_2);
+          assert.fail("revertBurn() did not throw.");
         } catch (e: any) {
-          expect(e.message).to.includes("Burn must be reserved");
+          expect(e.message).to.includes("Burn is not reserved");
         }
       });
     });
