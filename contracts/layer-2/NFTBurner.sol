@@ -21,7 +21,6 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         0x000000000000000000000000000000000000dEaD;
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
-    bytes32 public constant TOKEN_ROLE = keccak256("TOKEN_ROLE");
 
     // Possible states for an existing token burn
     bytes32 public constant BURN_RESERVED = keccak256("BURN_RESERVED");

@@ -97,8 +97,6 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
 
   OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
   UltimateChampionsNFT(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
@@ -303,8 +301,6 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    TOKEN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     UltimateChampionsNFT(
       txDetails?: Truffle.TransactionDetails

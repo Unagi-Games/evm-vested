@@ -6,7 +6,7 @@ import {
 const NFT = artifacts.require("UltimateChampionsNFT");
 const Burner = artifacts.require("NFTBurner");
 
-contract.only("NFT Burner", (accounts) => {
+contract("NFT Burner", (accounts) => {
   describe("As any user", () => {
     const rootUser = accounts[0];
     const holder = accounts[1];
