@@ -17,11 +17,12 @@ import "solidity-bytes-utils/contracts/BytesLib.sol";
 contract NFTBurner is IERC721Receiver, AccessControl {
     using SafeERC20 for IERC20;
 
-    address public constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+    address public constant DEAD_ADDRESS =
+        0x000000000000000000000000000000000000dEaD;
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant TOKEN_ROLE = keccak256("TOKEN_ROLE");
-    
+
     // Possible states for an existing token burn
     bytes32 public constant BURN_RESERVED = keccak256("BURN_RESERVED");
     bytes32 public constant BURN_EXECUTED = keccak256("BURN_EXECUTED");
@@ -53,7 +54,9 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         override(AccessControl)
         returns (bool)
     {
-        return interfaceId == type(IERC721Receiver).interfaceId || AccessControl.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IERC721Receiver).interfaceId ||
+            AccessControl.supportsInterface(interfaceId);
     }
 
     /**
@@ -68,30 +71,20 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         return this.onERC721Received.selector;
     }
 
-    function getBurn(bytes32 UID)
-        external
-        view
-        returns(Burn memory)
-    {
+    function getBurn(bytes32 UID) external view returns (Burn memory) {
         return _burns[UID];
     }
 
-    function isBurnReserved(bytes32 UID)
-        public
-        view
-        returns (bool)
-    {
+    function isBurnReserved(bytes32 UID) public view returns (bool) {
         return _burns[UID].state == BURN_RESERVED;
     }
 
-    function isBurnProcessed(bytes32 UID)
-        public
-        view
-        returns (bool)
-    {
-        return _burns[UID].state == BURN_EXECUTED || _burns[UID].state == BURN_REVERTED; 
+    function isBurnProcessed(bytes32 UID) public view returns (bool) {
+        return
+            _burns[UID].state == BURN_EXECUTED ||
+            _burns[UID].state == BURN_REVERTED;
     }
-    
+
     /**
      * @dev sends a batch of NFCHAMP tokens from `from` to `to`.
      * Requires this contract to be approved by the tokens' holder before hand.
@@ -101,12 +94,15 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         address to,
         uint256[] memory tokenIds
     ) private {
-        uint length = tokenIds.length;
-        for(uint i = 0; i < length;) {
+        uint256 length = tokenIds.length;
+        for (uint256 i = 0; i < length; ) {
             UltimateChampionsNFT.safeTransferFrom(from, to, tokenIds[i]);
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
     }
+
     /**
      * Reserves a token burn on behalf of a NFCHAMP/CHAMP holder, placeing the holder's tokens under escrow.
      *
@@ -126,7 +122,10 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         address from,
         uint256[] calldata tokenIds
     ) external onlyRole(OPERATOR_ROLE) {
-        require(tokenIds.length > 0, "NFTBurner: burn must be reserved for at least 1 token");
+        require(
+            tokenIds.length > 0,
+            "NFTBurner: burn must be reserved for at least 1 token"
+        );
         require(
             !isBurnReserved(UID),
             "NFTBurner: Burn already reserved for given UID"
@@ -145,10 +144,7 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         emit BurnReserved(UID, from, tokenIds);
     }
 
-    function executeBurn(bytes32 UID)
-        external
-        onlyRole(OPERATOR_ROLE)
-    {
+    function executeBurn(bytes32 UID) external onlyRole(OPERATOR_ROLE) {
         require(isBurnReserved(UID), "NFTBurner: Burn must be reserved first");
 
         Burn storage burn = _burns[UID];
@@ -158,10 +154,7 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         emit BurnExecuted(UID);
     }
 
-    function revertBurn(bytes32 UID)
-        external
-        onlyRole(OPERATOR_ROLE)
-    {
+    function revertBurn(bytes32 UID) external onlyRole(OPERATOR_ROLE) {
         require(isBurnReserved(UID), "NFTBurner: Burn must be reserved first");
 
         Burn storage burn = _burns[UID];
