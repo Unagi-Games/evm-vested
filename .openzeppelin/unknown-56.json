@@ -117,6 +117,12 @@
           },
           {
             "contract": "ChampMarketplace",
+            "label": "_reservedOffers",
+            "type": "t_mapping(t_uint64,t_address)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:97"
+          },
+          {
+            "contract": "ChampMarketplace",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
             "src": "../project:/contracts/layer-2/ChampMarketplace.sol:598"
@@ -194,6 +200,263 @@
                 "type": "t_uint256"
               }
             ]
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_mapping(t_bytes32,t_struct(AddressSet)3408_storage)": {
+            "label": "mapping(bytes32 => struct EnumerableSetUpgradeable.AddressSet)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(AddressSet)3408_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3093_storage"
+              }
+            ]
+          },
+          "t_struct(Set)3093_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)179_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)179_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "dfa4d5f3e09a7b3e0ebebaaa2778da91adfc849c0271e6a2bdf5a58bf1422f73": {
+      "address": "0x7d8F773383c4D8F75cf4D9174A04d603357aE57F",
+      "txHash": "0x0ec33992ddf895f724e5277edd7b9c18e05f13c4091e5246319bb7a398e31df6",
+      "layout": {
+        "solcVersion": "0.8.12",
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_uint8",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "contract": "ERC165Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)179_storage)",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
+          },
+          {
+            "contract": "AccessControlEnumerableUpgradeable",
+            "label": "_roleMembers",
+            "type": "t_mapping(t_bytes32,t_struct(AddressSet)3408_storage)",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:22"
+          },
+          {
+            "contract": "AccessControlEnumerableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol:76"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_CHAMP_TOKEN_CONTRACT",
+            "type": "t_contract(IERC20Upgradeable)825",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:69"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_NFCHAMP_CONTRACT",
+            "type": "t_contract(IERC721Upgradeable)1258",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:70"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_sales",
+            "type": "t_mapping(t_uint64,t_uint256)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:83"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_options",
+            "type": "t_mapping(t_uint64,t_struct(Option)11846_storage)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:85"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_rateLimits",
+            "type": "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)11856_storage))",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:87"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_optionLock",
+            "type": "t_mapping(t_address,t_struct(OptionLock)11851_storage)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:89"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_marketplacePercentFees",
+            "type": "t_uint256",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:92"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_marketplaceFeesReceiver",
+            "type": "t_address",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:94"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_reservedOffers",
+            "type": "t_mapping(t_uint64,t_address)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:97"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:714"
+          }
+        ],
+        "types": {
+          "t_contract(IERC20Upgradeable)825": {
+            "label": "contract IERC20Upgradeable"
+          },
+          "t_contract(IERC721Upgradeable)1258": {
+            "label": "contract IERC721Upgradeable"
+          },
+          "t_mapping(t_uint64,t_uint256)": {
+            "label": "mapping(uint64 => uint256)"
+          },
+          "t_uint64": {
+            "label": "uint64"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint64,t_struct(Option)11846_storage)": {
+            "label": "mapping(uint64 => struct ChampMarketplace.Option)"
+          },
+          "t_struct(Option)11846_storage": {
+            "label": "struct ChampMarketplace.Option",
+            "members": [
+              {
+                "label": "buyer",
+                "type": "t_address"
+              },
+              {
+                "label": "until",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)11856_storage))": {
+            "label": "mapping(uint64 => mapping(address => struct ChampMarketplace.RateLimit))"
+          },
+          "t_mapping(t_address,t_struct(RateLimit)11856_storage)": {
+            "label": "mapping(address => struct ChampMarketplace.RateLimit)"
+          },
+          "t_struct(RateLimit)11856_storage": {
+            "label": "struct ChampMarketplace.RateLimit",
+            "members": [
+              {
+                "label": "renew",
+                "type": "t_uint8"
+              },
+              {
+                "label": "until",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_address,t_struct(OptionLock)11851_storage)": {
+            "label": "mapping(address => struct ChampMarketplace.OptionLock)"
+          },
+          "t_struct(OptionLock)11851_storage": {
+            "label": "struct ChampMarketplace.OptionLock",
+            "members": [
+              {
+                "label": "tokenId",
+                "type": "t_uint64"
+              },
+              {
+                "label": "until",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_uint64,t_address)": {
+            "label": "mapping(uint64 => address)"
           },
           "t_array(t_uint256)50_storage": {
             "label": "uint256[50]"

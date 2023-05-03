@@ -1,20 +1,20 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x4C243D2eBe83aF7C57E28F17038c2545Aa3E4492",
-    "txHash": "0xef884d52e96e1635ad7eb9362880cb50b0ad6aa7476a8b19b89fa09de1186bdc"
+    "address": "0xe391f875F8c8456BE7C52379f286E0D6256a677b",
+    "txHash": "0x0f0253722e95ac83b862fd4ba4c296ef688d60279e426dc98fd843171b233248"
   },
   "proxies": [
     {
-      "address": "0xD6867c853ab52B220e2EF60422a16227a242223c",
-      "txHash": "0xd42920c31543f17358ea05eefd9807daf2692573ba6cd380e19a23a609433ae0",
+      "address": "0xdA70b97b55007b8C324c53B5e1d26185c44440b2",
+      "txHash": "0x9d264c0b336e8398fb7a3b59d7e879ef2ce645f9b391bf50d6500a639f97f8db",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "c751b7a2983a3210e2e18c61bab6c7e71e4d9a245266e781f34a0911abdab904": {
-      "address": "0x2359bA46b4da73Ed479823542B751F9972920A40",
-      "txHash": "0x4a7a1c35bed41b9d18e680a99b456b559adad4b0bf6af5f63a9916d3653c4b1b",
+    "dfa4d5f3e09a7b3e0ebebaaa2778da91adfc849c0271e6a2bdf5a58bf1422f73": {
+      "address": "0x33E82c77c40A646a10BE3716203Fa89416bCAd6c",
+      "txHash": "0x51e52a4c025df0b32d0a0cb30a3770315596ee717c01e8e28a041110d75d94a9",
       "layout": {
         "solcVersion": "0.8.12",
         "storage": [
@@ -71,55 +71,61 @@
             "contract": "ChampMarketplace",
             "label": "_CHAMP_TOKEN_CONTRACT",
             "type": "t_contract(IERC20Upgradeable)825",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:63"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:69"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_NFCHAMP_CONTRACT",
             "type": "t_contract(IERC721Upgradeable)1258",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:64"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:70"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_sales",
             "type": "t_mapping(t_uint64,t_uint256)",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:77"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:83"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_options",
             "type": "t_mapping(t_uint64,t_struct(Option)11846_storage)",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:79"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:85"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_rateLimits",
             "type": "t_mapping(t_uint64,t_mapping(t_address,t_struct(RateLimit)11856_storage))",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:81"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:87"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_optionLock",
             "type": "t_mapping(t_address,t_struct(OptionLock)11851_storage)",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:83"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:89"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_marketplacePercentFees",
             "type": "t_uint256",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:86"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:92"
           },
           {
             "contract": "ChampMarketplace",
             "label": "_marketplaceFeesReceiver",
             "type": "t_address",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:88"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:94"
+          },
+          {
+            "contract": "ChampMarketplace",
+            "label": "_reservedOffers",
+            "type": "t_mapping(t_uint64,t_address)",
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:97"
           },
           {
             "contract": "ChampMarketplace",
             "label": "__gap",
             "type": "t_array(t_uint256)50_storage",
-            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:598"
+            "src": "../project:/contracts/layer-2/ChampMarketplace.sol:714"
           }
         ],
         "types": {
@@ -194,6 +200,9 @@
                 "type": "t_uint256"
               }
             ]
+          },
+          "t_mapping(t_uint64,t_address)": {
+            "label": "mapping(uint64 => address)"
           },
           "t_array(t_uint256)50_storage": {
             "label": "uint256[50]"

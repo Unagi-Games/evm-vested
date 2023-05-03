@@ -152,17 +152,19 @@ contract("Marketplace", (accounts) => {
           await nftContract.approve(marketContract.address, nft, {
             from: seller,
           });
-          await marketContract.createSaleFrom(seller, nft, price, {
+          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, price, {
             from: seller,
           });
 
           // Accept the sale
-          await tokenContract.approve(
-            marketContract.address,
+          await tokenContract.approve(marketContract.address, price, {
+            from: buyer,
+          });
+          await marketContract.methods["acceptSale(uint64,uint256)"](
+            nft,
             price,
             { from: buyer }
           );
-          await marketContract.methods["acceptSale(uint64,uint256)"](nft, price, { from: buyer });
 
           // Check final state
           expect(
