@@ -41,6 +41,7 @@ import { IERC777RecipientContract } from "./IERC777Recipient";
 import { IERC777SenderContract } from "./IERC777Sender";
 import { IMintableContract } from "./IMintable";
 import { InitializableContract } from "./Initializable";
+import { LastSeenContract } from "./LastSeen";
 import { LockableContract } from "./Lockable";
 import { LockedChampTokenContract } from "./LockedChampToken";
 import { MgcTokenContract } from "./MgcToken";
@@ -112,6 +113,7 @@ declare global {
       require(name: "IERC777Sender"): IERC777SenderContract;
       require(name: "IMintable"): IMintableContract;
       require(name: "Initializable"): InitializableContract;
+      require(name: "LastSeen"): LastSeenContract;
       require(name: "Lockable"): LockableContract;
       require(name: "LockedChampToken"): LockedChampTokenContract;
       require(name: "MgcToken"): MgcTokenContract;
@@ -245,6 +247,7 @@ export {
 export { IERC777SenderContract, IERC777SenderInstance } from "./IERC777Sender";
 export { IMintableContract, IMintableInstance } from "./IMintable";
 export { InitializableContract, InitializableInstance } from "./Initializable";
+export { LastSeenContract, LastSeenInstance } from "./LastSeen";
 export { LockableContract, LockableInstance } from "./Lockable";
 export {
   LockedChampTokenContract,
