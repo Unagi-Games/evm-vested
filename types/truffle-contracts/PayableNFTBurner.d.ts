@@ -5,11 +5,14 @@
 import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
-export interface NFTBurnerContract extends Truffle.Contract<NFTBurnerInstance> {
+export interface PayableNFTBurnerContract
+  extends Truffle.Contract<PayableNFTBurnerInstance> {
   "new"(
-    nft: string,
+    _erc721: string,
+    _erc20: string,
+    _erc20Receiver: string,
     meta?: Truffle.TransactionDetails
-  ): Promise<NFTBurnerInstance>;
+  ): Promise<PayableNFTBurnerInstance>;
 }
 
 export interface BurnExecuted {
@@ -26,9 +29,11 @@ export interface BurnReserved {
     UID: string;
     from: string;
     tokenIds: BN[];
+    amount: BN;
     0: string;
     1: string;
     2: BN[];
+    3: BN;
   };
 }
 
@@ -84,7 +89,7 @@ type AllEvents =
   | RoleGranted
   | RoleRevoked;
 
-export interface NFTBurnerInstance extends Truffle.ContractInstance {
+export interface PayableNFTBurnerInstance extends Truffle.ContractInstance {
   BURN_EXECUTED(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   BURN_RESERVED(txDetails?: Truffle.TransactionDetails): Promise<string>;
@@ -95,9 +100,17 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
 
   DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
+  ERC20Origin(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  ERC20ReceiverAddress(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  ERC721Origin(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  MAINTENANCE_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
   OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  UltimateChampionsNFT(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
    * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
@@ -213,10 +226,31 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<string>;
 
+  /**
+   * sets the address to which ERC20 tokens should be sent to. The function caller must have been granted MAINTENANCE_ROLE.
+   */
+  setERC20Receiver: {
+    (_erc20Receiver: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      _erc20Receiver: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      _erc20Receiver: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _erc20Receiver: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
   getBurn(
     UID: string,
     txDetails?: Truffle.TransactionDetails
-  ): Promise<{ from: string; tokenIds: BN[]; state: string }>;
+  ): Promise<{ from: string; tokenIds: BN[]; amount: BN; state: string }>;
 
   isBurnReserved(
     UID: string,
@@ -229,32 +263,36 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
-   * Function transfers `tokenIds` and `amount` of  to the contract's account. A new Payment instance holding the payment details is assigned to `UID`. Burn intent is placed in BURN_RESERVED state. Requirements: - `tokenIds` must contain at least 1 token ID - `amount` must be greater than 0 - reserved burn must not exist for given `UID` - processed burn must not exist for given `UID`
-   * Reserves a token burn on behalf of a NFCHAMP/CHAMP holder, placeing the holder's tokens under escrow.
+   * Function transfers `tokenIds` and `amount` of erc20 to the contract's account. A new Payment instance holding the payment details is assigned to `UID`. Burn intent is placed in BURN_RESERVED state. Requirements: - `tokenIds` must contain at least 1 token ID - `amount` must be greater than 0 - reserved burn must not exist for given `UID` - processed burn must not exist for given `UID`
+   * Reserves a token burn on behalf of a NFCHAMP/CHAMP holder, placing the holder's tokens under escrow.
    */
   reserveBurn: {
     (
       UID: string,
       from: string,
       tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
       UID: string,
       from: string,
       tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
       UID: string,
       from: string,
       tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
       UID: string,
       from: string,
       tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -300,11 +338,19 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
 
     DEFAULT_ADMIN_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    ERC20Origin(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    UltimateChampionsNFT(
+    ERC20ReceiverAddress(
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
+
+    ERC721Origin(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    MAINTENANCE_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
      * Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.
@@ -420,10 +466,31 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
 
+    /**
+     * sets the address to which ERC20 tokens should be sent to. The function caller must have been granted MAINTENANCE_ROLE.
+     */
+    setERC20Receiver: {
+      (_erc20Receiver: string, txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(
+        _erc20Receiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        _erc20Receiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _erc20Receiver: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
     getBurn(
       UID: string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<{ from: string; tokenIds: BN[]; state: string }>;
+    ): Promise<{ from: string; tokenIds: BN[]; amount: BN; state: string }>;
 
     isBurnReserved(
       UID: string,
@@ -436,32 +503,36 @@ export interface NFTBurnerInstance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
-     * Function transfers `tokenIds` and `amount` of  to the contract's account. A new Payment instance holding the payment details is assigned to `UID`. Burn intent is placed in BURN_RESERVED state. Requirements: - `tokenIds` must contain at least 1 token ID - `amount` must be greater than 0 - reserved burn must not exist for given `UID` - processed burn must not exist for given `UID`
-     * Reserves a token burn on behalf of a NFCHAMP/CHAMP holder, placeing the holder's tokens under escrow.
+     * Function transfers `tokenIds` and `amount` of erc20 to the contract's account. A new Payment instance holding the payment details is assigned to `UID`. Burn intent is placed in BURN_RESERVED state. Requirements: - `tokenIds` must contain at least 1 token ID - `amount` must be greater than 0 - reserved burn must not exist for given `UID` - processed burn must not exist for given `UID`
+     * Reserves a token burn on behalf of a NFCHAMP/CHAMP holder, placing the holder's tokens under escrow.
      */
     reserveBurn: {
       (
         UID: string,
         from: string,
         tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
         UID: string,
         from: string,
         tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
         UID: string,
         from: string,
         tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
         UID: string,
         from: string,
         tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

@@ -8,38 +8,55 @@ import "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "solidity-bytes-utils/contracts/BytesLib.sol";
 
 /**
- * @title NFTBurner
+ * @title PayableNFTBurner
  * @dev TODO
  */
-contract NFTBurner is IERC721Receiver, AccessControl {
+contract PayableNFTBurner is IERC721Receiver, AccessControl {
     using SafeERC20 for IERC20;
 
+    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+    bytes32 public constant MAINTENANCE_ROLE = keccak256("MAINTENANCE_ROLE");
+    bytes32 public constant RECEIVER_ROLE = keccak256("RECEIVER_ROLE");
+
+    // ERC721 tokens will be sent to this address
     address public constant DEAD_ADDRESS =
         0x000000000000000000000000000000000000dEaD;
-
-    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     // Possible states for an existing token burn
     bytes32 public constant BURN_RESERVED = keccak256("BURN_RESERVED");
     bytes32 public constant BURN_EXECUTED = keccak256("BURN_EXECUTED");
     bytes32 public constant BURN_REVERTED = keccak256("BURN_REVERTED");
 
+    // The ERC721 origin contract from which tokens will be burned
+    IERC721 public ERC721Origin;
+
+    // The ERC20 origin contract from which tokens will be transfered
+    IERC20 public ERC20Origin;
+
+    // Address to which ERC20 tokens will be sent once a burn is executed
+    address public ERC20ReceiverAddress;
+
     struct Burn {
         address from;
         uint256[] tokenIds;
+        uint256 amount;
         bytes32 state;
     }
-
-    IERC721 public UltimateChampionsNFT;
 
     // (keccak256 UID => Burn) mapping of burn operations
     mapping(bytes32 => Burn) private _burns;
 
-    constructor(address nft) {
-        UltimateChampionsNFT = IERC721(nft);
+    constructor(
+        address _erc721,
+        address _erc20,
+        address _erc20Receiver
+    ) {
+        ERC721Origin = IERC721(_erc721);
+        ERC20Origin = IERC20(_erc20);
+        ERC20ReceiverAddress = _erc20Receiver;
+
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
@@ -70,6 +87,18 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         return this.onERC721Received.selector;
     }
 
+    /**
+     * @dev sets the address to which ERC20 tokens should be sent to.
+     * The function caller must have been granted MAINTENANCE_ROLE.
+     */
+    function setERC20Receiver(address _erc20Receiver)
+        external
+        onlyRole(MAINTENANCE_ROLE)
+    {
+        _checkRole(RECEIVER_ROLE, _erc20Receiver);
+        ERC20ReceiverAddress = _erc20Receiver;
+    }
+
     function getBurn(bytes32 UID) external view returns (Burn memory) {
         return _burns[UID];
     }
@@ -88,14 +117,14 @@ contract NFTBurner is IERC721Receiver, AccessControl {
      * @dev sends a batch of NFCHAMP tokens from `from` to `to`.
      * Requires this contract to be approved by the tokens' holder before hand.
      */
-    function _batchTokenTransfer(
+    function _batchERC721Transfer(
         address from,
         address to,
         uint256[] memory tokenIds
     ) private {
         uint256 length = tokenIds.length;
         for (uint256 i = 0; i < length; ) {
-            UltimateChampionsNFT.safeTransferFrom(from, to, tokenIds[i]);
+            ERC721Origin.safeTransferFrom(from, to, tokenIds[i]);
             unchecked {
                 ++i;
             }
@@ -103,9 +132,23 @@ contract NFTBurner is IERC721Receiver, AccessControl {
     }
 
     /**
-     * Reserves a token burn on behalf of a NFCHAMP/CHAMP holder, placeing the holder's tokens under escrow.
+     * @dev sends `amount` of ERC20Origin tokens from `from` to `to`.
+     * Requires this contract to be approved by the tokens' holder before hand.
+     */
+    function _ERC20Transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) private {
+        if (amount > 0) {
+            ERC20Origin.safeTransferFrom(from, to, amount);
+        }
+    }
+
+    /**
+     * Reserves a token burn on behalf of a NFCHAMP/CHAMP holder, placing the holder's tokens under escrow.
      *
-     * @dev Function transfers `tokenIds` and `amount` of  to the contract's account.
+     * @dev Function transfers `tokenIds` and `amount` of erc20 to the contract's account.
      * A new Payment instance holding the payment details is assigned to `UID`.
      *
      * Burn intent is placed in BURN_RESERVED state.
@@ -119,7 +162,8 @@ contract NFTBurner is IERC721Receiver, AccessControl {
     function reserveBurn(
         bytes32 UID,
         address from,
-        uint256[] calldata tokenIds
+        uint256[] calldata tokenIds,
+        uint256 amount
     ) external onlyRole(OPERATOR_ROLE) {
         require(
             tokenIds.length > 0,
@@ -129,12 +173,13 @@ contract NFTBurner is IERC721Receiver, AccessControl {
         require(!isBurnProcessed(UID), "NFTBurner: Burn already processed");
 
         // Save new Burn instance to storage
-        _burns[UID] = Burn(from, tokenIds, BURN_RESERVED);
+        _burns[UID] = Burn(from, tokenIds, amount, BURN_RESERVED);
 
         // Place NFTs under escrow
-        _batchTokenTransfer(from, address(this), tokenIds);
+        _batchERC721Transfer(from, address(this), tokenIds);
+        _ERC20Transfer(from, address(this), amount);
 
-        emit BurnReserved(UID, from, tokenIds);
+        emit BurnReserved(UID, from, tokenIds, amount);
     }
 
     function executeBurn(bytes32 UID) external onlyRole(OPERATOR_ROLE) {
@@ -142,7 +187,9 @@ contract NFTBurner is IERC721Receiver, AccessControl {
 
         Burn storage burn = _burns[UID];
         burn.state = BURN_EXECUTED;
-        _batchTokenTransfer(address(this), DEAD_ADDRESS, burn.tokenIds);
+
+        _batchERC721Transfer(address(this), DEAD_ADDRESS, burn.tokenIds);
+        _ERC20Transfer(address(this), ERC20ReceiverAddress, burn.amount);
 
         emit BurnExecuted(UID);
     }
@@ -152,12 +199,19 @@ contract NFTBurner is IERC721Receiver, AccessControl {
 
         Burn storage burn = _burns[UID];
         burn.state = BURN_REVERTED;
-        _batchTokenTransfer(address(this), burn.from, burn.tokenIds);
+
+        _batchERC721Transfer(address(this), burn.from, burn.tokenIds);
+        _ERC20Transfer(address(this), burn.from, burn.amount);
 
         emit BurnReverted(UID);
     }
 
-    event BurnReserved(bytes32 UID, address from, uint256[] tokenIds);
+    event BurnReserved(
+        bytes32 UID,
+        address from,
+        uint256[] tokenIds,
+        uint256 amount
+    );
     event BurnExecuted(bytes32 UID);
     event BurnReverted(bytes32 UID);
 }
