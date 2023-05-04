@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/105_deploy-nft-burner")(web3);

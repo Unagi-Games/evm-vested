@@ -1,5 +1,4 @@
-import { DEFAULT_ADMIN_ROLE, RECEIVER_ROLE, TOKEN_ROLE } from "../roles";
-import { L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER } from "../config";
+import { DEFAULT_ADMIN_ROLE, OPERATOR_ROLE } from "../roles";
 import { Address, Network } from "../types";
 
 const UltimateChampionsNFT = artifacts.require("UltimateChampionsNFT");
@@ -21,10 +20,6 @@ module.exports =
     await deployer.deploy(NFTBurner, ultimateChampionsNFTContract.address);
     const nftBurnerContract = await NFTBurner.deployed();
 
-    await nftBurnerContract.grantRole(
-      DEFAULT_ADMIN_ROLE,
-      L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
-    );
-    await nftBurnerContract.grantRole(RECEIVER_ROLE, operator);
+    await nftBurnerContract.grantRole(OPERATOR_ROLE, operator);
     await nftBurnerContract.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
   };
