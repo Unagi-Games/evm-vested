@@ -14,6 +14,8 @@ import {
   PAUSER_ROLE,
   RECEIVER_ROLE,
   TOKEN_ROLE,
+  OPERATOR_ROLE,
+  MAINTENANCE_ROLE,
 } from "../roles";
 import {
   BINANCE_UNAGI_MAINTENANCE_MULTISIG,
@@ -24,11 +26,12 @@ import {
 const UltimateChampionsNFT = artifacts.require("UltimateChampionsNFT");
 const ChampMarketplace = artifacts.require("ChampMarketplace");
 const DistributionManager = artifacts.require("DistributionManager");
-const PaymentRelay = artifacts.require("PaymentRelay");
+const TokenTransferRelay = artifacts.require("TokenTransferRelay");
 
 const CHAMP_TOKEN_BINANCE = "0x7e9ab560d37e62883e882474b096643cab234b65";
 // Unagi operation -> 3
-const PAYMENT_RECEIVER = "0xDE99C51f634A2879f648DCB9aA7be5d6443B1BE5";
+const TRANSFER_RECEIVER = "0xDE99C51f634A2879f648DCB9aA7be5d6443B1BE5";
+const TRANSFER_RELAY_OPERATOR = "";
 
 module.exports =
   () =>
@@ -119,18 +122,31 @@ module.exports =
     await distributionManager.renounceRole(DISTRIBUTOR_ROLE, rootAccount);
 
     //////////////////////////////////////////////////////////////
-    // Deploy PaymentRelay
+    // Deploy TokenTransferRelay
     //////////////////////////////////////////////////////////////
-    await deployer.deploy(PaymentRelay);
-    const paymentRelay = await PaymentRelay.deployed();
+    await deployer.deploy(
+      TokenTransferRelay,
+      ultimateChampionsNFT.address,
+      CHAMP_TOKEN_BINANCE,
+      TRANSFER_RECEIVER,
+      TRANSFER_RECEIVER
+    );
+    const tokenTransferRelayContract = await TokenTransferRelay.deployed();
 
-    await paymentRelay.grantRole(
+    await tokenTransferRelayContract.grantRole(
+      OPERATOR_ROLE,
+      TRANSFER_RELAY_OPERATOR
+    );
+    await tokenTransferRelayContract.grantRole(
+      MAINTENANCE_ROLE,
+      BINANCE_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
+    );
+    await tokenTransferRelayContract.grantRole(
       DEFAULT_ADMIN_ROLE,
       BINANCE_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
     );
-    await paymentRelay.grantRole(RECEIVER_ROLE, PAYMENT_RECEIVER);
-    await paymentRelay.grantRole(TOKEN_ROLE, CHAMP_TOKEN_BINANCE);
-    await paymentRelay.renounceRole(DEFAULT_ADMIN_ROLE, rootAccount);
-    await paymentRelay.renounceRole(TOKEN_ROLE, rootAccount);
-    await paymentRelay.renounceRole(RECEIVER_ROLE, rootAccount);
+    await tokenTransferRelayContract.renounceRole(
+      DEFAULT_ADMIN_ROLE,
+      rootAccount
+    );
   };

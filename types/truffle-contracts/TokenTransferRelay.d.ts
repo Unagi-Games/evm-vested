@@ -56,7 +56,9 @@ export interface TransferExecuted {
   name: "TransferExecuted";
   args: {
     UID: string;
+    from: string;
     0: string;
+    1: string;
   };
 }
 
@@ -78,7 +80,9 @@ export interface TransferReverted {
   name: "TransferReverted";
   args: {
     UID: string;
+    from: string;
     0: string;
+    1: string;
   };
 }
 
@@ -104,8 +108,6 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
   MAINTENANCE_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   TRANSFER_EXECUTED(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -269,26 +271,58 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
+  getTransferKey(
+    UID: string,
+    from: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
   getTransfer(
     UID: string,
+    from: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ from: string; tokenIds: BN[]; amount: BN; state: string }>;
 
   isTransferReserved(
     UID: string,
+    from: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
   isTransferProcessed(
     UID: string,
+    from: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<boolean>;
 
-  /**
-   * Function transfers `tokenIds` and `amount` of erc20 to the contract's account. A new Payment instance holding the payment details is assigned to `UID`. Transfer intent is placed in TRANSFER_RESERVED state. Requirements: - `tokenIds` must contain at least 1 token ID - `amount` must be greater than 0 - reserved transfer must not exist for given `UID` - processed transfer must not exist for given `UID`
-   * Reserves a token transfer on behalf of a NFCHAMP/CHAMP holder, placing the holder's tokens under escrow.
-   */
   reserveTransfer: {
+    (
+      UID: string,
+      tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      UID: string,
+      tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      UID: string,
+      tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      UID: string,
+      tokenIds: (number | BN | string)[],
+      amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  reserveTransferFrom: {
     (
       UID: string,
       from: string,
@@ -334,17 +368,48 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
-  revertTransfer: {
-    (UID: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(UID: string, txDetails?: Truffle.TransactionDetails): Promise<void>;
+  executeTransferFrom: {
+    (
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
     sendTransaction(
       UID: string,
+      from: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
       UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  revertTransfer: {
+    (
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      UID: string,
+      from: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -363,8 +428,6 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
     MAINTENANCE_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     OPERATOR_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    RECEIVER_ROLE(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     TRANSFER_EXECUTED(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -529,26 +592,58 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
       ): Promise<number>;
     };
 
+    getTransferKey(
+      UID: string,
+      from: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
     getTransfer(
       UID: string,
+      from: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ from: string; tokenIds: BN[]; amount: BN; state: string }>;
 
     isTransferReserved(
       UID: string,
+      from: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
 
     isTransferProcessed(
       UID: string,
+      from: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
 
-    /**
-     * Function transfers `tokenIds` and `amount` of erc20 to the contract's account. A new Payment instance holding the payment details is assigned to `UID`. Transfer intent is placed in TRANSFER_RESERVED state. Requirements: - `tokenIds` must contain at least 1 token ID - `amount` must be greater than 0 - reserved transfer must not exist for given `UID` - processed transfer must not exist for given `UID`
-     * Reserves a token transfer on behalf of a NFCHAMP/CHAMP holder, placing the holder's tokens under escrow.
-     */
     reserveTransfer: {
+      (
+        UID: string,
+        tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        UID: string,
+        tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        UID: string,
+        tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        UID: string,
+        tokenIds: (number | BN | string)[],
+        amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    reserveTransferFrom: {
       (
         UID: string,
         from: string,
@@ -594,17 +689,48 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
       ): Promise<number>;
     };
 
-    revertTransfer: {
-      (UID: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(UID: string, txDetails?: Truffle.TransactionDetails): Promise<void>;
+    executeTransferFrom: {
+      (
+        UID: string,
+        from: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        UID: string,
+        from: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
       sendTransaction(
         UID: string,
+        from: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
         UID: string,
+        from: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    revertTransfer: {
+      (
+        UID: string,
+        from: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        UID: string,
+        from: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        UID: string,
+        from: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        UID: string,
+        from: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
