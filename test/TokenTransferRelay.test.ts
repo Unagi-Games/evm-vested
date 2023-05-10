@@ -516,7 +516,7 @@ contract("TokenTransferRelay", (accounts) => {
     });
 
     describe("When a token transfer is processed", () => {
-      it("Should block reservation of the already processed token reservation", async () => {
+      it("Should block reservation of the already processed token transfer", async () => {
         async function tryTransferReservation(uid: string) {
           try {
             await tokenTransferRelayContract.reserveTransferFrom(
@@ -539,7 +539,7 @@ contract("TokenTransferRelay", (accounts) => {
         ]);
       });
 
-      it("Should block execution of the already processed token reservation", async () => {
+      it("Should block execution of the already processed token transfer", async () => {
         async function tryTransferExecute(uid: string) {
           try {
             await tokenTransferRelayContract.executeTransferFrom(uid, holder);
@@ -557,7 +557,7 @@ contract("TokenTransferRelay", (accounts) => {
         ]);
       });
 
-      it("Should block revert of the already processed token reservation", async () => {
+      it("Should block revert of the already processed token transfer", async () => {
         async function tryTransferRevert(uid: string) {
           try {
             await tokenTransferRelayContract.revertTransfer(uid, holder);
@@ -575,162 +575,5 @@ contract("TokenTransferRelay", (accounts) => {
         ]);
       });
     });
-
-    /*
-    describe("When a token transfer is executed", () => {
-      before(async () => {
-        // Assert initial state
-        assert(
-          (await nftContract.ownerOf(nfts[0])) === tokenTransferRelayContract.address,
-          "NFT owner is not correct"
-        );
-        assert(
-          (await nftContract.ownerOf(nfts[1])) === tokenTransferRelayContract.address,
-          "NFT owner is not correct"
-        );
-        assert(
-          (await nftContract.ownerOf(nfts[2])) === tokenTransferRelayContract.address,
-          "NFT owner is not correct"
-        );
-
-        await tokenTransferRelayContract.executeBurn(BURN_UID);
-      });
-
-      it("Should mark token transfer as executed", async () => {
-        async function validateTransferExecution(uid: string) {
-
-        }
-        expect(await tokenTransferRelayContract.isTransferProcessed(BURN_UID)).to.be.true;
-        expect(await tokenTransferRelayContract.isBurnProcessed(BURN_UID)).to.be.true;
-        const { state } = await tokenTransferRelayContract.getBurn(BURN_UID);
-        expect(state).to.equals(await tokenTransferRelayContract.BURN_EXECUTED());
-      });
-
-      it("Should transfer tokens to ERC20Receiver and ERC721Receiver", async () => {
-        expect(await nftContract.ownerOf(nfts[0])).to.equals(DEAD_ADDRESS);
-        expect(await nftContract.ownerOf(nfts[1])).to.equals(DEAD_ADDRESS);
-        expect(await nftContract.ownerOf(nfts[2])).to.equals(DEAD_ADDRESS);
-      });
-    });
-
-    describe("When a token burn is executed", () => {
-      const DEAD_ADDRESS = "0x000000000000000000000000000000000000dEaD";
-
-      before(async () => {
-        // Assert initial state
-        assert(
-          (await nftContract.ownerOf(nfts[0])) === tokenTransferRelayContract.address,
-          "NFT owner is not correct"
-        );
-        assert(
-          (await nftContract.ownerOf(nfts[1])) === tokenTransferRelayContract.address,
-          "NFT owner is not correct"
-        );
-        assert(
-          (await nftContract.ownerOf(nfts[2])) === tokenTransferRelayContract.address,
-          "NFT owner is not correct"
-        );
-
-        await tokenTransferRelayContract.executeBurn(BURN_UID);
-      });
-
-      it("Should mark token burn as executed", async () => {
-        expect(await tokenTransferRelayContract.isBurnProcessed(BURN_UID)).to.be.true;
-        const { state } = await tokenTransferRelayContract.getBurn(BURN_UID);
-        expect(state).to.equals(await tokenTransferRelayContract.BURN_EXECUTED());
-      });
-
-      it("Should transfer the NFTs in escrow to DEAD address", async () => {
-        expect(await nftContract.ownerOf(nfts[0])).to.equals(DEAD_ADDRESS);
-        expect(await nftContract.ownerOf(nfts[1])).to.equals(DEAD_ADDRESS);
-        expect(await nftContract.ownerOf(nfts[2])).to.equals(DEAD_ADDRESS);
-      });
-    });
-
-    describe("When a token burn is reverted", () => {
-      before(async () => {
-        // Assert initial state
-        expect(await nftContract.ownerOf(nfts[3])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[4])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[5])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[6])).to.equals(holder);
-
-        await tokenTransferRelayContract.reserveTransfer(BURN_UID_2, holder, nfts.slice(3));
-        await tokenTransferRelayContract.revertBurn(BURN_UID_2);
-      });
-
-      it("Should mark token burn as reverted", async () => {
-        expect(await tokenTransferRelayContract.isBurnProcessed(BURN_UID_2)).to.be.true;
-        const { state } = await tokenTransferRelayContract.getBurn(BURN_UID_2);
-        expect(state).to.equals(await tokenTransferRelayContract.BURN_REVERTED());
-      });
-
-      it("Should transfer the NFTs in escrow back to the original holder", async () => {
-        expect(await nftContract.ownerOf(nfts[3])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[4])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[5])).to.equals(holder);
-        expect(await nftContract.ownerOf(nfts[6])).to.equals(holder);
-      });
-    });
-
-    describe("When a token burn is processed", () => {
-      before(async () => {
-        // Assert initial state
-        assert(
-          await tokenTransferRelayContract.isBurnProcessed(BURN_UID),
-          "Token burn `BURN_UID` is not processed"
-        );
-        assert(
-          await tokenTransferRelayContract.isBurnProcessed(BURN_UID_2),
-          "Token burn `BURN_UID` is not processed"
-        );
-      });
-
-      it("Should block reservation of the already processed token burn", async () => {
-        try {
-          await tokenTransferRelayContract.reserveTransfer(BURN_UID, holder, nfts);
-          assert.fail("reserveTransfer() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("already processed");
-        }
-        try {
-          await tokenTransferRelayContract.reserveTransfer(BURN_UID, holder, nfts);
-          assert.fail("reserveTransfer() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("already processed");
-        }
-      });
-
-      it("Should block execution of the already processed token burn", async () => {
-        try {
-          await tokenTransferRelayContract.executeBurn(BURN_UID);
-          assert.fail("executeBurn() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("Burn is not reserved");
-        }
-        try {
-          await tokenTransferRelayContract.executeBurn(BURN_UID_2);
-          assert.fail("executeBurn() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("Burn is not reserved");
-        }
-      });
-
-      it("Should block revert of the already processed token burn", async () => {
-        try {
-          await tokenTransferRelayContract.revertBurn(BURN_UID);
-          assert.fail("revertBurn() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("Burn is not reserved");
-        }
-        try {
-          await tokenTransferRelayContract.revertBurn(BURN_UID_2);
-          assert.fail("revertBurn() did not throw.");
-        } catch (e: any) {
-          expect(e.message).to.includes("Burn is not reserved");
-        }
-      });
-    });
-    */
   });
 });
