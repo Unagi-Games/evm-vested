@@ -1,13 +1,16 @@
 import { DEFAULT_ADMIN_ROLE, OPERATOR_ROLE, MAINTENANCE_ROLE } from "../roles";
-import { L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER } from "../config";
+import {
+  L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER,
+  L2_UNAGI_MAINTENANCE_MULTISIG,
+} from "../config";
 import { Address, Network } from "../types";
 
 const UltimateChampionsNFT = artifacts.require("UltimateChampionsNFT");
 const ChildChampToken = artifacts.require("ChildChampToken");
 const TokenTransferRelay = artifacts.require("TokenTransferRelay");
 
-const TRANSFER_RELAY_OPERATOR = "";
-const ERC721_RECEIVER = "";
+const TRANSFER_RELAY_OPERATOR = L2_UNAGI_MAINTENANCE_MULTISIG;
+const ERC721_RECEIVER = "0x000000000000000000000000000000000000dEaD";
 const ERC20_RECEIVER = "";
 
 module.exports =

@@ -14,15 +14,19 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * @dev TokenTransferRelay smart contract implements a two-step token transfer service that allows for refundable token transfers.
  * Each contract instance can relay only one ERC20 / ERC721 tokens per deployment.
  *
- * ERC20 / ERC721 token transfers can be reserved on behalf of a token holder, by calling the `reserveTransfer` function.
- * This places the token holder's funds in escrow, allowing for later execution, or refund of the transfer. To interact with this
- * function, the caller must be granted OPERATOR_ROLE and approved by the token holder to manage their funds.
+ * ERC20 / ERC721 token transfers can be reserved by a token holder, by calling the `reserveTransfer` function.
+ * This places the token holder's funds in escrow, allowing for later execution, or refund of the transfer.
  *
- * Calling `executeTransfer` executes a reserved transfer, relaying the funds under escrow to either ERC721Receiver, or ERC20Receiver.
- * Alternatively, a reserved transfer can be refunded back to the original token holder by calling `revertTransfer`.
- * Both of these functions require the caller to be granted OPERATOR_ROLE.
+ * Calling `executeTransfer` executes a reserved token transfer, relaying the funds under escrow to either ERC721Receiver, or ERC20Receiver.
+ * Alternatively, a reserved transfer can be refunded back to the original token holder by calling `revertTransfer`. Only accounts 
+ * granted OPERATOR_ROLE can call this function.
  *
- * The ERC721Receiver and ERC20Receiver addresses can be configured by caller's granted MAINTENANCE_ROLE.
+ * The token holder must always give the necessary approval and allowance to the contract for it to manage their funds. 
+ *
+ * The contract also provides the option to reserve and execute token transfers on behalf of a token holder by using
+ * the `reserveTransferFrom` and `executeTransferFrom` functions, respectively. 
+ *
+ * The ERC721Receiver and ERC20Receiver addresses can be configured by accounts granted MAINTENANCE_ROLE.
  *
  */
 contract TokenTransferRelay is IERC721Receiver, AccessControl {

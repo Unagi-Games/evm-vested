@@ -12,8 +12,6 @@ import {
   MINT_ROLE,
   OPTION_ROLE,
   PAUSER_ROLE,
-  RECEIVER_ROLE,
-  TOKEN_ROLE,
   OPERATOR_ROLE,
   MAINTENANCE_ROLE,
 } from "../roles";
@@ -31,7 +29,7 @@ const TokenTransferRelay = artifacts.require("TokenTransferRelay");
 const CHAMP_TOKEN_BINANCE = "0x7e9ab560d37e62883e882474b096643cab234b65";
 // Unagi operation -> 3
 const TRANSFER_RECEIVER = "0xDE99C51f634A2879f648DCB9aA7be5d6443B1BE5";
-const TRANSFER_RELAY_OPERATOR = "";
+const TRANSFER_RELAY_OPERATOR = BINANCE_UNAGI_MAINTENANCE_MULTISIG;
 
 module.exports =
   () =>
@@ -128,7 +126,7 @@ module.exports =
       TokenTransferRelay,
       ultimateChampionsNFT.address,
       CHAMP_TOKEN_BINANCE,
-      TRANSFER_RECEIVER,
+      "0x000000000000000000000000000000000000dEaD",
       TRANSFER_RECEIVER
     );
     const tokenTransferRelayContract = await TokenTransferRelay.deployed();
