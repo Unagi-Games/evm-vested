@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/103_deploy-token-transfer-relay")(web3);
