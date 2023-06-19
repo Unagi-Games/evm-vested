@@ -222,10 +222,10 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
    * See {IERC721Receiver-onERC721Received}.
    */
   onERC721Received(
-    operator: string,
-    from: string,
-    tokenId: number | BN | string,
-    data: string,
+    arg0: string,
+    arg1: string,
+    arg2: number | BN | string,
+    arg3: string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<string>;
 
@@ -542,10 +542,10 @@ export interface TokenTransferRelayInstance extends Truffle.ContractInstance {
      * See {IERC721Receiver-onERC721Received}.
      */
     onERC721Received(
-      operator: string,
-      from: string,
-      tokenId: number | BN | string,
-      data: string,
+      arg0: string,
+      arg1: string,
+      arg2: number | BN | string,
+      arg3: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
 

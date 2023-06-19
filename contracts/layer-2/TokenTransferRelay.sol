@@ -18,13 +18,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * This places the token holder's funds in escrow, allowing for later execution, or refund of the transfer.
  *
  * Calling `executeTransfer` executes a reserved token transfer, relaying the funds under escrow to either ERC721Receiver, or ERC20Receiver.
- * Alternatively, a reserved transfer can be refunded back to the original token holder by calling `revertTransfer`. Only accounts 
+ * Alternatively, a reserved transfer can be refunded back to the original token holder by calling `revertTransfer`. Only accounts
  * granted OPERATOR_ROLE can call this function.
  *
- * The token holder must always give the necessary approval and allowance to the contract for it to manage their funds. 
+ * The token holder must always give the necessary approval and allowance to the contract for it to manage their funds.
  *
  * The contract also provides the option to reserve and execute token transfers on behalf of a token holder by using
- * the `reserveTransferFrom` and `executeTransferFrom` functions, respectively. 
+ * the `reserveTransferFrom` and `executeTransferFrom` functions, respectively.
  *
  * The ERC721Receiver and ERC20Receiver addresses can be configured by accounts granted MAINTENANCE_ROLE.
  *
@@ -95,10 +95,10 @@ contract TokenTransferRelay is IERC721Receiver, AccessControl {
      * @dev See {IERC721Receiver-onERC721Received}.
      */
     function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
+        address,
+        address,
+        uint256,
+        bytes calldata
     ) external pure returns (bytes4) {
         return this.onERC721Received.selector;
     }

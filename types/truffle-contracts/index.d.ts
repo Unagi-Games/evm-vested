@@ -54,6 +54,7 @@ import { PaymentSplitterContract } from "./PaymentSplitter";
 import { TestChampMarketplaceContract } from "./TestChampMarketplace";
 import { TestERC20Contract } from "./TestERC20";
 import { TestLockableContract } from "./TestLockable";
+import { TokenTransferRelayContract } from "./TokenTransferRelay";
 import { UltimateChampionsNFTContract } from "./UltimateChampionsNFT";
 import { UPaymentSplitterContract } from "./UPaymentSplitter";
 import { VestingWalletContract } from "./VestingWallet";
@@ -126,6 +127,7 @@ declare global {
       require(name: "TestChampMarketplace"): TestChampMarketplaceContract;
       require(name: "TestERC20"): TestERC20Contract;
       require(name: "TestLockable"): TestLockableContract;
+      require(name: "TokenTransferRelay"): TokenTransferRelayContract;
       require(name: "UltimateChampionsNFT"): UltimateChampionsNFTContract;
       require(name: "UPaymentSplitter"): UPaymentSplitterContract;
       require(name: "VestingWallet"): VestingWalletContract;
@@ -269,6 +271,10 @@ export {
 } from "./TestChampMarketplace";
 export { TestERC20Contract, TestERC20Instance } from "./TestERC20";
 export { TestLockableContract, TestLockableInstance } from "./TestLockable";
+export {
+  TokenTransferRelayContract,
+  TokenTransferRelayInstance,
+} from "./TokenTransferRelay";
 export {
   UltimateChampionsNFTContract,
   UltimateChampionsNFTInstance,
