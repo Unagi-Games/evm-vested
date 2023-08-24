@@ -10,7 +10,7 @@ import { NewChampMarketplace } from "./ChampMarketplace.service";
 const NFT = artifacts.require("UltimateChampionsNFT");
 const Token = artifacts.require("TestERC20");
 
-contract("Marketplace", (accounts) => {
+contract.only("Marketplace", (accounts) => {
   describe("as a user", () => {
     const seller = accounts[1];
     const buyer = accounts[2];
@@ -45,9 +45,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
 
         try {
           await marketContract.setOption(buyer, nft, { from: buyer });
@@ -63,9 +68,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           seller
@@ -88,9 +98,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -98,7 +113,9 @@ contract("Marketplace", (accounts) => {
         await marketContract.setOption(buyer, nft, { from: buyer });
 
         try {
-          await marketContract.updateSaleFrom(seller, nft, 2, ZeroAddress, { from: seller });
+          await marketContract.updateSaleFrom(seller, nft, 2, ZeroAddress, {
+            from: seller,
+          });
           assert.fail("updateSaleFrom did not throw.");
         } catch (e: any) {
           expect(e.message).to.includes("An option exists on this sale");
@@ -111,9 +128,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -144,9 +166,14 @@ contract("Marketplace", (accounts) => {
           await nftContract.approve(marketContract.address, tokenId, {
             from: seller,
           });
-          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, tokenId, 1, {
-            from: seller,
-          });
+          await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+            seller,
+            tokenId,
+            1,
+            {
+              from: seller,
+            }
+          );
         }
 
         await marketContract.grantRole(
@@ -171,9 +198,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -192,9 +224,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -210,9 +247,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: buyer,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](buyer, nft, 1, {
-          from: buyer,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          buyer,
+          nft,
+          1,
+          {
+            from: buyer,
+          }
+        );
         await marketContract.setOption(buyer, nft, { from: buyer });
 
         expect(await marketContract.hasOption(buyer, nft)).to.be.true;
@@ -222,9 +264,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -248,9 +295,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -280,9 +332,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -302,9 +359,14 @@ contract("Marketplace", (accounts) => {
         await nftContract.approve(marketContract.address, nft, {
           from: seller,
         });
-        await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-          from: seller,
-        });
+        await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+          seller,
+          nft,
+          1,
+          {
+            from: seller,
+          }
+        );
         await marketContract.grantRole(
           await marketContract.OPTION_ROLE(),
           buyer
@@ -369,9 +431,14 @@ contract("Marketplace", (accounts) => {
       await nftContract.approve(marketContract.address, nft, {
         from: seller,
       });
-      await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, 1, {
-        from: seller,
-      });
+      await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
+        seller,
+        nft,
+        1,
+        {
+          from: seller,
+        }
+      );
       await marketContract.setOption(buyer, nft, { from: operator });
 
       expect(await marketContract.hasOption(buyer, nft)).to.be.true;
