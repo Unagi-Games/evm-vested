@@ -390,7 +390,7 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: BN; 1: string }>;
 
-  getSaleBuyerPrice(
+  getBuyerSalePrice(
     tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<BN>;
@@ -778,7 +778,7 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: BN; 1: string }>;
 
-    getSaleBuyerPrice(
+    getBuyerSalePrice(
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<BN>;

@@ -126,13 +126,24 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     function computeSaleShares(uint256 weiPrice)
         public
         view
-        returns (uint256 sellerShare, uint256 marketplaceSellFeeShare, uint256 marketplaceBuyFeeShare, uint256 marketplaceBurnFeeShare)
+        returns (
+            uint256 sellerShare,
+            uint256 marketplaceSellFeeShare,
+            uint256 marketplaceBuyFeeShare,
+            uint256 marketplaceBurnFeeShare
+        )
     {
-        (uint128 sellFee, uint128 buyFee, uint256 burnFee) = marketplacePercentFees();
+        (
+            uint128 sellFee,
+            uint128 buyFee,
+            uint256 burnFee
+        ) = marketplacePercentFees();
         marketplaceSellFeeShare = weiPrice.mul(sellFee).div(100);
         marketplaceBuyFeeShare = weiPrice.mul(buyFee).div(100);
         marketplaceBurnFeeShare = weiPrice.mul(burnFee).div(100);
-        sellerShare = weiPrice.sub(marketplaceSellFeeShare).sub(marketplaceBurnFeeShare);
+        sellerShare = weiPrice.sub(marketplaceSellFeeShare).sub(
+            marketplaceBurnFeeShare
+        );
     }
 
     /**
@@ -293,13 +304,15 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         return (_sales[tokenId], _reservedOffers[tokenId]);
     }
 
-    function getSaleBuyerPrice(uint64 tokenId) public view returns (uint256) {
+    function getBuyerSalePrice(uint64 tokenId) public view returns (uint256) {
         if (_NFCHAMP_CONTRACT.getApproved(tokenId) != address(this)) {
             return 0;
         }
 
-        (,,uint256 marketplaceBuyFeeShare,) = computeSaleShares(_sales[tokenId]);
-        return _sales[tokenId].add(marketplaceBuyFeeShare);
+        (, , uint256 marketplaceBuyFeeShare, ) = computeSaleShares(
+            _sales[tokenId]
+        );
+        return _sales[tokenId] + marketplaceBuyFeeShare;
     }
 
     /**
@@ -353,7 +366,15 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     /**
      * @dev Getter for the marketplace fees.
      */
-    function marketplacePercentFees() public view returns (uint128 sellFee, uint128 buyFee, uint256 burnFee) {  
+    function marketplacePercentFees()
+        public
+        view
+        returns (
+            uint128 sellFee,
+            uint128 buyFee,
+            uint256 burnFee
+        )
+    {
         sellFee = uint128(_marketplacePercentFees >> 128);
         buyFee = uint128(_marketplacePercentFees);
         burnFee = _marketplaceBurnPercentFees;
@@ -387,18 +408,25 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * - nMarketplacePercentFees must be a percentage (Between 0 and 100 included).
      * - Caller must have role FEE_MANAGER_ROLE.
      */
-    function setMarketplacePercentFees(uint128 nMarketplaceSellPercentFees, uint128 nMarketplaceBuyPercentFees, uint256 nMarketplaceBurnPercentFees)
-        external
-        onlyRole(FEE_MANAGER_ROLE)
-    {
+    function setMarketplacePercentFees(
+        uint128 nMarketplaceSellPercentFees,
+        uint128 nMarketplaceBuyPercentFees,
+        uint256 nMarketplaceBurnPercentFees
+    ) external onlyRole(FEE_MANAGER_ROLE) {
         require(
-            nMarketplaceSellPercentFees + nMarketplaceBurnPercentFees < 100,
+            nMarketplaceSellPercentFees + nMarketplaceBurnPercentFees <= 100,
             "ChampMarketplace: total marketplace sell and burn fees should be below 100"
         );
-        _marketplacePercentFees = uint256(nMarketplaceSellPercentFees) << 128 | uint256(nMarketplaceBuyPercentFees);
+        _marketplacePercentFees =
+            (uint256(nMarketplaceSellPercentFees) << 128) |
+            uint256(nMarketplaceBuyPercentFees);
         _marketplaceBurnPercentFees = nMarketplaceBurnPercentFees;
 
-        emit MarketplaceFeesUpdated(nMarketplaceSellPercentFees, nMarketplaceBuyPercentFees, nMarketplaceBurnPercentFees);
+        emit MarketplaceFeesUpdated(
+            nMarketplaceSellPercentFees,
+            nMarketplaceBuyPercentFees,
+            nMarketplaceBurnPercentFees
+        );
     }
 
     /**
@@ -662,7 +690,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         require(
             _CHAMP_TOKEN_CONTRACT.allowance(msg.sender, address(this)) >=
                 salePrice + marketplaceBuyFeeShare,
-            "ChampMarketplace: Allowance is lower than sale price"
+            "ChampMarketplace: Allowance is lower than buyer sale price"
         );
 
         //
@@ -672,13 +700,10 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         delete _sales[tokenId];
 
         _NFCHAMP_CONTRACT.safeTransferFrom(seller, nftReceiver, tokenId);
-        _CHAMP_TOKEN_CONTRACT.safeTransferFrom(
-            msg.sender,
-            seller,
-            sellerShare
-        );
+        _CHAMP_TOKEN_CONTRACT.safeTransferFrom(msg.sender, seller, sellerShare);
 
-        uint256 marketplaceFeesShare = marketplaceSellFeeShare + marketplaceBuyFeeShare;
+        uint256 marketplaceFeesShare = marketplaceSellFeeShare +
+            marketplaceBuyFeeShare;
         if (marketplaceFeesShare > 0) {
             _CHAMP_TOKEN_CONTRACT.safeTransferFrom(
                 msg.sender,
@@ -708,7 +733,11 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         emit SaleAccepted(tokenId, salePrice, seller, nftReceiver);
     }
 
-    event MarketplaceFeesUpdated(uint128 sellerPercentFees, uint128 buyerPercentFees, uint256 burnPercentFees);
+    event MarketplaceFeesUpdated(
+        uint128 sellerPercentFees,
+        uint128 buyerPercentFees,
+        uint256 burnPercentFees
+    );
 
     event MarketplaceFeesReceiverUpdated(address feesReceiver);
 

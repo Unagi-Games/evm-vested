@@ -211,6 +211,11 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
+  getBuyerSalePrice(
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
+
   /**
    */
   getOption(
@@ -250,11 +255,6 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     tokenId: number | BN | string,
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: BN; 1: string }>;
-
-  getSaleBuyerPrice(
-    tokenId: number | BN | string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
 
   /**
    * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.
@@ -599,6 +599,11 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
       ): Promise<number>;
     };
 
+    getBuyerSalePrice(
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
+
     /**
      */
     getOption(
@@ -638,11 +643,6 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
       tokenId: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: BN; 1: string }>;
-
-    getSaleBuyerPrice(
-      tokenId: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
 
     /**
      * Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.

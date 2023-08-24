@@ -43,7 +43,11 @@ module.exports =
     await champMarketplaceContract.setMarketplaceFeesReceiver(
       "0xa6A47E2Ad1dC0680308B16731285a8F1476473C8"
     );
-    await champMarketplaceContract.setMarketplacePercentFees(5);
+
+    const marketplaceFees: [number, number, number] = [9, 5, 1];
+    await champMarketplaceContract.setMarketplacePercentFees(
+      ...marketplaceFees
+    );
     await champMarketplaceContract.grantRole(
       DEFAULT_ADMIN_ROLE,
       L2_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER
