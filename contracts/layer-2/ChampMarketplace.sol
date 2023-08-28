@@ -30,9 +30,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
  * can accept a specifc sale. To accept a sale, the CHAMP holder must approve CHAMP tokens to
  * the ChampMarketplace address and call the function `acceptSale`.
  *
- * Once a NFT is sold, a fee (readable through `marketplacePercentFees()`)
- * will be applied on the CHAMP payment and forwarded to the marketplace
- * fees receiver (readable through `marketplaceFeesReceiver()`).
+ * Once a NFT is sold, sell, buy and burn fees (readable through `marketplacePercentFees()`)
+ * will be applied on the CHAMP payment. Sell and buy fees are forwarded to the marketplace
+ * fees receiver (readable through `marketplaceFeesReceiver()`), while the burn fee is forwarded to the DEAD address.
  * The rest is sent to the seller.
  *
  * The fees is editable by FEE_MANAGER_ROLE.
@@ -88,7 +88,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     // (wallet => Option) mapping of locks to prevent multiple options per wallet
     mapping(address => OptionLock) private _optionLock;
 
-    // Percent fees applied on each sale.
+    // Percent fees applied on each sale. Stores sell and buy fees: 0-128bits buy fee, 128-256bits -> sell fee
     uint256 private _marketplacePercentFees;
     // Fees receiver address
     address private _marketplaceFeesReceiver;
@@ -304,6 +304,11 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         return (_sales[tokenId], _reservedOffers[tokenId]);
     }
 
+    /**
+     * @dev Returns the CHAMP wei price to buy a given NFCHAMP ID with included buyer fees.
+     *
+     * If the sale does not exists, the function returns a wei price of 0.
+     */
     function getBuyerSalePrice(uint64 tokenId) public view returns (uint256) {
         if (_NFCHAMP_CONTRACT.getApproved(tokenId) != address(this)) {
             return 0;
@@ -405,7 +410,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      *
      * Requirements:
      *
-     * - nMarketplacePercentFees must be a percentage (Between 0 and 100 included).
+     * - Sum of nMarketplaceSellPercentFees and nMarketplaceBurnPercentFees must be an integer between 0 and 100 included.
      * - Caller must have role FEE_MANAGER_ROLE.
      */
     function setMarketplacePercentFees(
@@ -648,7 +653,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * - salePrice must match sale price.
      * - nftReceiver can interact with the sale.
      * - sale reservation is open for nftReceiver.
-     * - ChampMarketplace allowance must be greater than sale price.
+     * - ChampMarketplace allowance must be greater than sale price including buy fees.
      */
     function _acceptSale(
         uint64 tokenId,

@@ -166,14 +166,11 @@ contract.only("Marketplace", (accounts) => {
           await nftContract.approve(marketContract.address, tokenId, {
             from: seller,
           });
-          await marketContract.methods["createSaleFrom(address,uint64,uint256)"](
-            seller,
-            tokenId,
-            1,
-            {
-              from: seller,
-            }
-          );
+          await marketContract.methods[
+            "createSaleFrom(address,uint64,uint256)"
+          ](seller, tokenId, 1, {
+            from: seller,
+          });
         }
 
         await marketContract.grantRole(
