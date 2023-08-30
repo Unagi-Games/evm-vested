@@ -88,8 +88,12 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     // (wallet => Option) mapping of locks to prevent multiple options per wallet
     mapping(address => OptionLock) private _optionLock;
 
-    // Percent fees applied on each sale. Stores sell and buy fees: 0-128bits buy fee, 128-256bits -> sell fee
-    uint256 private _marketplacePercentFees;
+    // Percent fees applied on each sale: sell, buy and burn fees.
+    uint8 private _marketplaceSellPercentFee;
+    uint8 private _marketplaceBuyPercentFee;
+    uint8 private _marketplaceBurnPercentFee;
+    uint232 private _EMPTY_GAP;
+
     // Fees receiver address
     address private _marketplaceFeesReceiver;
 
@@ -133,11 +137,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
             uint256 marketplaceBurnFeeShare
         )
     {
-        (
-            uint128 sellFee,
-            uint128 buyFee,
-            uint256 burnFee
-        ) = marketplacePercentFees();
+        (uint8 sellFee, uint8 buyFee, uint8 burnFee) = marketplacePercentFees();
         marketplaceSellFeeShare = weiPrice.mul(sellFee).div(100);
         marketplaceBuyFeeShare = weiPrice.mul(buyFee).div(100);
         marketplaceBurnFeeShare = weiPrice.mul(burnFee).div(100);
@@ -375,14 +375,16 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         public
         view
         returns (
-            uint128 sellFee,
-            uint128 buyFee,
-            uint256 burnFee
+            uint8,
+            uint8,
+            uint8
         )
     {
-        sellFee = uint128(_marketplacePercentFees >> 128);
-        buyFee = uint128(_marketplacePercentFees);
-        burnFee = _marketplaceBurnPercentFees;
+        return (
+            _marketplaceSellPercentFee,
+            _marketplaceBuyPercentFee,
+            _marketplaceBurnPercentFee
+        );
     }
 
     /**
@@ -414,23 +416,22 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * - Caller must have role FEE_MANAGER_ROLE.
      */
     function setMarketplacePercentFees(
-        uint128 nMarketplaceSellPercentFees,
-        uint128 nMarketplaceBuyPercentFees,
-        uint256 nMarketplaceBurnPercentFees
+        uint8 nMarketplaceSellPercentFee,
+        uint8 nMarketplaceBuyPercentFee,
+        uint8 nMarketplaceBurnPercentFee
     ) external onlyRole(FEE_MANAGER_ROLE) {
         require(
-            nMarketplaceSellPercentFees + nMarketplaceBurnPercentFees <= 100,
+            nMarketplaceSellPercentFee + nMarketplaceBurnPercentFee <= 100,
             "ChampMarketplace: total marketplace sell and burn fees should be below 100"
         );
-        _marketplacePercentFees =
-            (uint256(nMarketplaceSellPercentFees) << 128) |
-            uint256(nMarketplaceBuyPercentFees);
-        _marketplaceBurnPercentFees = nMarketplaceBurnPercentFees;
+        _marketplaceSellPercentFee = nMarketplaceSellPercentFee;
+        _marketplaceBuyPercentFee = nMarketplaceBuyPercentFee;
+        _marketplaceBurnPercentFee = nMarketplaceBurnPercentFee;
 
         emit MarketplaceFeesUpdated(
-            nMarketplaceSellPercentFees,
-            nMarketplaceBuyPercentFees,
-            nMarketplaceBurnPercentFees
+            nMarketplaceSellPercentFee,
+            nMarketplaceBuyPercentFee,
+            nMarketplaceBurnPercentFee
         );
     }
 

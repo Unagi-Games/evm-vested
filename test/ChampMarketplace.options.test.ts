@@ -10,7 +10,7 @@ import { NewChampMarketplace } from "./ChampMarketplace.service";
 const NFT = artifacts.require("UltimateChampionsNFT");
 const Token = artifacts.require("TestERC20");
 
-contract.only("Marketplace", (accounts) => {
+contract("Marketplace", (accounts) => {
   describe("as a user", () => {
     const seller = accounts[1];
     const buyer = accounts[2];
