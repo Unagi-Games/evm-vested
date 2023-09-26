@@ -29,8 +29,12 @@ export interface MarketplaceFeesReceiverUpdated {
 export interface MarketplaceFeesUpdated {
   name: "MarketplaceFeesUpdated";
   args: {
-    percentFees: BN;
+    sellerPercentFees: BN;
+    buyerPercentFees: BN;
+    burnPercentFees: BN;
     0: BN;
+    1: BN;
+    2: BN;
   };
 }
 
@@ -309,7 +313,7 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   computeSaleShares(
     weiPrice: number | BN | string,
     txDetails?: Truffle.TransactionDetails
-  ): Promise<{ 0: BN; 1: BN }>;
+  ): Promise<{ 0: BN; 1: BN; 2: BN; 3: BN }>;
 
   /**
    * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
@@ -386,6 +390,11 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<{ 0: BN; 1: string }>;
 
+  getBuyerSalePrice(
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
+
   /**
    * Returns true if the given address has an option on a sale for the specified NFT. If no option is set on the sale, it means that anyone can purchase the NFT.
    * @param from the address to check for an option
@@ -426,7 +435,9 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
   /**
    * Getter for the marketplace fees.
    */
-  marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+  marketplacePercentFees(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<{ 0: BN; 1: BN; 2: BN }>;
 
   /**
    * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
@@ -455,19 +466,27 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
    */
   setMarketplacePercentFees: {
     (
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -682,7 +701,7 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     computeSaleShares(
       weiPrice: number | BN | string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<{ 0: BN; 1: BN }>;
+    ): Promise<{ 0: BN; 1: BN; 2: BN; 3: BN }>;
 
     /**
      * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
@@ -759,6 +778,11 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<{ 0: BN; 1: string }>;
 
+    getBuyerSalePrice(
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
+
     /**
      * Returns true if the given address has an option on a sale for the specified NFT. If no option is set on the sale, it means that anyone can purchase the NFT.
      * @param from the address to check for an option
@@ -799,7 +823,9 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
     /**
      * Getter for the marketplace fees.
      */
-    marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+    marketplacePercentFees(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<{ 0: BN; 1: BN; 2: BN }>;
 
     /**
      * Setter for the marketplace fees receiver address. Emits a {MarketplaceFeesReceiverUpdated} event. Requirements: - Caller must have role FEE_MANAGER_ROLE.
@@ -828,19 +854,27 @@ export interface ChampMarketplaceInstance extends Truffle.ContractInstance {
      */
     setMarketplacePercentFees: {
       (
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

@@ -75,7 +75,9 @@ module.exports =
     await champMarketplace.setMarketplaceFeesReceiver(
       "0xa6A47E2Ad1dC0680308B16731285a8F1476473C8"
     );
-    await champMarketplace.setMarketplacePercentFees(5);
+
+    const marketPlaceFees: [number, number, number] = [9, 5, 1];
+    await champMarketplace.setMarketplacePercentFees(...marketPlaceFees);
     await champMarketplace.grantRole(
       DEFAULT_ADMIN_ROLE,
       BINANCE_UNAGI_MAINTENANCE_TIMELOCK_CONTROLLER

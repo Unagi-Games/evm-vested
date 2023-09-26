@@ -12,5 +12,6 @@ module.exports = () => async (deployer: Truffle.Deployer, network: Network) => {
   );
   await prepareUpgrade(existing, ChampMarketplace as any, {
     deployer: deployer as any,
+    unsafeSkipStorageCheck: true
   });
 };

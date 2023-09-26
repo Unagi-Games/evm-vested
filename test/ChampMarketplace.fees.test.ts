@@ -40,27 +40,41 @@ contract("Marketplace", (accounts) => {
   });
 
   it("Should set marketplace fees", async function () {
-    await marketContract.setMarketplacePercentFees(1);
-    expect(
-      (await marketContract.marketplacePercentFees()).toNumber()
-    ).to.equals(1);
+    const [sellFee, buyFee, burnFee] = [9, 5, 1];
+    await marketContract.setMarketplacePercentFees(sellFee, buyFee, burnFee);
+    const {
+      0: mpSellFee,
+      1: mpBuyFee,
+      2: mpBurnFee,
+    } = await marketContract.marketplacePercentFees();
+
+    expect(mpSellFee.toNumber()).to.equals(sellFee);
+    expect(mpBuyFee.toNumber()).to.equals(buyFee);
+    expect(mpBurnFee.toNumber()).to.equals(burnFee);
   });
 
   it("Should emit MarketplaceFeesUpdated", async function () {
-    const fees = 20;
-    await marketContract.setMarketplacePercentFees(fees);
+    const [sellFee, buyFee, burnFee] = [10, 15, 11];
     const { receipt: editFeesReceipt } =
-      await marketContract.setMarketplacePercentFees(fees);
-
+      await marketContract.setMarketplacePercentFees(sellFee, buyFee, burnFee);
     const editFeesEvent = editFeesReceipt.logs.find(
       ({ event }) => event === "MarketplaceFeesUpdated"
     );
-    expect(editFeesEvent.args.percentFees.toNumber()).to.equals(fees);
+
+    expect(editFeesEvent.args.sellerPercentFees.toNumber()).to.equals(sellFee);
+    expect(editFeesEvent.args.buyerPercentFees.toNumber()).to.equals(buyFee);
+    expect(editFeesEvent.args.burnPercentFees.toNumber()).to.equals(burnFee);
   });
 
-  it("Should throw if marketplace fees is more than 100", async function () {
+  it("Should throw if deductable marketplace fees add up to more than 100", async function () {
     try {
-      await marketContract.setMarketplacePercentFees(101);
+      await marketContract.setMarketplacePercentFees(101, 0, 0);
+      assert.fail("setMarketplacePercentFees() did not throw.");
+    } catch (e: any) {
+      expect(e.message).to.includes("should be below 100");
+    }
+    try {
+      await marketContract.setMarketplacePercentFees(90, 0, 11);
       assert.fail("setMarketplacePercentFees() did not throw.");
     } catch (e: any) {
       expect(e.message).to.includes("should be below 100");
@@ -69,34 +83,39 @@ contract("Marketplace", (accounts) => {
 
   it("Should throw if marketplace fees is less than 0", async function () {
     try {
-      await marketContract.setMarketplacePercentFees(-1);
+      await marketContract.setMarketplacePercentFees(-1, 0, 0);
       assert.fail("setMarketplacePercentFees() did not throw.");
     } catch (e: any) {
       expect(e.message).to.includes("value out-of-bounds");
     }
   });
 
-  describe("Should share sale between fees receiver and seller", async function () {
+  describe("Should share sale between fees receiver, seller and burn address", async function () {
+    type FeesTuple = [number, number, number];
     type TestCase = [
       string, // Title
       number, // Sale price
-      number, // Marketplace fees
+      FeesTuple, // Marketplace fees
       number, // Expectation for seller
-      number // Expectation for fees receiver
+      number, // Expectation for fees receiver
+      number // Expectation for burn address
     ];
 
     const tests: TestCase[] = [
-      ["Common case", 100, 5, 95, 5],
-      ["Price too low for split", 1, 5, 1, 0],
-      ["Round should be in favor of seller", 99, 5, 95, 4],
-      ["0% fees", 50, 0, 50, 0],
-      ["100% fees", 50, 100, 0, 50],
+      ["Common case", 100, [4, 1, 1], 95, 5, 1],
+      ["Price too low for split", 2, [5, 5, 2], 2, 0, 0],
+      ["Round should be in favor of seller", 99, [5, 2, 2], 94, 5, 1],
+      ["0% fees", 50, [0, 0, 0], 50, 0, 0],
+      ["100% sell fees", 50, [100, 0, 0], 0, 50, 0],
+      ["100% buy fees", 50, [0, 100, 0], 50, 50, 0],
+      ["100% burn fees", 50, [0, 0, 100], 0, 0, 50],
     ];
 
     const rootUser = accounts[0];
     const seller = accounts[1];
     const buyer = accounts[2];
     const marketplaceFeesReceiver = accounts[3];
+    const burnAddress = "0x000000000000000000000000000000000000dEaD";
     let nftContract: UltimateChampionsNFTInstance;
     let tokenContract: ChildChampTokenInstance;
     let nft: number;
@@ -119,7 +138,6 @@ contract("Marketplace", (accounts) => {
         rootUser,
         "0x00000000000000000000000000000000000000000000000000000000000f424075696e74323536"
       );
-      await tokenContract.send(buyer, 1_000_000, "0x0");
 
       const { receipt: mintReceipt } = await nftContract.safeMint(
         rootUser,
@@ -137,7 +155,14 @@ contract("Marketplace", (accounts) => {
     });
 
     tests.forEach(
-      ([title, price, fees, expectedSellerTokens, expectedFeesToken]) => {
+      ([
+        title,
+        price,
+        fees,
+        expectedSellerTokens,
+        expectedFeesToken,
+        expectedBurnedToken,
+      ]) => {
         it(`Scenario: ${title}`, async function () {
           const initialSellerBalance = (
             await tokenContract.balanceOf(seller)
@@ -145,19 +170,25 @@ contract("Marketplace", (accounts) => {
           const initialFeesBalance = (
             await tokenContract.balanceOf(marketplaceFeesReceiver)
           ).toNumber();
+          const initialBurnBalance = (
+            await tokenContract.balanceOf(burnAddress)
+          ).toNumber();
 
-          await marketContract.setMarketplacePercentFees(fees);
+          await marketContract.setMarketplacePercentFees(...fees);
 
           // Create sale
           await nftContract.approve(marketContract.address, nft, {
             from: seller,
           });
-          await marketContract['createSaleFrom(address,uint64,uint256)'](seller, nft, price, {
+          await marketContract.methods[
+            "createSaleFrom(address,uint64,uint256)"
+          ](seller, nft, price, {
             from: seller,
           });
 
           // Accept the sale
-          await tokenContract.approve(marketContract.address, price, {
+          const buyerPrice = await marketContract.getBuyerSalePrice(nft);
+          await tokenContract.approve(marketContract.address, buyerPrice, {
             from: buyer,
           });
           await marketContract.methods["acceptSale(uint64,uint256)"](
@@ -175,6 +206,10 @@ contract("Marketplace", (accounts) => {
             (await tokenContract.balanceOf(marketplaceFeesReceiver)).toNumber(),
             "marketplaceFeesReceiver balance"
           ).to.equals(initialFeesBalance + expectedFeesToken);
+          expect(
+            (await tokenContract.balanceOf(burnAddress)).toNumber(),
+            "marketplaceFeesReceiver balance"
+          ).to.equals(initialBurnBalance + expectedBurnedToken);
         });
       }
     );

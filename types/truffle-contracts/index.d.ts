@@ -49,11 +49,11 @@ import { MigrationsContract } from "./Migrations";
 import { MulticallContract } from "./Multicall";
 import { OwnableContract } from "./Ownable";
 import { PausableContract } from "./Pausable";
-import { PaymentRelayContract } from "./PaymentRelay";
 import { PaymentSplitterContract } from "./PaymentSplitter";
 import { TestChampMarketplaceContract } from "./TestChampMarketplace";
 import { TestERC20Contract } from "./TestERC20";
 import { TestLockableContract } from "./TestLockable";
+import { TokenTransferRelayContract } from "./TokenTransferRelay";
 import { UltimateChampionsNFTContract } from "./UltimateChampionsNFT";
 import { UPaymentSplitterContract } from "./UPaymentSplitter";
 import { VestingWalletContract } from "./VestingWallet";
@@ -121,11 +121,11 @@ declare global {
       require(name: "Multicall"): MulticallContract;
       require(name: "Ownable"): OwnableContract;
       require(name: "Pausable"): PausableContract;
-      require(name: "PaymentRelay"): PaymentRelayContract;
       require(name: "PaymentSplitter"): PaymentSplitterContract;
       require(name: "TestChampMarketplace"): TestChampMarketplaceContract;
       require(name: "TestERC20"): TestERC20Contract;
       require(name: "TestLockable"): TestLockableContract;
+      require(name: "TokenTransferRelay"): TokenTransferRelayContract;
       require(name: "UltimateChampionsNFT"): UltimateChampionsNFTContract;
       require(name: "UPaymentSplitter"): UPaymentSplitterContract;
       require(name: "VestingWallet"): VestingWalletContract;
@@ -258,7 +258,6 @@ export { MigrationsContract, MigrationsInstance } from "./Migrations";
 export { MulticallContract, MulticallInstance } from "./Multicall";
 export { OwnableContract, OwnableInstance } from "./Ownable";
 export { PausableContract, PausableInstance } from "./Pausable";
-export { PaymentRelayContract, PaymentRelayInstance } from "./PaymentRelay";
 export {
   PaymentSplitterContract,
   PaymentSplitterInstance,
@@ -269,6 +268,10 @@ export {
 } from "./TestChampMarketplace";
 export { TestERC20Contract, TestERC20Instance } from "./TestERC20";
 export { TestLockableContract, TestLockableInstance } from "./TestLockable";
+export {
+  TokenTransferRelayContract,
+  TokenTransferRelayInstance,
+} from "./TokenTransferRelay";
 export {
   UltimateChampionsNFTContract,
   UltimateChampionsNFTInstance,

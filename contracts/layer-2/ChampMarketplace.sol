@@ -30,9 +30,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
  * can accept a specifc sale. To accept a sale, the CHAMP holder must approve CHAMP tokens to
  * the ChampMarketplace address and call the function `acceptSale`.
  *
- * Once a NFT is sold, a fee (readable through `marketplacePercentFees()`)
- * will be applied on the CHAMP payment and forwarded to the marketplace
- * fees receiver (readable through `marketplaceFeesReceiver()`).
+ * Once a NFT is sold, sell, buy and burn fees (readable through `marketplacePercentFees()`)
+ * will be applied on the CHAMP payment. Sell and buy fees are forwarded to the marketplace
+ * fees receiver (readable through `marketplaceFeesReceiver()`), while the burn fee is forwarded to the DEAD address.
  * The rest is sent to the seller.
  *
  * The fees is editable by FEE_MANAGER_ROLE.
@@ -88,13 +88,20 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     // (wallet => Option) mapping of locks to prevent multiple options per wallet
     mapping(address => OptionLock) private _optionLock;
 
-    // Percent fees applied on each sale.
-    uint256 private _marketplacePercentFees;
+    // Percent fees applied on each sale: sell, buy and burn fees.
+    uint8 private _marketplaceSellPercentFee;
+    uint8 private _marketplaceBuyPercentFee;
+    uint8 private _marketplaceBurnPercentFee;
+    uint232 private _EMPTY_GAP;
+
     // Fees receiver address
     address private _marketplaceFeesReceiver;
 
     // (nft ID => address) mapping of reserved offers
     mapping(uint64 => address) private _reservedOffers;
+
+    // Percent BURN fees
+    uint256 private _marketplaceBurnPercentFees;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -123,10 +130,20 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     function computeSaleShares(uint256 weiPrice)
         public
         view
-        returns (uint256, uint256)
+        returns (
+            uint256 sellerShare,
+            uint256 marketplaceSellFeeShare,
+            uint256 marketplaceBuyFeeShare,
+            uint256 marketplaceBurnFeeShare
+        )
     {
-        uint256 saleFees = weiPrice.mul(marketplacePercentFees()).div(100);
-        return (weiPrice.sub(saleFees), saleFees);
+        (uint8 sellFee, uint8 buyFee, uint8 burnFee) = marketplacePercentFees();
+        marketplaceSellFeeShare = weiPrice.mul(sellFee).div(100);
+        marketplaceBuyFeeShare = weiPrice.mul(buyFee).div(100);
+        marketplaceBurnFeeShare = weiPrice.mul(burnFee).div(100);
+        sellerShare = weiPrice.sub(marketplaceSellFeeShare).sub(
+            marketplaceBurnFeeShare
+        );
     }
 
     /**
@@ -288,6 +305,22 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     }
 
     /**
+     * @dev Returns the CHAMP wei price to buy a given NFCHAMP ID with included buyer fees.
+     *
+     * If the sale does not exists, the function returns a wei price of 0.
+     */
+    function getBuyerSalePrice(uint64 tokenId) public view returns (uint256) {
+        if (_NFCHAMP_CONTRACT.getApproved(tokenId) != address(this)) {
+            return 0;
+        }
+
+        (, , uint256 marketplaceBuyFeeShare, ) = computeSaleShares(
+            _sales[tokenId]
+        );
+        return _sales[tokenId] + marketplaceBuyFeeShare;
+    }
+
+    /**
      * Returns true if the given address has an option on a sale for the specified NFT.
      * If no option is set on the sale, it means that anyone can purchase the NFT.
      *
@@ -338,8 +371,20 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
     /**
      * @dev Getter for the marketplace fees.
      */
-    function marketplacePercentFees() public view returns (uint256) {
-        return _marketplacePercentFees;
+    function marketplacePercentFees()
+        public
+        view
+        returns (
+            uint8,
+            uint8,
+            uint8
+        )
+    {
+        return (
+            _marketplaceSellPercentFee,
+            _marketplaceBuyPercentFee,
+            _marketplaceBurnPercentFee
+        );
     }
 
     /**
@@ -367,24 +412,27 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      *
      * Requirements:
      *
-     * - nMarketplacePercentFees must be a percentage (Between 0 and 100 included).
+     * - Sum of nMarketplaceSellPercentFees and nMarketplaceBurnPercentFees must be an integer between 0 and 100 included.
      * - Caller must have role FEE_MANAGER_ROLE.
      */
-    function setMarketplacePercentFees(uint256 nMarketplacePercentFees)
-        external
-        onlyRole(FEE_MANAGER_ROLE)
-    {
+    function setMarketplacePercentFees(
+        uint8 nMarketplaceSellPercentFee,
+        uint8 nMarketplaceBuyPercentFee,
+        uint8 nMarketplaceBurnPercentFee
+    ) external onlyRole(FEE_MANAGER_ROLE) {
         require(
-            nMarketplacePercentFees >= 0,
-            "ChampMarketplace: nMarketplacePercentFees should be positive"
+            nMarketplaceSellPercentFee + nMarketplaceBurnPercentFee <= 100,
+            "ChampMarketplace: total marketplace sell and burn fees should be below 100"
         );
-        require(
-            nMarketplacePercentFees <= 100,
-            "ChampMarketplace: nMarketplacePercentFees should be below 100"
-        );
-        _marketplacePercentFees = nMarketplacePercentFees;
+        _marketplaceSellPercentFee = nMarketplaceSellPercentFee;
+        _marketplaceBuyPercentFee = nMarketplaceBuyPercentFee;
+        _marketplaceBurnPercentFee = nMarketplaceBurnPercentFee;
 
-        emit MarketplaceFeesUpdated(_marketplacePercentFees);
+        emit MarketplaceFeesUpdated(
+            nMarketplaceSellPercentFee,
+            nMarketplaceBuyPercentFee,
+            nMarketplaceBurnPercentFee
+        );
     }
 
     /**
@@ -606,7 +654,7 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
      * - salePrice must match sale price.
      * - nftReceiver can interact with the sale.
      * - sale reservation is open for nftReceiver.
-     * - ChampMarketplace allowance must be greater than sale price.
+     * - ChampMarketplace allowance must be greater than sale price including buy fees.
      */
     function _acceptSale(
         uint64 tokenId,
@@ -632,21 +680,23 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
             isReservationOpenFor(nftReceiver, tokenId),
             "ChampMarketplace: A reservation exists for this sale"
         );
-        require(
-            _CHAMP_TOKEN_CONTRACT.allowance(msg.sender, address(this)) >=
-                salePrice,
-            "ChampMarketplace: Allowance is lower than sale price"
-        );
 
         //
         // 2.
         // Process sale
         //
         address seller = _NFCHAMP_CONTRACT.ownerOf(tokenId);
-        uint256 sellerTokenWeiShare;
-        uint256 marketplaceFeesTokenWeiShare;
-        (sellerTokenWeiShare, marketplaceFeesTokenWeiShare) = computeSaleShares(
-            salePrice
+        (
+            uint256 sellerShare,
+            uint256 marketplaceSellFeeShare,
+            uint256 marketplaceBuyFeeShare,
+            uint256 marketplaceBurnFeeShare
+        ) = computeSaleShares(salePrice);
+
+        require(
+            _CHAMP_TOKEN_CONTRACT.allowance(msg.sender, address(this)) >=
+                salePrice + marketplaceBuyFeeShare,
+            "ChampMarketplace: Allowance is lower than buyer sale price"
         );
 
         //
@@ -654,17 +704,24 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         // Execute sale
         //
         delete _sales[tokenId];
+
         _NFCHAMP_CONTRACT.safeTransferFrom(seller, nftReceiver, tokenId);
-        _CHAMP_TOKEN_CONTRACT.safeTransferFrom(
-            msg.sender,
-            seller,
-            sellerTokenWeiShare
-        );
-        if (marketplaceFeesTokenWeiShare > 0) {
+        _CHAMP_TOKEN_CONTRACT.safeTransferFrom(msg.sender, seller, sellerShare);
+
+        uint256 marketplaceFeesShare = marketplaceSellFeeShare +
+            marketplaceBuyFeeShare;
+        if (marketplaceFeesShare > 0) {
             _CHAMP_TOKEN_CONTRACT.safeTransferFrom(
                 msg.sender,
                 marketplaceFeesReceiver(),
-                marketplaceFeesTokenWeiShare
+                marketplaceFeesShare
+            );
+        }
+        if (marketplaceBurnFeeShare > 0) {
+            _CHAMP_TOKEN_CONTRACT.safeTransferFrom(
+                msg.sender,
+                0x000000000000000000000000000000000000dEaD,
+                marketplaceBurnFeeShare
             );
         }
 
@@ -682,7 +739,11 @@ contract ChampMarketplace is AccessControlEnumerableUpgradeable {
         emit SaleAccepted(tokenId, salePrice, seller, nftReceiver);
     }
 
-    event MarketplaceFeesUpdated(uint256 percentFees);
+    event MarketplaceFeesUpdated(
+        uint128 sellerPercentFees,
+        uint128 buyerPercentFees,
+        uint256 burnPercentFees
+    );
 
     event MarketplaceFeesReceiverUpdated(address feesReceiver);
 
