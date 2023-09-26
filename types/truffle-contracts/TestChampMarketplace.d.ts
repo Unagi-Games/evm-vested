@@ -31,8 +31,12 @@ export interface MarketplaceFeesReceiverUpdated {
 export interface MarketplaceFeesUpdated {
   name: "MarketplaceFeesUpdated";
   args: {
-    percentFees: BN;
+    sellerPercentFees: BN;
+    buyerPercentFees: BN;
+    burnPercentFees: BN;
     0: BN;
+    1: BN;
+    2: BN;
   };
 }
 
@@ -179,7 +183,7 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
   computeSaleShares(
     weiPrice: number | BN | string,
     txDetails?: Truffle.TransactionDetails
-  ): Promise<{ 0: BN; 1: BN }>;
+  ): Promise<{ 0: BN; 1: BN; 2: BN; 3: BN }>;
 
   /**
    * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
@@ -206,6 +210,11 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
+
+  getBuyerSalePrice(
+    tokenId: number | BN | string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
 
   /**
    */
@@ -356,7 +365,9 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
   /**
    * Getter for the marketplace fees.
    */
-  marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+  marketplacePercentFees(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<{ 0: BN; 1: BN; 2: BN }>;
 
   /**
    * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event.
@@ -437,19 +448,27 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
    */
   setMarketplacePercentFees: {
     (
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      nMarketplacePercentFees: number | BN | string,
+      nMarketplaceSellPercentFees: number | BN | string,
+      nMarketplaceBuyPercentFees: number | BN | string,
+      nMarketplaceBurnPercentFees: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -552,7 +571,7 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     computeSaleShares(
       weiPrice: number | BN | string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<{ 0: BN; 1: BN }>;
+    ): Promise<{ 0: BN; 1: BN; 2: BN; 3: BN }>;
 
     /**
      * Allow to destroy a sale for a given NFCHAMP ID. Emits a {SaleDestroyed} event. Requirements: - NFCHAMP ID should be on sale. - from can interact with the sale. - from must be the NFCHAMP owner. - msg.sender should be either the NFCHAMP owner or approved by the NFCHAMP owner. - ChampMarketplace contract should be approved for the given NFCHAMP ID.
@@ -579,6 +598,11 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
+
+    getBuyerSalePrice(
+      tokenId: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
 
     /**
      */
@@ -729,7 +753,9 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
     /**
      * Getter for the marketplace fees.
      */
-    marketplacePercentFees(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+    marketplacePercentFees(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<{ 0: BN; 1: BN; 2: BN }>;
 
     /**
      * Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`. May emit a {RoleRevoked} event.
@@ -810,19 +836,27 @@ export interface TestChampMarketplaceInstance extends Truffle.ContractInstance {
      */
     setMarketplacePercentFees: {
       (
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        nMarketplacePercentFees: number | BN | string,
+        nMarketplaceSellPercentFees: number | BN | string,
+        nMarketplaceBuyPercentFees: number | BN | string,
+        nMarketplaceBurnPercentFees: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

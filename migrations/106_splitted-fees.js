@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/106_splitted-fees")(web3);

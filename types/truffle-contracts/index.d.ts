@@ -49,7 +49,6 @@ import { MigrationsContract } from "./Migrations";
 import { MulticallContract } from "./Multicall";
 import { OwnableContract } from "./Ownable";
 import { PausableContract } from "./Pausable";
-import { PaymentRelayContract } from "./PaymentRelay";
 import { PaymentSplitterContract } from "./PaymentSplitter";
 import { TestChampMarketplaceContract } from "./TestChampMarketplace";
 import { TestERC20Contract } from "./TestERC20";
@@ -122,7 +121,6 @@ declare global {
       require(name: "Multicall"): MulticallContract;
       require(name: "Ownable"): OwnableContract;
       require(name: "Pausable"): PausableContract;
-      require(name: "PaymentRelay"): PaymentRelayContract;
       require(name: "PaymentSplitter"): PaymentSplitterContract;
       require(name: "TestChampMarketplace"): TestChampMarketplaceContract;
       require(name: "TestERC20"): TestERC20Contract;
@@ -260,7 +258,6 @@ export { MigrationsContract, MigrationsInstance } from "./Migrations";
 export { MulticallContract, MulticallInstance } from "./Multicall";
 export { OwnableContract, OwnableInstance } from "./Ownable";
 export { PausableContract, PausableInstance } from "./Pausable";
-export { PaymentRelayContract, PaymentRelayInstance } from "./PaymentRelay";
 export {
   PaymentSplitterContract,
   PaymentSplitterInstance,
