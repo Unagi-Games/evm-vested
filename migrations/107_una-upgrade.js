@@ -1,0 +1,1 @@
+module.exports = require("../src/migrations/107_una-upgrade")(web3);
