@@ -135,7 +135,7 @@ contract("Marketplace", (accounts) => {
         rootUser
       );
       await tokenContract.deposit(
-        rootUser,
+        buyer,
         "0x00000000000000000000000000000000000000000000000000000000000f424075696e74323536"
       );
 
